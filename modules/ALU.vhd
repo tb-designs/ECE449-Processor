@@ -36,7 +36,6 @@ entity ALU is
     Port ( in_1 : in STD_LOGIC_VECTOR (15 downto 0);
            in_2 : in STD_LOGIC_VECTOR (15 downto 0);
            alu_mode : in STD_LOGIC_VECTOR (2 downto 0);
-           clk : in STD_LOGIC;
            rst : in STD_LOGIC;
            result : out STD_LOGIC_VECTOR (15 downto 0);
            z_flag : out STD_LOGIC;
@@ -61,78 +60,67 @@ begin
     return num;
 end function to_int;
 
-begin
-process(clk)
-
---Variables
-variable result_buf: std_logic_vector(31 downto 0);
-variable shift_amount: integer;
+--Signals
+signal result_buf : std_logic_vector(15 downto 0) := (others => '0');
 
 begin
+    process(in_1, in_2, alu_mode, rst)
+    begin
 --Reset Behaviour
-   if(clk='0' and clk'event) then if(rst='1') then
-      result <= (others => '0'); 
+    if (rst = '1') then
+      result_buf <= (others => '0'); 
       z_flag <= '0'; 
       n_flag <= '0'; 
-   else
+   elsif rst = '0' then
          case alu_mode(2 downto 0) is
          --NOP
          when "000" => NULL;
          --ADD
          when "001" => 
-            result_buf := in_1 + in_2;
+            result_buf <= in_1 + in_2;
             
             --Overflow Detection
-            if (result_buf(16) = '1') then
-                z_flag <= '1'; 
-                n_flag <= '1';
-            end if;
-            result <= result_buf(15 downto 0);
+            --if (result_buf(16) = '1') then
+              --  z_flag <= '1'; 
+               -- n_flag <= '1';
+            --end if;
+            
             
          --SUB
          when "010" =>
-            result_buf := in_1 - in_2;
-            result <= result_buf(15 downto 0);
-         
+            result_buf <= in_1 - in_2;
          --MUL
          when "011" =>
-            result_buf := in_1*in_2;
-            
+            result_buf <= in_1(7 downto 0)*in_2(7 downto 0);
             --Temp solution
-            if (result_buf(16) = '1') then
-                z_flag <= '1'; 
-                n_flag <= '1';
-            end if;
-            result <= result_buf(15 downto 0);
+            --if (result_buf(16) = '1') then
+            --    z_flag <= '1'; 
+            --    n_flag <= '1';
+            --end if;
             
          --NAND
          when "100" =>
-            result <= in_1 NAND in_2;
+            result_buf <= in_1 NAND in_2;
             
          --SHL
          when "101" =>
-            shift_amount := to_int(in_2);
-            result_buf := in_1( 15 - shift_amount downto 0) & ((shift_amount-1) downto 0 => '0');
-            result <= result_buf(15 downto 0);
+            result_buf <= in_1( 15 - to_int(in_2) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
          
          --SHR
          when "110" => 
-            shift_amount := to_int(in_2);
-            result_buf := ((shift_amount-1) downto 0 => '0') & in_1(15 downto shift_amount);
-            result <= result_buf(15 downto 0);          
+            result_buf <= ((to_int(in_2)-1) downto 0 => '0') & in_1(15 downto to_int(in_2));
          
          --TEST
          when "111" => 
-            result_buf := in_1;
-            if (result_buf(15 downto 0) < ((others => '0'))) then 
+            if (in_1(15 downto 0) < X"0") then 
                 n_flag <= '1';
-            elsif(result_buf(15 downto 0) = (others => '0')) then
+            elsif(in_1(15 downto 0) = X"0") then
                 z_flag <= '1';
             end if;
-            end if;                   
          when others => NULL; end case;
-     end if;
-end process;
+    end if;
+    end process;
+    result <= result_buf(15 downto 0);
 end Behavioral;
 
 
