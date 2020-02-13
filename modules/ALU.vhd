@@ -104,7 +104,7 @@ begin
             
          --SHL
          when "101" =>
-            result_buf <= in_1( 15 - to_int(in_2) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
+            result_buf <= in_1((15 - to_int(in_2)) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
          
          --SHR
          when "110" => 
