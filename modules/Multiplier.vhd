@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 entity half_adder is
 	Port ( a,b : in std_logic;
-	       sum,carry : out std_logic);
+	       sum,carry : out std_logic));
 end half_adder;
 
 architecture Behavioral of half_adder is
@@ -14,7 +14,7 @@ end Behavioral;
 
 entity full_adder is
 	Port ( a,b,c : in std_logic;
-	       sum,carry : out std_logic);
+	       sum,carry : out std_logic));
 end full_adder;
 
 architecture Behavioral of full_adder is
@@ -26,19 +26,19 @@ end Behavioral;
 entity dadda_mult is
 	Port ( A : in std_logic_vector(15 downto 0);
 	       B : in std_logic_vector(15 downto 0);
-	       prod : out std_logic_vector(31 downto 0);
+	       prod : out std_logic_vector(31 downto 0));
 end dadda_mult;
 
 architecture Behavioral of dadda_mult is
 
 component full_adder is
 	Port ( a,b,c : in std_logic;
-	       sum,carry : out std_logic);
+	       sum,carry : out std_logic));
 end component;
 
 component half_adder is
 	Port ( a,b : in std_logic;
-	       sum,carry : out std_logic);
+	       sum,carry : out std_logic));
 end component;
 
 -- stage 6 signals
