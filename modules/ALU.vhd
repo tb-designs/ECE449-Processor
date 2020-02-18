@@ -51,6 +51,13 @@ component dadda_mult is
 	       prod : out std_logic_vector(31 downto 0));
 end component;
 
+component bshift is
+	Port ( left : in std_logic;
+	       shift : in std_logic_vector(3 downto 0);
+	       input : in std_logic_vector(15 downto 0);
+	       output : out std_logic_vector(15 downto 0));
+end component;
+
 -- Functions
 
 --to_int, used to determine amount of shift needed
@@ -113,11 +120,13 @@ begin
             
          		--SHL
          		when "101" =>
-            			result_buf <= in_1( 15 - to_int(in_2) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
+				sh1 : bshift port map('1',in_2(3 downto 0),in_1,result);
+            			--result_buf <= in_1( 15 - to_int(in_2) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
          
          		--SHR
-         		when "110" => 
-            			result_buf <= ((to_int(in_2)-1) downto 0 => '0') & in_1(15 downto to_int(in_2));
+         		when "110" =>
+				sh2 : bshift port map('0',in_2(3 downto 0),in_1,result);	
+            			--result_buf <= ((to_int(in_2)-1) downto 0 => '0') & in_1(15 downto to_int(in_2));
          
          		--TEST
          		when "111" => 
