@@ -3,25 +3,31 @@ use ieee.std_logic_1164.all;
 
 entity half_adder is
 	Port ( a,b : in std_logic;
-	       sum,carry : out std_logic));
+	       sum,carry : out std_logic);
 end half_adder;
 
-architecture Behavioral of half_adder is
+architecture behavioral of half_adder is
 begin
 	sum <= a xor b;
 	carry <= a and b;
-end Behavioral;
+end behavioral;
+
+library ieee;
+use ieee.std_logic_1164.all;
 
 entity full_adder is
 	Port ( a,b,c : in std_logic;
-	       sum,carry : out std_logic));
+	       sum,carry : out std_logic);
 end full_adder;
 
-architecture Behavioral of full_adder is
+architecture behavioral of full_adder is
 begin
 	sum <= (a xor b xor c);
 	carry <= (a and b) xor (c and (a xor b));
-end Behavioral;
+end behavioral;
+
+library ieee;
+use ieee.std_logic_1164.all;
 
 entity dadda_mult is
 	Port ( A : in std_logic_vector(15 downto 0);
@@ -29,16 +35,16 @@ entity dadda_mult is
 	       prod : out std_logic_vector(31 downto 0));
 end dadda_mult;
 
-architecture Behavioral of dadda_mult is
+architecture behavioral of dadda_mult is
 
 component full_adder is
 	Port ( a,b,c : in std_logic;
-	       sum,carry : out std_logic));
+	       sum,carry : out std_logic);
 end component;
 
 component half_adder is
 	Port ( a,b : in std_logic;
-	       sum,carry : out std_logic));
+	       sum,carry : out std_logic);
 end component;
 
 -- stage 6 signals
@@ -54,8 +60,8 @@ signal s46,s47,s47_2,s48,s48_2,s48_3,s49,s49_2,s49_3,s410,s410_2,s410_3,s411,s41
 signal c46,c47,c47_2,c48,c48_2,c48_3,c49,c49_2,c49_3,c410,c410_2,c410_3,c411,c411_2,c411_3,c412,c412_2,c412_3,c413,c413_2,c413_3,c414,c414_2,c414_3,c415,c415_2,c415_3,c416,c416_2,c416_3,c417,c417_2,c417_3,c418,c418_2,c418_3,c419,c419_2,c419_3,c420,c420_2,c420_3,c421,c421_2,c421_3,c422,c422_2,c422_3,c423,c423_2,c423_3,c424,c424_2,c425 : std_logic;
 
 -- stage 3 signals
-signal s34,s35,s35_2,s36,s36_2,s37,s37_2,s38,s28_2,s39,s39_2,s310,s310_2,s311,s311_2,s312,s312_2,s313,s313_2,s314,s314_2,s315,s315_2,s316,s316_2,s317,s317_2,s318,s318_2,s319,s319_2,s320,s320_2,s321,s321_2,s322,s322_2,s323,s323_2,s324,s324_2,s325,s325_2,s326,s326_2,s327 : std_logic;
-signal c34,c35,c35_2,c36,c36_2,c37,c37_2,c38,c28_2,c39,c39_2,c310,c310_2,c311,c311_2,c312,c312_2,c313,c313_2,c314,c314_2,c315,c315_2,c316,c316_2,c317,c317_2,c318,c318_2,c319,c319_2,c320,c320_2,c321,c321_2,c322,c322_2,c323,c323_2,c324,c324_2,c325,c325_2,c326,c326_2,c327 : std_logic;
+signal s34,s35,s35_2,s36,s36_2,s37,s37_2,s38,s38_2,s39,s39_2,s310,s310_2,s311,s311_2,s312,s312_2,s313,s313_2,s314,s314_2,s315,s315_2,s316,s316_2,s317,s317_2,s318,s318_2,s319,s319_2,s320,s320_2,s321,s321_2,s322,s322_2,s323,s323_2,s324,s324_2,s325,s325_2,s326,s326_2,s327 : std_logic;
+signal c34,c35,c35_2,c36,c36_2,c37,c37_2,c38,c38_2,c39,c39_2,c310,c310_2,c311,c311_2,c312,c312_2,c313,c313_2,c314,c314_2,c315,c315_2,c316,c316_2,c317,c317_2,c318,c318_2,c319,c319_2,c320,c320_2,c321,c321_2,c322,c322_2,c323,c323_2,c324,c324_2,c325,c325_2,c326,c326_2,c327 : std_logic;
 
 -- stage 2 signals
 signal s23,s24,s25,s26,s27,s28,s29,s210,s211,s212,s213,s214,s215,s216,s217,s218,s219,s220,s221,s222,s223,s224,s225,s226,s227,s228 : std_logic;
@@ -173,11 +179,11 @@ fa516_4 : full_adder port map(p5(11),p4(12),p3(13),s516_4,c516_4);
 fa517 : full_adder port map(c516_4,c516_3,c516_2,s517,c517);
 fa517_2 : full_adder port map(c516,p12(5),p11(6),s517_2,c517_2);
 fa517_3 : full_adder port map(p10(7),p9(8),p8(9),s517_3,c517_3);
-fa517_4 : ful_adder port map(p7(10),p6(11),p5(12),s517_4,c517_4);
+fa517_4 : full_adder port map(p7(10),p6(11),p5(12),s517_4,c517_4);
 fa518 : full_adder port map(c517_4,c517_3,c517_2,s518,c518);
 fa518_2 : full_adder port map(c517,p14(4),p13(5),s518_2,c518_2);
 fa518_3 : full_adder port map(p12(6),p11(7),p10(8),s518_3,c518_3);
-fa518_4 : full_adder port map(p9(9),p8(10,p7(11),s518_4,c518_4);
+fa518_4 : full_adder port map(p9(9),p8(10),p7(11),s518_4,c518_4);
 fa519 : full_adder port map(c518_4,c518_3,c518_2,s519,c519);
 fa519_2 : full_adder port map(c518,c618,p15(4),s519_2,c519_2);
 fa519_3 : full_adder port map(p14(5),p13(6),p12(7),s519_3,c519_3);
@@ -224,7 +230,7 @@ fa417 : full_adder port map(c416_3,c416_2,c416,s417,c417);
 fa417_2 : full_adder port map(p4(13),p3(14),p2(15),s417_2,c417_2);
 fa417_3 : full_adder port map(s617,s617_2,s517,s417_3,c417_3);
 fa418 : full_adder port map(c417_3,c417_2,c417,s418,c418);
-fa418_2 : full_adder port map(p6(12),p5(13),p4(14),s418_2.c418_2);
+fa418_2 : full_adder port map(p6(12),p5(13),p4(14),s418_2,c418_2);
 fa418_3 : full_adder port map(p3(15),s618,s518,s418_3,c418_3);
 fa419 : full_adder port map(c418_3,c418_2,c418,s419,c419);
 fa419_2 : full_adder port map(p8(11),p7(12),p6(13),s419_2,c419_2);
@@ -268,7 +274,7 @@ fa313_2 : full_adder port map(s513_3,s513_4,s413,s313_2,c313_2);
 fa314 : full_adder port map(c313_2,c313,s514_2,s314,c314);
 fa314_2 : full_adder port map(s514_3,s514_4,s414,s314_2,c314_2);
 fa315 : full_adder port map(c314_2,c314,s515_2,s315,c315);
-fa315_2 : full_adder port map(s515_3,s515_4,s415,s315_2,c315_2)
+fa315_2 : full_adder port map(s515_3,s515_4,s415,s315_2,c315_2);
 fa316 : full_adder port map(c315_2,c315,s516_2,s316,c316);
 fa316_2 : full_adder port map(s516_3,s516_4,s416,s316_2,c316_2);
 fa317 : full_adder port map(c316_2,c316,s517_2,s317,c317);
@@ -342,7 +348,7 @@ fa118 : full_adder port map(c117,s318,s318_2,s118,c118);
 fa119 : full_adder port map(c118,s319,s319_2,s119,c119);
 fa120 : full_adder port map(c119,s320,s320_2,s120,c120);
 fa121 : full_adder port map(c120,s321,s321_2,s121,c121);
-fa122 : full_adder port map(c121,s322,s322_2,s122_c122);
+fa122 : full_adder port map(c121,s322,s322_2,s122,c122);
 fa123 : full_adder port map(c122,s323,s323_2,s123,c123);
 fa124 : full_adder port map(c123,s324,s324_2,s124,c124);
 fa125 : full_adder port map(c124,s325,s325_2,s125,c125);
@@ -383,4 +389,4 @@ fa028 : full_adder port map(c027,s228,s128,s028,c028);
 fa029 : full_adder port map(c028,p14(15),s129,s029,c029);
 ha030 : half_adder port map(c029,p15(15),s030,c030);
 -- end dadda
-end Behavioral;
+end behavioral;

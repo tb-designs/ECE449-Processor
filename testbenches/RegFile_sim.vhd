@@ -1,12 +1,11 @@
- 
 library ieee; 
 use ieee.std_logic_1164.all; 
 use ieee.std_logic_unsigned.all; 
 use work.all;
 
-entity test_alu is end test_alu;
+entity test_reg is end test_reg;
 
-architecture behavioural of test_alu is
+architecture behavioural of test_reg is
 component register_file port(rst : in std_logic; clk: in std_logic; 
 rd_index1, rd_index2: in std_logic_vector(2 downto 0);
 rd_data1, rd_data2: out std_logic_vector(15 downto 0); 

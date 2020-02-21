@@ -75,15 +75,16 @@ begin
 end function to_int;
 
 --Signals
-signal add_buf : std_logic_vector(16 downto 0);
+signal add_buf : std_logic_vector(15 downto 0);
 signal mult_buf : std_logic_vector(31 downto 0);
+signal left_buf,right_buf : std_logic_vector(15 downto 0);
 
 begin
 process(in_1, in_2, alu_mode, rst)
 begin
     	--Reset Behaviour
 	if (rst = '1') then
-      		result_buf <= (others => '0'); 
+      		result <= (others => '0'); 
       		z_flag <= '0'; 
       		n_flag <= '0'; 
     	elsif rst = '0' then
@@ -94,25 +95,24 @@ begin
          		when "001" => 
             			add_buf <= in_1 + in_2;
             			-- Overflow detection
-            			if (result_buf(16) = '1') then
-                			z_flag <= '1'; 
-                			n_flag <= '1';
-            			end if;
-            			result <= add_buf;
+            			--if (add_buf(16) = '1') then
+                			--z_flag <= '1'; 
+                			--n_flag <= '1';
+            			--end if;
+            			--result <= add_buf;
             
          		--SUB
          		when "010" =>
             			result <= in_1 - in_2;
          		--MUL
          		when "011" =>
-	    			multiplier : dadda_mult port map(in_1,in_2,mult_buf);
+                    result <= mult_buf(15 downto 0);
 	    			-- mult_buf <= in_1*in_2;
             			--Temp solution
             			if (mult_buf(16) = '1') then
                 			z_flag <= '1'; 
                 			n_flag <= '1';
             			end if;
-            			result <= mult_buf(15 downto 0);
 
          		--NAND
          		when "100" =>
@@ -120,12 +120,12 @@ begin
             
          		--SHL
          		when "101" =>
-				sh1 : bshift port map('1',in_2(3 downto 0),in_1,result);
+                        result <= left_buf;
             			--result_buf <= in_1( 15 - to_int(in_2) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
          
          		--SHR
          		when "110" =>
-				sh2 : bshift port map('0',in_2(3 downto 0),in_1,result);	
+                        result <= right_buf;
             			--result_buf <= ((to_int(in_2)-1) downto 0 => '0') & in_1(15 downto to_int(in_2));
          
          		--TEST
@@ -139,4 +139,9 @@ begin
  	 	end case;
 	end if;
 end process;
+
+multiplier : dadda_mult port map(in_1,in_2,mult_buf);
+shleft : bshift port map('1',in_2(3 downto 0),in_1,left_buf);
+shright : bshift port map('0',in_2(3 downto 0),in_1,right_buf);
+
 end Behavioral;

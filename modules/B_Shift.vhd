@@ -22,26 +22,26 @@ begin --process
 
 	case c3 is
 		when "00"|"01" => x := input;
-		when "10" => x := (others(7 downto 0) => '0') & input(15 downto 8); -- shift 8b right
-		when "11" => x := input(7 downto 0) & (others(7 downto 0) => '0'); -- shift 8b left
+		when "10" => x := "00000000" & input(15 downto 8); -- shift 8b right
+		when "11" => x := input(7 downto 0) & "00000000"; -- shift 8b left
 		when others => null;
 	end case;
 	case c2 is
 		when "00"|"01" => y := x;
-		when "10" => y := (others(3 downto 0) => '0') & x(15 downto 4); -- shift 4b right
-		when "01" => y := x(11 downto 0) & (others(3 downto 0) => '0'); -- shift 4b left
+		when "10" => y := "0000" & x(15 downto 4); -- shift 4b right
+		when "11" => y := x(11 downto 0) & "0000"; -- shift 4b left
 		when others => null;
 	end case;
 	case c1 is
 		when "00"|"01" => z := y;
-		when "10" => z := (others(1 downto 0) => '0') & y(15 downto 2); -- shift 2b right
-		when "01" => z := y(13 downto 0) & (others(1 downto 0) => '0'); -- shift 2b left
+		when "10" => z := "00" & y(15 downto 2); -- shift 2b right
+		when "11" => z := y(13 downto 0) & "00"; -- shift 2b left
 		when others => null;
 	end case;
 	case c0 is
 		when "00"|"01" => output <= z;
 		when "10" => output <= '0' & z(14 downto 0); -- shift 1b right
-		when "01" => output <= z(14 downto 0) & '0' -- shift 1b left
+		when "11" => output <= z(14 downto 0) & '0'; -- shift 1b left
 		when others => null;
 	end case;
 end process;
