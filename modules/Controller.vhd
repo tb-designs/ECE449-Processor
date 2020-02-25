@@ -1,4 +1,5 @@
-----------------------------------------------------------------------------------
+
+ ----------------------------------------------------------------------------------
 -- Company: 
 -- Engineer: 
 -- 
@@ -30,59 +31,113 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity controller is
-    Port (	clk : IN STD_LOGIC;
-            rst : in std_logic;
-        --Inputs
-        instr : in std_logic_vector (15 downto 0);
-        --Format A Outputs
-        ra_addr : out std_logic_vector (2 downto 0);
-        rb_addr : out std_logic_vector (2 downto 0);
-        rc_addr : out std_logic_vector (2 downto 0);
-        alu_op  : out std_logic_vector (2 downto 0);
-        mem_opr : out std_logic;
-        wb_opr  : out std_logic;
-        io_flag : out std_logic --used to put IN in ra or ra in OUT
-        );
+    Port (clk : in std_logic;
+          rst : in std_logic;
+          --Inputs
+          opcode_in  : in std_logic_vector (6 downto 0);
+          --Format A Outputs
+          alu_op     : out std_logic_vector (2 downto 0);
+          instr_form : out std_logic_vector (2 downto 0);
+          mem_opr    : out std_logic;
+          wb_opr     : out std_logic;
+          io_flag    : out std_logic
+          );
 end controller;
 
 architecture Behavioral of controller is
 
-  --Create aliases for easier coding
-  alias opcode is instr(15 downto 9); --All
-  alias ra_op  is instr (8 downto 6); --A1, A2, A3
-  alias rb_op  is instr (5 downto 3); --A1
-  alias rc_op  is instr (2 downto 0); --A1
-  alias c1_op  is instr (3 downto 0); --A2
+    
+  alias opcode is opcode_in(6 downto 0);
 
   --Decoding section
   begin
   --Format A Decoding
-  alu_op <=
-	  "001" when opcode = "0000001" else	-- ADD
-	  "010" when opcode = "0000010" else	-- SUB
-	  "011" when opcode = "0000011" else	-- MUL
-	  "100" when opcode = "0000100" else	-- NAND
-	  "101" when opcode = "0000101" else	-- SHL
-	  "110" when opcode = "0000110" else	-- SHR
-	  "111" when opcode = "0000111" else	-- TEST
-	  "000";										          -- NOP
-
-  --Look at flag AND op-code to determine input vs output
-  io_flag <=
-    "1" when opcode = "00100000" else --OUT
-    "1" when opcode = "00100001" else --IN
-    "0";
-
-   
-  process(clk,rst,instr)
+  case opcode is 
+   when "0000001" =>
+        --ADD
+        instr_form <= "001"; --A1
+        alu_op <= "001";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "0000010" =>
+        --SUB
+        instr_form <= "001"; --A1
+        alu_op <= "010";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "0000011" =>
+        --MUL
+        instr_form <= "001"; --A1
+        alu_op <= "011";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "0000100" =>
+        --NAND
+        instr_form <= "001"; --A1
+        alu_op <= "100";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "0000101" =>
+        --SHL
+        instr_form <= "010"; --A2
+        alu_op <= "101";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "0000110" =>
+        --SHR
+        instr_form <= "010"; --A2
+        alu_op <= "110";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "0000111" =>
+        --TEST
+        instr_form <= "011"; --A3
+        alu_op <= "111";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "00100000" =>
+        --OUT
+        instr_form <= "011"; --A3
+        alu_op <= "000";
+        io_flag <= '1';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when "00100001" =>
+        --IN
+        instr_form <= "011"; --A3
+        alu_op <= "000";
+        io_flag <= '1';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   when others =>
+        --NOP
+        instr_form <= "000" --A0
+        alu_op <= "000";
+        io_flag <= '0';
+        mem_opr <= '0';
+        wb_opr  <= '0';
+   end case;
+ 
+  process(rst)
   begin
-    case opcode is
-      --ADD
-      when "0000001" =>
+  --Reset behaviour
+  if rst='1' then
+    alu_op <= "000";
+    instr_form <= "000";
+    mem_opr <= '0';
+    wb_opr  <= '0';
+    io_flag <= '0';
+  end if;
+  end process
 
-
-
-
+    --TODO
 
 
 

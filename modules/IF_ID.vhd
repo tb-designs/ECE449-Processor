@@ -2,77 +2,63 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
-entity IF_ID is 
-  port( instr_in : in std_logic_vector (15 downto 0); --next instruction to latch
-        clk      : in std_logic;
-        op_code : out std_logic_vector (6 downto 0);
-        ra_addr : out std_logic_vector (2 downto 0); -- or r_dest
-        rb_addr : out std_logic_vector (2 downto 0); -- or r_source
-        rc_addr : out std_logic_vector (2 downto 0);
-        instr_out : out std_logic_vector (15 downto 0));
-end IF_ID;
+entity MEM_WB is 
+  port(
+  --Might need to add instruction format input/output later
+       instr_in       : in std_logic_vector (15 downto 0);
+       mem_data_in    : in std_logic_vector (15 downto 0);
+       alu_result_in  : in std_logic_vector (15 downto 0);
+       ra_addr_in     : in std_logic_vector (2 downto 0);
+       wb_oper_in     : in std_logic;
+       clk            : in std_logic;
+       instr_out      : out std_logic_vector (15 downto 0);
+       mem_data_out   : out std_logic_vector (15 downto 0);
+       alu_result_out : out std_logic_vector (15 downto 0);
+       ra_addr_out    : out std_logic_vector (2 downto 0);
+       wb_oper_out    : out std_logic
+  );
 
-architecture Behavioral of IF_ID is
-   
-  --Signals(acting as our register)
-  signal if_id : std_logic_vector (15 downto 0) := (others => '0');
+end MEM_WB;
+
+architecture Behavioral of MEM_WB is
+
+  --Signals
+  signal mem_wb : std_logic_vector (51 downto 0) := (others => '0');
+
+  --Alias
+  alias instr is mem_wb(51 downto 36);
+  alias mem_data is mem_wb(35 downto 20);
+  alias alu_res is mem_wb(19 downto 4);
+  alias ra_addr is mem_wb(3 downto 1);
+  alias wb_oper is mem_wb(0);
+
+
+  begin
+    process(clk)
+    begin
+    --if the clock is falling we latch
+    --if the clock is rising we gate
     
-   begin
-       process(clk)
-       begin 
-      --if the clock is falling we latch
-     --if the clock is rising we gate
-    
-     if(clk='0' and clk'event) then
-     --rising edge set the output
-        op_code <= if_id(15 downto 9);
-        ra_addr <= if_id(8 downto 6);
-        rb_addr <= if_id(5 downto 3);
-        rc_addr <= if_id(2 downto 0);
-        instr_out <= if_id; --Pass instruction to ID/EX
+    if(clk='0' and clk'event) then
+       --rising edge set output
+        instr_out <= instr;
+        mem_data_out <= mem_data;
+        alu_result_out <= alu_res;
+        wb_oper_out <= wb_oper;
+        
+    elsif(clk='1' and clk'event) then
+       --falling edge store input
+        mem_wb <= instr_in&
+              mem_data_in&
+              alu_result_in&
+              ra_addr_in&
+              wb_oper_in;
 
-     elsif(clk='1' and clk'event) then
-     --falling edge store the input
-        if_id <= instr_in;
-     
-     end if
-     end if;
-   end process;
+    end if
+    end if
+       
+      
 
-       --Instruction format depends on opcode
-       --A Format (Due Feb 26th)
-         --0,NOP = A0      (A0 = 000)
-         --1,ADD = A1      (A1 = 001)
-         --2,SUB = A1
-         --3,MUL = A1
-         --4,NAND = A1
-         --5,SHL = A2      (A2 = 010)
-         --6,SHL = A2
-         --7,TEST = A3     (A3 = 011)
-         --32,OUT = A3
-         --33,IN = A3
-     
-         --Variables
-         --variable format : std_logic_vector (2 downto 0);
-     
-     
-      --Format decision (probably should do this in the controller)
-     --case instr(15 downto 9) is
-        --A Format Instr
-       -- when "0000000" => format := "000"
-       -- when "0000001" => format := "001"
-       -- when "0000010" => format := "001"
-       -- when "0000011" => format := "001"
-       -- when "0000100" => format := "001"
-       -- when "0000101" => format := "010"
-       -- when "0000110" => format := "010"
-       -- when "0000111" => format := "011"
-       -- when "0100000" => format := "011"
-       -- when "0100001" => format := "011"
-        --B Format Instr
-     
-        --L Format Instr
-     
- 
+
 
   end Behavioral;

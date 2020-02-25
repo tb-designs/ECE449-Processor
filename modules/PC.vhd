@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 02/12/2020 06:06:15 PM
+-- Create Date: 02/24/2020 04:02:50 PM
 -- Design Name: 
--- Module Name: PC - Behavioral
+-- Module Name: pc - Behavioral
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
@@ -31,14 +31,38 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity PC is
-    Port ( next_address : in STD_LOGIC_VECTOR (15 downto 0);
-           output_address : out STD_LOGIC_VECTOR (15 downto 0));
-end PC;
+entity pc is
+    Port ( clk : in STD_LOGIC;
+           rst : in STD_LOGIC;
+           en : in STD_LOGIC;
+           addr_in : in std_logic_vector(15 downto 0);
+           addr_out : out std_logic_vector(15 downto 0)  
+          );
+end pc;
 
-architecture Behavioral of PC is
+architecture Behavioral of pc is
 
-begin
+    --Signals
+    signal current_addr : std_logic_vector(15 downto 0) := (others => '0');
 
-
+    begin
+    process(clk)
+    begin
+        if rst='1' then
+            --Reset to base address
+            current_addr <= X"0000";
+            addr_out <= X"0000";
+        end if;
+    
+        if(clk='0' and clk'event) then
+            --Rising edge, set outputs
+            addr_out <= current_addr;
+        elsif (clk='1' and clk'event) then
+            --Falling Edge, store inputs
+            current_addr <= addr_in;
+        end if;
+        
+        
+        
+    end process;
 end Behavioral;
