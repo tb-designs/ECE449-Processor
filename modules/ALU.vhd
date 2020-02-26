@@ -19,13 +19,13 @@
 ----------------------------------------------------------------------------------
 
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use ieee.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_misc.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use ieee.numeric_std.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -33,8 +33,8 @@ use ieee.std_logic_unsigned.all;
 --use UNISIM.VComponents.all;
 
 entity ALU is
-	Port ( in_1 : in STD_LOGIC_VECTOR (15 downto 0);
-               in_2 : in STD_LOGIC_VECTOR (15 downto 0);
+	Port ( in1 : in STD_LOGIC_VECTOR (15 downto 0);
+               in2 : in STD_LOGIC_VECTOR (15 downto 0);
                alu_mode : in STD_LOGIC_VECTOR (2 downto 0);
                rst : in STD_LOGIC;
                result : out STD_LOGIC_VECTOR (15 downto 0);
@@ -43,6 +43,13 @@ entity ALU is
 end ALU;
 
 architecture Behavioral of ALU is
+
+-- Functions
+function slice_slv(x : signed; s, e : integer)
+return std_logic_vector is
+begin
+	return std_logic_vector(x(s downto e));
+end slice_slv;
 
 -- Components
 component dadda_mult is
@@ -58,85 +65,51 @@ component bshift is
 	       output : out std_logic_vector(15 downto 0));
 end component;
 
--- Functions
-
---to_int, used to determine amount of shift needed
-function to_int(sig : std_logic_vector) return integer is
-    variable num : integer := 0;
-begin
-    for i in sig'range loop
-        if sig(i) = '1' then
-            num := num*2+1;
-        else
-            num := num*2;
-        end if;
-    end loop;
-    return num;
-end function to_int;
-
 --Signals
 signal add_buf : std_logic_vector(15 downto 0);
 signal mult_buf : std_logic_vector(31 downto 0);
 signal left_buf,right_buf : std_logic_vector(15 downto 0);
 
 begin
-process(in_1, in_2, alu_mode, rst)
+	result <= (others => '0') when (rst = '1') else
+		  -- NOP
+		  NULL when (alu_mode = "000") else
+		  -- ADD
+		  std_logic_vector(signed(in1) + signed(in2)) when (alu_mode = "001") else
+		  -- SUB
+		  std_logic_vector(signed(in1) - signed(in2)) when (alu_mode = "010") else
+		  -- MUL
+		  slice_slv(signed(in1) * signed(in2),15,0) when (alu_mode = "011") else
+		  -- NAND
+		  in1 nand in2 when (alu_mode = "100") else
+		  -- SHL
+		  left_buf when (alu_mode = "101") else
+		  -- SHR
+		  right_buf when (alu_mode = "110") else
+		  -- default
+		  (others => '0');
+
+process(alu_mode, rst)
 begin
     	--Reset Behaviour
 	if (rst = '1') then
       		result <= (others => '0'); 
       		z_flag <= '0'; 
       		n_flag <= '0'; 
-    	elsif rst = '0' then
-         	case alu_mode(2 downto 0) is
-         		--NOP
-         		when "000" => NULL;
-         		--ADD
-         		when "001" => 
-            			add_buf <= in_1 + in_2;
-            			-- Overflow detection
-            			--if (add_buf(16) = '1') then
-                			--z_flag <= '1'; 
-                			--n_flag <= '1';
-            			--end if;
-            			--result <= add_buf;
-            
-         		--SUB
-         		when "010" =>
-            			result <= in_1 - in_2;
-         		--MUL
-         		when "011" =>
-                    result <= mult_buf(15 downto 0);
-	    			-- mult_buf <= in_1*in_2;
-            			--Temp solution
-            			if (mult_buf(16) = '1') then
-                			z_flag <= '1'; 
-                			n_flag <= '1';
-            			end if;
-
-         		--NAND
-         		when "100" =>
-            			result <= in_1 NAND in_2;
-            
-         		--SHL
-         		when "101" =>
-                        result <= left_buf;
-            			--result_buf <= in_1( 15 - to_int(in_2) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
-         
-         		--SHR
-         		when "110" =>
-                        result <= right_buf;
-            			--result_buf <= ((to_int(in_2)-1) downto 0 => '0') & in_1(15 downto to_int(in_2));
-         
+    	elsif (rst = '0') then
+		if (alu_mode = "111") then
          		--TEST
-         		when "111" => 
-            			if (in_1(15 downto 0) < X"0") then 
-                			n_flag <= '1';
-            			elsif (in_1(15 downto 0) = X"0") then
-                			z_flag <= '1';
-            			end if;
-         		when others => NULL;
- 	 	end case;
+			if(signed(in1) < 0) then 
+				n_flag <= '1';
+            		else
+				n_flag <= '0';
+			end if;
+			if(signed(in1) = 0) then
+				z_flag <= '1';
+			else
+				z_flag <= '0';
+			end if;
+         	end if;
 	end if;
 end process;
 
