@@ -42,7 +42,7 @@ entity ALU is
                n_flag : out STD_LOGIC);
 end ALU;
 
-architecture Behavioral of ALU is
+architecture behavioral of ALU is
 
 -- Functions
 function slice_slv(x : signed; s, e : integer)
@@ -66,7 +66,6 @@ component bshift is
 end component;
 
 --Signals
-signal add_buf : std_logic_vector(15 downto 0);
 signal mult_buf : std_logic_vector(31 downto 0);
 signal left_buf,right_buf : std_logic_vector(15 downto 0);
 
@@ -89,32 +88,14 @@ begin
 		  -- default
 		  (others => '0');
 
-process(alu_mode, rst)
-begin
-    	--Reset Behaviour
-	if (rst = '1') then
-      		result <= (others => '0'); 
-      		z_flag <= '0'; 
-      		n_flag <= '0'; 
-    	elsif (rst = '0') then
-		if (alu_mode = "111") then
-         		--TEST
-			if(signed(in1) < 0) then 
-				n_flag <= '1';
-            		else
-				n_flag <= '0';
-			end if;
-			if(signed(in1) = 0) then
-				z_flag <= '1';
-			else
-				z_flag <= '0';
-			end if;
-         	end if;
-	end if;
-end process;
+	z_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) /= 0)) else
+		  '1' when (alu_mode = "111") and (signed(in1) = 0);
 
-multiplier : dadda_mult port map(in_1,in_2,mult_buf);
-shleft : bshift port map('1',in_2(3 downto 0),in_1,left_buf);
-shright : bshift port map('0',in_2(3 downto 0),in_1,right_buf);
+	n_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) >= 0)) else
+		  '1' when (alu_mode = "111") and (signed(in1) < 0);
 
-end Behavioral;
+	mult : dadda_mult port map(in1,in2,mult_buf);
+	shleft : bshift port map('1',in2(3 downto 0),in1,left_buf);
+	shright : bshift port map('0',in2(3 downto 0),in1,right_buf);
+
+end behavioral;
