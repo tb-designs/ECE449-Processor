@@ -248,7 +248,7 @@ fa423 : full_adder port map(c422_3,c422_2,c422,s423,c423);
 fa423_2 : full_adder port map(c522,p15(8),p14(9),s423_2,c423_2);
 fa423_3 : full_adder port map(p13(10),p12(11),p11(12),s423_3,c423_3);
 fa424 : full_adder port map(c423_3,c423_2,c423,s424,c424);
-fa424_2 : full_adder port map(p15(9),p14(10),p3(11),s424_2,c424_2);
+fa424_2 : full_adder port map(p15(9),p14(10),p13(11),s424_2,c424_2);
 fa425 : full_adder port map(c424_2,c424,p15(10),s425,c425);
 
 -- stage d3 = 4

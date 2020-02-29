@@ -71,8 +71,6 @@ signal left_buf,right_buf : std_logic_vector(15 downto 0);
 
 begin
 	result <= (others => '0') when (rst = '1') else
-		  -- NOP
-		  NULL when (alu_mode = "000") else
 		  -- ADD
 		  std_logic_vector(signed(in1) + signed(in2)) when (alu_mode = "001") else
 		  -- SUB
