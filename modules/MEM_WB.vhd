@@ -19,6 +19,7 @@ entity MEM_WB is
 
 end MEM_WB;
 
+
 architecture Behavioral of MEM_WB is
 
 --Type for easier modification

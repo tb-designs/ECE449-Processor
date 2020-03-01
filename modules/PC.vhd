@@ -53,10 +53,9 @@ begin
         pc_out <= (others => '0');
     end if;
     
-    if rising_edge(clk) then
-        pc_out <= cur_pc;
-    elsif falling_edge(clk) then
-        cur_pc <= pc_in;
-    end if;  
+    if (clk='0' and clk'event) then
+        pc_out <= pc_in;
+    end if;
+    
 end process;
 end behavioral;

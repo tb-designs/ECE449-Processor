@@ -20,7 +20,7 @@ entity EX_MEM is
        opcode_out     : out std_logic_vector (6 downto 0);
        instr_form_out : out std_logic_vector (2 downto 0);
        ra_addr_out    : out std_logic_vector (2 downto 0);
-       mem_oper_out   : out std_logic;
+       mem_oper_out   : out std_logic_vector (1 downto 0); --Mem interface requires vector
        wb_oper_out    : out std_logic
   );
 
@@ -69,7 +69,7 @@ constant EX_MEM_INIT : ex_mem := (
           src_data       <= (others => '0');
           instr_form_out <= (others => '0');
           ra_addr_out    <= (others => '0');
-          mem_oper_out   <= '0';
+          mem_oper_out   <= "0";
           wb_oper_out    <= '0';
       end if;
 
@@ -84,7 +84,14 @@ constant EX_MEM_INIT : ex_mem := (
       opcode_out     <= ex_mem_sig.opcode;
       PC_addr_out    <= ex_mem_sig.pc_addr;
       ra_addr_out    <= ex_mem_sig.ra_addr;
-      mem_oper_out   <= ex_mem_sig.mem_opr;
+      
+      --quick fix for wb_oper needing to be 0-length vector
+      if ex_mem_sig.mem_opr = '1' then
+        mem_oper_out   <= "11";
+      else
+        mem_oper_out   <= "00";
+      end if;
+      
       wb_oper_out    <= ex_mem_sig.wb_opr;
 
       --Data memory outputs depend on if LOAD/IN or STORE/OUT instruction
