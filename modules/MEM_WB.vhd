@@ -21,16 +21,30 @@ end MEM_WB;
 
 architecture Behavioral of MEM_WB is
 
-  --Signals(acting as our register)
-  signal mem_wb : std_logic_vector (61 downto 0) := (others => '0');
+--Type for easier modification
+type mem_wb is record
+    mem_data     : std_logic_vector (15 downto 0);
+    alu_result   : std_logic_vector (15 downto 0);
+    instr_format : std_logic_vector (2 downto 0);
+    pc_addr      : std_logic_vector (15 downto 0);
+    opcode       : std_logic_vector (6 downto 0);
+    ra_addr      : std_logic_vector (2 downto 0);
+    wb_opr       : std_logic;
+end record mem_wb;
 
-  alias mem_data is mem_wb(61 downto 46);
-  alias alu_result is mem_wb(45 downto 30);
-  alias instr_format is mem_wb(29 downto 27);
-  alias pc_addr is mem_wb(26 downto 11);
-  alias opcode is mem_wb(10 downto 4);
-  alias ra_addr is mem_wb(3 downto 1);
-  alias wb_oper is mem_wb(0);
+--Specify init value for the type
+constant MEM_WB_INIT : mem_wb := (
+    mem_data    => (others => '0'),
+    alu_result => (others => '0'),
+    instr_format     => (others => '0'),
+    pc_addr    => (others => '0'),
+    opcode  => (others => '0'),
+    ra_addr   => (others => '0'),
+    wb_opr     => '0'
+    );
+
+  --Signals(acting as our register)
+  signal mem_wb_sig : mem_wb := MEM_WB_INIT;
 
   begin
     process(clk,rst)
@@ -39,7 +53,7 @@ architecture Behavioral of MEM_WB is
       if rst = '1' then
           wb_data_out <= (others => '0');
           ra_addr_out <= (others => '0');
-          wb_oper_out <= (others => '0');
+          wb_oper_out <= '0';
       end if;
 
     
@@ -48,28 +62,27 @@ architecture Behavioral of MEM_WB is
     if(clk='0' and clk'event) then
        --rising edge set output
 
-        ra_addr_out <= ra_addr;
-        wb_oper_out <= wb_oper;
+        ra_addr_out <= mem_wb_sig.ra_addr;
+        wb_oper_out <= mem_wb_sig.wb_opr;
 
       --data output depends on if ALU op or if a LOAD
-      if opcode is "0010000" then
+      if mem_wb_sig.opcode = "0010000" then
         --LOAD
-        wb_data_out <= mem_data;
+        wb_data_out <= mem_wb_sig.mem_data;
       else
         --NOT LOAD
-        wb_data_out <= alu_result;  
+        wb_data_out <= mem_wb_sig.alu_result;  
       end if;
         
     elsif(clk='1' and clk'event) then
        --falling edge store input
-
-        mem_wb <= mem_data_in&
-                  alu_result_in&
-                  instr_format_in&
-                  pc_addr_in&
-                  opcode_in&
-                  ra_addr_in&
-                  wb_oper_in;
+       mem_wb_sig.mem_data <= mem_data_in;
+       mem_wb_sig.alu_result <= alu_result_in;
+       mem_wb_sig.instr_format <= instr_format_in;
+       mem_wb_sig.pc_addr <= pc_addr_in;
+       mem_wb_sig.opcode <= opcode_in;
+       mem_wb_sig.ra_addr <= ra_addr_in;
+       mem_wb_sig.wb_opr <= wb_oper_in;
 
     end if;
   end process;   

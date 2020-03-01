@@ -15,8 +15,8 @@ entity EX_MEM is
        clk,rst        : in std_logic;
        alu_result_out : out std_logic_vector (15 downto 0);
        PC_addr_out    : out std_logic_vector (15 downto 0);
-       mem_addr_out   : out std_logic_vector (15 downto 0);
-       wr_data_out    : out std_logic_vector (15 downto 0);
+       dest_data      : out std_logic_vector (15 downto 0); --
+       src_data       : out std_logic_vector (15 downto 0);
        opcode_out     : out std_logic_vector (6 downto 0);
        instr_form_out : out std_logic_vector (2 downto 0);
        ra_addr_out    : out std_logic_vector (2 downto 0);
@@ -28,19 +28,35 @@ end EX_MEM;
 
 architecture Behavioral of EX_MEM is
 
+--Type for easier modification
+type ex_mem is record
+    alu_res    : std_logic_vector (15 downto 0);
+    instr_form : std_logic_vector (2 downto 0);
+    opcode     : std_logic_vector (6 downto 0);
+    pc_addr    : std_logic_vector (15 downto 0);
+    dest_data  : std_logic_vector (15 downto 0);
+    src_data   : std_logic_vector (15 downto 0);
+    ra_addr    : std_logic_vector (2 downto 0);
+    mem_opr    : std_logic;
+    wb_opr     : std_logic;
+end record ex_mem;
+
+--Specify init value for the type
+constant EX_MEM_INIT : ex_mem := (
+    alu_res    => (others => '0'),
+    instr_form => (others => '0'),
+    opcode     => (others => '0'),
+    pc_addr    => (others => '0'),
+    dest_data  => (others => '0'),
+    src_data   => (others => '0'),
+    ra_addr    => (others => '0'),
+    mem_opr    => '0',
+    wb_opr     => '0'
+    );
+
+
   --Signal (acting as our storage)
-  signal ex_mem : std_logic_vector (78 downto 0) := (others => '0');
-  
-  --Alias
-  alias alu_res    is ex_mem(78 downto 63);
-  alias instr_form is ex_mem(62 downto 60);
-  alias opcode     is ex_mem(59 downto 53);
-  alias pc_addr    is ex_mem(52 downto 37);
-  alias dest_data  is ex_mem(36 downto 21);
-  alias src_data   is ex_mem(20 downto 5);
-  alias ra_addr    is ex_mem(4 downto 2);
-  alias mem_opr    is ex_mem(1);
-  alias wb_opr     is ex_mem(0);
+  signal ex_mem_sig : ex_mem := EX_MEM_INIT;
   
   begin
     process(clk,rst)
@@ -48,13 +64,13 @@ architecture Behavioral of EX_MEM is
       --reset behaviour, all outputs to zero
       if rst = '1' then
           alu_result_out <= (others => '0');
-          PC_addr_out <= (others => '0');
-          mem_addr_out <= (others => '0');
-          wr_data_out <= (others => '0');
+          PC_addr_out    <= (others => '0');
+          dest_data      <= (others => '0');
+          src_data       <= (others => '0');
           instr_form_out <= (others => '0');
-          ra_addr_out <= (others => '0');
-          mem_oper_out <= (others => '0');
-          wb_oper_out <= (others => '0');
+          ra_addr_out    <= (others => '0');
+          mem_oper_out   <= '0';
+          wb_oper_out    <= '0';
       end if;
 
     --if the clock is falling we latch
@@ -63,43 +79,54 @@ architecture Behavioral of EX_MEM is
       --rising edge set output
 
       --pass-through values
-      alu_result_out <= alu_res;
-      instr_form_out <= instr_form;
-      opcode_out <= opcode;
-      PC_addr_out <= pc_addr;
-      ra_addr_out <= ra_addr;
-      mem_opr_out <= mem_opr;
-      wb_opr_out <= wb_opr;
+      alu_result_out <= ex_mem_sig.alu_res;
+      instr_form_out <= ex_mem_sig.instr_form;
+      opcode_out     <= ex_mem_sig.opcode;
+      PC_addr_out    <= ex_mem_sig.pc_addr;
+      ra_addr_out    <= ex_mem_sig.ra_addr;
+      mem_oper_out   <= ex_mem_sig.mem_opr;
+      wb_oper_out    <= ex_mem_sig.wb_opr;
 
-      --Data memory outputs depend on if LOAD or STORE instruction
-      if opcode is "0010000" then
+      --Data memory outputs depend on if LOAD/IN or STORE/OUT instruction
+      if ex_mem_sig.opcode = "0010000" then
         --LOAD
-        src_data <= dest_data_in;
-        dest_data <= src_data_in;
+        src_data  <= ex_mem_sig.dest_data;
+        dest_data <= ex_mem_sig.src_data;
 
-      elsif opcode is "0010001" then
+      elsif ex_mem_sig.opcode = "0010001" then
         --STORE
-        dest_data <= dest_data_in;
-        src_data <= src_data_in;
+        dest_data <= ex_mem_sig.dest_data;
+        src_data  <= ex_mem_sig.src_data;
+        
+      elsif ex_mem_sig.opcode = "0100000" then
+         --OUT
+        dest_data <= ex_mem_sig.dest_data;
+        src_data  <= ex_mem_sig.src_data;       
+       
+      elsif ex_mem_sig.opcode = "0100001" then
+        --IN
+        dest_data <= ex_mem_sig.dest_data;
+        src_data  <= ex_mem_sig.src_data;       
+        
       else
         --Other instructions do no access Data memory
         --TODO consider sending a default value that the memory interface would recognize
         dest_data <= (others => '0');
-        src_data <= (others => '0');
+        src_data  <= (others => '0');
 
       end if;
       
     elsif(clk='1' and clk'event) then
         --falling edge store input
-        ex_mem <= alu_result&
-              instr_form_in&
-              opcode_in&
-              PC_addr_in&
-              dest_data_in&
-              src_data_in&
-              ra_addr_in&
-              mem_oper_in&
-              wb_oper_in;
+        ex_mem_sig.alu_res    <= alu_result;
+        ex_mem_sig.instr_form <= instr_form_in;
+        ex_mem_sig.opcode     <= opcode_in;
+        ex_mem_sig.pc_addr    <= pc_addr_in;
+        ex_mem_sig.dest_data  <= dest_data_in;
+        ex_mem_sig.src_data   <= src_data_in;
+        ex_mem_sig.ra_addr    <= ra_addr_in;
+        ex_mem_sig.mem_opr    <= mem_oper_in;
+        ex_mem_sig.wb_opr     <= wb_oper_in;
                   
     end if;
     end process;
