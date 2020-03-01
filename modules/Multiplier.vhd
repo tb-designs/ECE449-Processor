@@ -339,7 +339,7 @@ fa19 : full_adder port map(c18,s39,s39_2,s19,c19);
 fa110 : full_adder port map(c19,s310,s310_2,s110,c110);
 fa111 : full_adder port map(c110,s311,s311_2,s111,c111);
 fa112 : full_adder port map(c111,s312,s312_2,s112,c112);
-fa113 : full_adder port map(c112,s113,s313_2,s113,c113);
+fa113 : full_adder port map(c112,s313,s313_2,s113,c113);
 fa114 : full_adder port map(c113,s314,s314_2,s114,c114);
 fa115 : full_adder port map(c114,s315,s315_2,s115,c115);
 fa116 : full_adder port map(c115,s316,s316_2,s116,c116);
@@ -387,6 +387,6 @@ fa026 : full_adder port map(c025,s226,s126,s026,c026);
 fa027 : full_adder port map(c026,s227,s127,s027,c027);
 fa028 : full_adder port map(c027,s228,s128,s028,c028);
 fa029 : full_adder port map(c028,p14(15),s129,s029,c029);
-ha030 : half_adder port map(c029,p15(15),s030,c030);
+fa030 : full_adder port map(c029,p15(15),'1',s030,c030);
 -- end dadda
 end behavioral;
