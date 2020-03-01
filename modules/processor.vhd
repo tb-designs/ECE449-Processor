@@ -71,7 +71,7 @@ component IF_ID is
     port (
         instr_in, pc_addr_in : in  std_logic_vector (15 downto 0);
         clk,rst : in  std_logic;
-        pc_addr_out,op_pass out std_logic_vector (15 downto 0);
+        pc_addr_out,op_pass : out std_logic_vector (15 downto 0);
         op_code: out std_logic_vector (6 downto 0);
         instr_format, reg1_addr, reg2_addr : out std_logic_vector (2 downto 0);
         mem_oper_out, wb_oper_out : out std_logic
@@ -98,7 +98,7 @@ end component;
 component ID_EX is 
     port (
         data_1, data_2, operand_3, pc_addr_in : in std_logic_vector (15 downto 0);
-        opcode_in : in std_logic_vector in (6 downto 0);
+        opcode_in : std_logic_vector (6 downto 0);
         instr_form_in : in std_logic_vector (2 downto 0);
         mem_oper_in, wb_oper_in, clk, rst : in std_logic;
         operand1, operand2, pc_addr_out, dest_mem_data, src_mem_data : out std_logic_vector (15 downto 0);
@@ -151,10 +151,59 @@ end component;
 -- Constants
 constant instr_mem_size : integer := 2; -- each instr is 2 bytes
 
---Signals (internal connections)
+--GLOBAL
+signal clk_sig : std_logic;
+signal rst_sig : std_logic;
+
+--INSTRUCTION FETCH
+signal instr_mem_output : std_logic_vector (15 downto 0);
+signal ifid_pc_addr_out : std_logic_vector (15 downto 0);
+signal ifid_op_pass_out : std_logic_vector (15 downto 0);
+signal ifid_opcode_out : std_logic_vector (6 downto 0);
+signal ifid_instr_format_out : std_logic_vector (2 downto 0);
+signal ifid_reg1_addr_out : std_logic_vector (2 downto 0);
+signal ifid_reg2_addr_out : std_logic_vector (2 downto 0);
+signal ifid_mem_oper_out : std_logic;
+signal ifid_wb_oper_out : std_logic;
+
+--INSTRUCTION DECODE
+signal regfile_reg1_data_out : std_logic_vector (15 downto 0);
+signal regfile_reg2_data_out : std_logic_vector (15 downto 0);
+signal idex_operand1_out : std_logic_vector (15 downto 0);
+signal idex_operand2_out : std_logic_vector (15 downto 0);
+signal idex_opcode_out : std_logic_vector (6 downto 0);
+signal idex_alu_mode_out : std_logic_vector (2 downto 0);
+signal idex_instr_form_out : std_logic_vector (2 downto 0);
+signal idex_pc_addr_out : std_logic_vector (15 downto 0);
+signal idex_dest_mem_data_out : std_logic_vector (15 downto 0);
+signal idex_src_mem_data_out : std_logic_vector (15 downto 0);
+signal idex_ra_addr_out : std_logic_vector (2 downto 0);
+signal idex_mem_oper_out : std_logic;
+signal idex_wb_oper_out : std_logic;
+
+--EXECUTE
+signal alu_result_out : std_logic_vector (15 downto 0);
+signal exmem_alu_result_out : std_logic_vector (15 downto 0);
+signal exmem_pc_addr_out : std_logic_vector (15 downto 0);
+signal exmem_dest_data_out : std_logic_vector (15 downto 0);
+signal exmem_src_data_out : std_logic_vector (15 downto 0);
+signal exmem_opcode_out : std_logic_vector (6 downto 0);
+signal exmem_instr_form_out : std_logic_vector (2 downto 0);
+signal exmem_ra_addr_out : std_logic_vector (15 downto 0);
+signal exmem_mem_oper_out : std_logic;
+signal exmem_wb_oper_out : std_logic;
+
+--MEMORY
+signal data_mem_output : std_logic_vector (15 downto 0);
+signal memwb_data_out : std_logic_vector (15 downto 0);
+signal memwb_ra_addr_out : std_logic_vector (2 downto 0);
+signal memwb_wb_oper_out : std_logic;
+
+--WRITE BACK
+
+--PC behaviour
 signal pc_addr : std_logic_vector(15 downto 0);
 signal pc_next_addr : std_logic_vector(15 downto 0);
-
 begin
 
 -- Component instantiations
