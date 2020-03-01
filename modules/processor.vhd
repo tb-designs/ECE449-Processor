@@ -69,14 +69,12 @@ end component;
 --IF/ID
 component IF_ID is
     port (
-        instr_in : in  std_logic_vector (15 downto 0); --next instruction to latch
-        clk : in  std_logic;
-        op_code_out : out std_logic_vector (6 downto 0);
-        ra_addr_out : out std_logic_vector (2 downto 0); -- or r_dest
-        rb_addr_out : out std_logic_vector (2 downto 0); -- or r_source
-        rc_addr_out : out std_logic_vector (2 downto 0);
-        c1_out : out std_logic_vector (3 downto 0);     --format A2
-        instr_out : out std_logic_vector (15 downto 0)
+        instr_in, pc_addr_in : in  std_logic_vector (15 downto 0);
+        clk,rst : in  std_logic;
+        pc_addr_out,op_pass out std_logic_vector (15 downto 0);
+        op_code: out std_logic_vector (6 downto 0);
+        instr_format, reg1_addr, reg2_addr : out std_logic_vector (2 downto 0);
+        mem_oper_out, wb_oper_out : out std_logic
     );
 end component;
 
@@ -99,23 +97,14 @@ end component;
 --ID/EX
 component ID_EX is 
     port (
-        instr_in    : in std_logic_vector (15 downto 0);
-        reg_data_1    : in std_logic_vector (15 downto 0);
-        reg_data_2    : in std_logic_vector (15 downto 0);
-        c1_in         : in std_logic_vector (3 downto 0);
-        alu_mode_in   : in std_logic_vector (2 downto 0);
+        data_1, data_2, operand_3, pc_addr_in : in std_logic_vector (15 downto 0);
+        opcode_in : in std_logic_vector in (6 downto 0);
         instr_form_in : in std_logic_vector (2 downto 0);
-        ra_addr_in    : in std_logic_vector (2 downto 0);
-        mem_oper_in   : in std_logic;
-        wb_oper_in    : in std_logic;
-        clk           : in std_logic;
-        operand1      : out std_logic_vector (15 downto 0);
-        operand2      : out std_logic_vector (15 downto 0);
-        instr_out     : out std_logic_vector (15 downto 0);
-        alu_mode_out  : out std_logic_vector (2 downto 0);
-        ra_addr_out   : out std_logic_vector (2 downto 0);
-        mem_oper_out  : out std_logic;
-        wb_oper_out   : out std_logic
+        mem_oper_in, wb_oper_in, clk, rst : in std_logic;
+        operand1, operand2, pc_addr_out, dest_mem_data, src_mem_data : out std_logic_vector (15 downto 0);
+        opcode_out : out std_logic_vector (6 downto 0);
+        alu_mode_out, instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
+        mem_oper_out, wb_oper_out : out std_logic
         );
 end component;
 
@@ -135,34 +124,25 @@ end component;
 --EX/MEM
 component EX_MEM is
     port (
-        instr_in     : in std_logic_vector (15 downto 0);
-        alu_result     : in std_logic_vector (15 downto 0);
-        instr_form_in  : in std_logic_vector (2 downto 0);
-        ra_addr_in     : in std_logic_vector (2 downto 0);
-        mem_oper_in    : in std_logic;
-        wb_oper_in     : in std_logic;
-        clk            : in std_logic;
-        instr_out      : out std_logic_vector (15 downto 0);
-        alu_result_out : out std_logic_vector (15 downto 0);
-        instr_form_out : out std_logic_vector (2 downto 0);
-        ra_addr_out    : out std_logic_vector (2 downto 0);
-        mem_oper_out   : out std_logic;
-        wb_oper_out    : out std_logic
+        alu_result, pc_addr_in, dest_data_in, src_data_in : in std_logic_vector (15 downto 0);
+        opcode_in : in std_logic_vector (6 downto 0);
+        instr_form_in, ra_addr_in : in std_logic_vector (2 downto 0);
+        mem_oper_in, wb_oper_in, clk, rst : in std_logic;
+        alu_result_out, pc_addr_out, dest_data, src_data : out std_logic_vector (15 downto 0);
+        opcode_out : out std_logic_vector (6 downto 0);
+        instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
+        mem_oper_out, wb_oper_out : out std_logic
     );
 end component;
 
 --MEM/WB
 component MEM_WB is 
     port (
-        instr_in       : in std_logic_vector (15 downto 0);
-        mem_data_in    : in std_logic_vector (15 downto 0);
-        alu_result_in  : in std_logic_vector (15 downto 0);
-        ra_addr_in     : in std_logic_vector (2 downto 0);
-        wb_oper_in     : in std_logic;
-        clk            : in std_logic;
-        instr_out      : out std_logic_vector (15 downto 0);
-        mem_data_out   : out std_logic_vector (15 downto 0);
-        alu_result_out : out std_logic_vector (15 downto 0);
+        mem_data_in, alu_result_in, pc_addr_in : in std_logic_vector (15 downto 0);
+        opcode_in : in std_logic_vector (6 downto 0);
+        instr_format_in, ra_addr_in : in std_logic_vector (2 downto 0);
+        wb_oper_in, clk, rst : in std_logic;
+        wb_data_out   : out std_logic_vector (15 downto 0);
         ra_addr_out    : out std_logic_vector (2 downto 0);
         wb_oper_out    : out std_logic
     );
