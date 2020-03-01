@@ -162,6 +162,34 @@ end component;
 
 --Signals (internal connections)
 
+--GLOBAL
+signal clk_sig : std_logic;
+signal rst_sig : std_logic;
+
+--INSTRUCTION FETCH
+signal pc_addr_out      : std_logic_vector (15 downto 0);
+signal instr_mem_output : std_logic_vector (15 downto 0);
+signal ifid_pc_addr_out : std_logic_vector (15 downto 0);
+signal ifid_op_pass_out : std_logic_vector (15 downto 0);
+signal ifid_opcode_out : std_logic_vector (6 downto 0);
+signal ifid_instr_format_out : std_logic_vector (2 downto 0);
+signal ifid_reg1_addr_out : std_logic_vector (2 downto 0);
+signal ifid_reg2_addr_out : std_logic_vector (2 downto 0);
+signal ifid_mem_oper_out : std_logic_vector (6 downto 0);
+signal ifid_wb_oper_out : std_logic_vector (6 downto 0);
+
+--INSTRUCTION DECODE
+signal regfile_reg1_data_out : std_logic_vector (6 downto 0);
+signal ifid_wb_oper_out : std_logic_vector (6 downto 0);
+signal ifid_wb_oper_out : std_logic_vector (6 downto 0);
+
+--EXECUTE
+
+--MEMORY
+
+--WRITE BACK
+
+
 
 --Connections
 begin
