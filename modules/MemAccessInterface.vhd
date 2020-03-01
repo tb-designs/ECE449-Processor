@@ -7,77 +7,83 @@ use xpm.vcomponents.all;
 --Wrapper around Xilinx RAM and ROM modules
 
 entity mem_interface is
-Port (addr1,addr2 : in std_logic_vector (11 downto 0); -- addr1 is r/w, addr2 is r only
-        write_data : in std_logic_vector(15 downto 0);
-        clk,rst,wr_en : in std_logic;
-  	r1_data,r2_data : out std_logic_vector(15 downto 0)); 
+Port (addr1,addr2 : in std_logic_vector (15 downto 0); -- addr1 is r/w, addr2 is r only
+      wr_data : in std_logic_vector(15 downto 0);
+      clk,rst : in std_logic;
+      wr_en : in std_logic_vector(1 downto 0);
+  	  r1_data,r2_data : out std_logic_vector(15 downto 0);
+  	  err : out std_logic;
+  	  in_port : in std_logic_vector(15 downto 0);
+  	  out_port : out std_logic_vector(15 downto 0));
 end mem_interface;
 
 architecture behavioral of mem_interface is
 
+constant addr_mask : std_logic_vector(15 downto 0) := X"03FF";
+
 -- RAM signals
 signal ram_douta,ram_doutb : std_logic_vector(15 downto 0); -- Data output for port A,B read operations
-signal ram_addra,ram_addrb : std_logic_vector(11 downto 0); -- Address for port A,B write and read operations
+signal ram_addra,ram_addrb : std_logic_vector(15 downto 0); -- Address for port A,B write and read operations
 signal ram_dina : std_logic_vector(15 downto 0); -- Data input for port A write operations
-signal ram_ena,ram_enb : std_logic; -- Memory enable signal for port A,B. Must be high on clock cycles when read or write operations are initiated
 
 -- ROM signals
 signal rom_douta : std_logic_vector(15 downto 0); -- Data output for port A read operations
-signal rom_addra : std_logic_vector(11 downto 0); -- Address for port A read operations
-signal rom_ena : std_logic; -- Memory enable signal for port A. Must be high on clock cycles when read operations are initiated. Pipelined internally
+signal rom_addra : std_logic_vector(15 downto 0); -- Address for port A read operations
 
+-- Processor ports
+signal in_reg : std_logic_vector(15 downto 0) := (others => '0');
+signal out_reg : std_logic_vector(15 downto 0) := (others => '0');
+
+begin	
+--choice of output depends on memory address (mem mapped)
+--ROM: 0x0000 to 0x03FF
+--RAM: 0x0400 to 0x07FF
+--InputPort:  0xFFF0
+--OutputPort: 0xFFF2
+
+r1_data <= ram_douta when addr1 >= X"0400" and addr1 <= X"07FF" else
+           in_reg when addr1 = X"FFF0" else
+           (others => '0');
+r2_data <= ram_doutb when rst = '1' or (addr2 >= X"0400" and addr2 <= X"07FF") else
+           rom_douta when addr2 >= X"0000" and addr2 <= X"03FF" else
+           in_reg when addr2 = X"FFF0" else
+           (others => '0');
+        
+ram_dina <= wr_data;
+
+ram_addra <= (addr1 and addr_mask) when rst = '0' and addr1 >= X"0400" and addr1 <= X"07FF";
+ram_addrb <= (addr2 and addr_mask) when rst = '0' and addr2 >= X"0400" and addr1 <= X"07FF";
+rom_addra <= addr2 when rst = '0' and addr2 >= X"0000" and addr2 <= X"03FF";
+
+err <= '1' when (addr1 > X"07FF" and addr1 < X"FFF0") or (addr1 > X"FFF3") or (addr2 > X"07FF" and addr2 < X"FFF0") or (addr2 > X"FFF3") else
+       '0' when rst = '1' else
+       '0'; --default
+       
+out_port <= out_reg;
+       
+ext_in : process(rst,in_port)
 begin
-process(clk)
+    if rst = '1' then
+        in_reg <= (others => '0');
+    else
+        in_reg <= in_port;
+    end if;
+end process;
+
+ext_out : process(rst,addr1)
 begin
-	if rising_edge(clk) or falling_edge(clk) then
-     		--choice of output depends on memory address (mem mapped)
-     		--ROM: 0x0000 to 0x03E0
-     		--RAM: 0x0400 to 0x0800
-     		--InputPort:  0xFFF0
-     		--OutputPort: 0xFFF2
-		
-		if addr1 >= X"0400" and addr1 <= X"0800" then
-			if wr_en = '1' then
-				-- write to RAM
-				ram_ena <= '1';
-				ram_dina <= write_data;
-				ram_addra <= addr1;
-			else then
-				-- read from RAM
-				ram_ena <= '1';
-				ram_addra <= addr1;
-				r1_data <= ram_douta;
-			end if;
-		elsif addr1 = X"FFF0" and wr_en = '0' then
-			-- read from In port
-
-		elsif addr1 = X"FFF2" and wr_en = '1' then
-			-- write to Out port
-
-		end if;
-		
-		if addr2 >= X"0000" and addr2 <= X"03E0" then
-			-- read from ROM
-			rom_ena <= '1';
-			rom_addra <= addr2;
-			r2_data <= rom_douta;
-		elsif addr2 >= X"0400" and addr2 <= X"0800" then
-			-- read from RAM
-			ram_enb <= '1';
-			ram_addrb <= addr2;
-			r2_data <= ram_doutb;
-		elsif addr2 = X"FFF0" then
-			-- read from In port
-
-		end if;
-	end if;
+    if rst = '1' then
+        out_reg <= (others => '0');
+    elsif addr1 = x"FFF2" then
+        out_reg <= wr_data;
+    end if;
 end process;
 
 xpm_memory_dpdistram_inst : xpm_memory_dpdistram
 generic map (
-  ADDR_WIDTH_A => 12, -- DECIMAL
-  ADDR_WIDTH_B => 12, -- DECIMAL
-  BYTE_WRITE_WIDTH_A => 16, -- DECIMAL
+  ADDR_WIDTH_A => 16, -- DECIMAL
+  ADDR_WIDTH_B => 16, -- DECIMAL
+  BYTE_WRITE_WIDTH_A => 8, -- DECIMAL
   CLOCKING_MODE => "common_clock", -- String
   MEMORY_INIT_FILE => "none", -- String
   MEMORY_INIT_PARAM => "0", -- String
@@ -86,12 +92,12 @@ generic map (
   MESSAGE_CONTROL => 0, -- DECIMAL
   READ_DATA_WIDTH_A => 16, -- DECIMAL
   READ_DATA_WIDTH_B => 16, -- DECIMAL
-  READ_LATENCY_A => 1, -- DECIMAL
-  READ_LATENCY_B => 1, -- DECIMAL
+  READ_LATENCY_A => 0, -- DECIMAL
+  READ_LATENCY_B => 0, -- DECIMAL
   READ_RESET_VALUE_A => "0", -- String
   READ_RESET_VALUE_B => "0", -- String
-  RST_MODE_A => "SYNC", -- String
-  RST_MODE_B => "SYNC", -- String
+  --RST_MODE_A => "SYNC", -- String
+  --RST_MODE_B => "SYNC", -- String
   USE_EMBEDDED_CONSTRAINT => 0, -- DECIMAL
   USE_MEM_INIT => 1, -- DECIMAL
   WRITE_DATA_WIDTH_A => 16 -- DECIMAL
@@ -103,11 +109,15 @@ port map (
   addrb => ram_addrb, -- ADDR_WIDTH_B-bit input: Address for port B write and read operations.
   clka => clk, -- 1-bit input: Clock signal for port A. Also clocks port B when parameter
   -- CLOCKING_MODE is "common_clock".
+  clkb => clk, -- 1-bit input: Clock signal for port B when parameter CLOCKING_MODE is
+    -- "independent_clock". Unused when parameter CLOCKING_MODE is "common_clock".
   dina => ram_dina, -- WRITE_DATA_WIDTH_A-bit input: Data input for port A write operations.
-  ena => ram_ena, -- 1-bit input: Memory enable signal for port A. Must be high on clock cycles when read
+  ena => '1', -- 1-bit input: Memory enable signal for port A. Must be high on clock cycles when read
   -- or write operations are initiated. Pipelined internally.
-  enb => ram_enb, -- 1-bit input: Memory enable signal for port B. Must be high on clock cycles when read
+  enb => '1', -- 1-bit input: Memory enable signal for port B. Must be high on clock cycles when read
   -- or write operations are initiated. Pipelined internally.
+  regcea => '1', -- 1-bit input: Clock Enable for the last register stage on the output data path.
+  regceb => '1', -- 1-bit input: Do not change from the provided value.
   rsta => rst, -- 1-bit input: Reset signal for the final port A output register stage. Synchronously
   -- resets output port douta to the value specified by parameter READ_RESET_VALUE_A.
   rstb => rst, -- 1-bit input: Reset signal for the final port B output register stage. Synchronously
@@ -122,7 +132,7 @@ port map (
 
 xpm_memory_sprom_inst : xpm_memory_sprom
 generic map (
-  ADDR_WIDTH_A => 12, -- DECIMAL
+  ADDR_WIDTH_A => 16, -- DECIMAL
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
   MEMORY_INIT_FILE => "none", -- String
@@ -132,21 +142,27 @@ generic map (
   MEMORY_SIZE => 8192, -- DECIMAL
   MESSAGE_CONTROL => 0, -- DECIMAL
   READ_DATA_WIDTH_A => 16, -- DECIMAL
-  READ_LATENCY_A => 1, -- DECIMAL
+  READ_LATENCY_A => 0, -- DECIMAL
   READ_RESET_VALUE_A => "0", -- String
-  RST_MODE_A => "SYNC", -- String
+  --RST_MODE_A => "SYNC", -- String
   USE_MEM_INIT => 1, -- DECIMAL
   WAKEUP_TIME => "disable_sleep" -- String
 )
 port map (
+  dbiterra => open, -- 1-bit output: Leave open.
   douta => rom_douta, -- READ_DATA_WIDTH_A-bit output: Data output for port A read operations.
+  sbiterra => open, -- 1-bit output: Leave open.
   addra => rom_addra, -- ADDR_WIDTH_A-bit input: Address for port A read operations.
   clka => clk, -- 1-bit input: Clock signal for port A.
-  ena => rom_ena, -- 1-bit input: Memory enable signal for port A. Must be high on clock
+  ena => '1', -- 1-bit input: Memory enable signal for port A. Must be high on clock
   -- cycles when read operations are initiated. Pipelined internally.
+  injectdbiterra => '0', -- 1-bit input: Do not change from the provided value.
+  injectsbiterra => '0', -- 1-bit input: Do not change from the provided value.
+  regcea => '1', -- 1-bit input: Do not change from the provided value.
   rsta => rst, -- 1-bit input: Reset signal for the final port A output register
   -- stage. Synchronously resets output port douta to the value specified
   -- by parameter READ_RESET_VALUE_A.
+  sleep => '0' -- 1-bit input: sleep signal to enable the dynamic power saving feature.
 );
 -- End of xpm_memory_sprom_inst instantiation
 end behavioral;
