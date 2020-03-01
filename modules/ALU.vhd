@@ -87,7 +87,7 @@ begin
 		  -- default
 		  (others => '0');
 		  
-    -- TODO: add overflow reg
+  -- TODO: add overflow reg
 
 	z_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) /= 0)) else
 		  '1' when (alu_mode = "111") and (signed(in1) = 0);
