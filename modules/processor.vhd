@@ -156,6 +156,7 @@ signal clk_sig : std_logic;
 signal rst_sig : std_logic;
 
 --INSTRUCTION FETCH
+<<<<<<< HEAD
 signal instr_mem_output : std_logic_vector (15 downto 0);
 signal ifid_pc_addr_out : std_logic_vector (15 downto 0);
 signal ifid_op_pass_out : std_logic_vector (15 downto 0);
@@ -204,6 +205,33 @@ signal memwb_wb_oper_out : std_logic;
 --PC behaviour
 signal pc_addr : std_logic_vector(15 downto 0);
 signal pc_next_addr : std_logic_vector(15 downto 0);
+=======
+signal pc_addr : std_logic_vector(15 downto 0);
+signal pc_next_addr : std_logic_vector(15 downto 0);
+signal instr_mem_output : std_logic_vector (15 downto 0);
+signal ifid_pc_addr_out : std_logic_vector (15 downto 0);
+signal ifid_op_pass_out : std_logic_vector (15 downto 0);
+signal ifid_opcode_out : std_logic_vector (6 downto 0);
+signal ifid_instr_format_out : std_logic_vector (2 downto 0);
+signal ifid_reg1_addr_out : std_logic_vector (2 downto 0);
+signal ifid_reg2_addr_out : std_logic_vector (2 downto 0);
+signal ifid_mem_oper_out : std_logic_vector (6 downto 0);
+signal ifid_wb_oper_out : std_logic_vector (6 downto 0);
+
+--INSTRUCTION DECODE
+signal regfile_reg1_data_out : std_logic_vector (6 downto 0);
+signal ifid_wb_oper_out : std_logic_vector (6 downto 0);
+signal ifid_wb_oper_out : std_logic_vector (6 downto 0);
+
+--EXECUTE
+
+--MEMORY
+
+--WRITE BACK
+
+
+
+>>>>>>> a2e7bb7e361be99c6913f102e9ad992e5505fbbb
 begin
 
 -- Component instantiations
