@@ -83,36 +83,85 @@ function get_instrformat(op : std_logic_vector(6 downto 0)) return std_logic_vec
         when others => format := "000";
         
         end case;    
-        return format;
-        
+    return format;
 end function get_instrformat;
+
+--ALU mode decoding function
+function getalumode(op : std_logic_vector(6 downto 0)) return std_logic_vector is
+    variable mode : std_logic_vector(2 downto 0) := (others => '0');
+    begin
+        case op is
+        --A1
+        when "0000001" => mode := "001"; --ADD
+        when "0000010" => mode := "010"; --SUB
+        when "0000011" => mode := "011"; --MUL
+        when "0000100" => mode := "100"; --NAND
+        --A2
+        when "0000101" => mode := "101"; --SHL
+        when "0000110" => mode := "110"; --SHR
+        --A3
+        when "0000111" => mode := "111"; --TEST
+        --B1
+        when "1000000" => mode := "001"; --BRR
+        when "1000001" => mode := "001"; --BRR.N
+        when "1000010" => mode := "001"; --BRR.Z
+        --B2
+        when "1000011" => mode := "001"; --BR
+        when "1000100" => mode := "001"; --BR.N
+        when "1000101" => mode := "001"; --BR.Z
+        when "1000111" => mode := "001"; --BR.SUB
+        --Default to NOP
+        when others => mode := "000";
+        end case; 
+
+    return mode;
+end function getalumode;
+
+    --Type declaration for easier modification
+    type if_id is record
+        --A1,A3
+        opcode  : std_logic_vector(6 downto 0);
+        ra_addr : std_logic_vector (2 downto 0);
+        rb_addr : std_logic_vector (2 downto 0);
+        rc_addr : std_logic_vector (2 downto 0);
+        --A2
+        c1      : std_logic_vector (3 downto 0);
+        --B1
+        displ   : std_logic_vector (8 downto 0);
+        --B2
+        disps   : std_logic_vector (5 downto 0);
+        --L1
+        m1      : std_logic;
+        imm     : std_logic_vector (7 downto 0);
+        --L2
+        rdest   : std_logic_vector (2 downto 0);
+        rsrc    : std_logic_vector (2 downto 0);
+    end record if_id;
+
+    constant IF_ID_INIT : if_if := (
+        opcode  => (others => '0');
+        ra_addr => (others => '0');
+        rb_addr => (others => '0');
+        rc_addr => (others => '0');
+        --A2
+        c1      => (others => '0');
+        --B1
+        displ   => (others => '0');
+        --B2
+        disps   => (others => '0');
+        --L1
+        m1      => '0';
+        imm     => (others => '0');
+        --L2
+        rdest   => (others => '0');
+        rsrc    => (others => '0')
+        )
 
 
   --Signals
-  signal if_id   : std_logic_vector (15 downto 0) := (others => '0');
-  signal pc_addr : std_logic_vector (15 downto 0) := (others => '0');
-  signal format  : std_logic_vector (2 downto 0)  := (others => '0');
-  
-  --Alias
-  alias default_reg is "000";
-  --Take the segments as needed depending on the format
-  --A1, A3
-  alias opcode is if_id(15 downto 9);
-  alias ra_addr_sig is if_id(8 downto 6);
-  alias rb_addr_sig is if_id(5 downto 3);
-  alias rc_addr_sig is if_id(2 downto 0);
-  --A2
-  alias c1_sig is if_id(3 downto 0);
-  --B1
-  alias disp1 is if_id(8 downto 0);
-  --B2
-  alias disps is if_id(5 downto 0);
-  --L1
-  alias m1 is if_id(8);
-  alias imm is if_id(7 downto 0);
-  --L2
-  alias rdest is if_id(8 downto 6);
-  alias rsrc is if_id(5 downto 3);
+  signal if_id_sig : if_id := IF_ID_INIT;
+  signal pc_addr   : std_logic_vector (15 downto 0) := (others => '0');
+  signal format    : std_logic_vector (2 downto 0)  := (others => '0');
   
 begin
 process(clk,rst)
@@ -132,7 +181,20 @@ begin
     if(clk='1' and clk'event) then
         --falling edge store input and compute instr format
         
-        if_id <= instr_in;
+        --Decode Instruction
+        if_id_sig.opcode  <= instr_in(15 downto 9);
+        if_id_sig.ra_addr <= instr_in (8 downto 6);
+        if_id_sig.rb_addr <= instr_in (5 downto 3);
+        if_id_sig.rc_addr <= instr_in (2 downto 0);
+        if_id_sig.c1    <= instr_in(3 downto 0);
+        if_id_sig.displ <= instr_in(8 downto 0);
+        if_id_sig.disps <= instr_in (5 downto 0);
+        if_id_sig.m1    <= instr_in (8);
+        if_id_sig.imm   <= instr_in(7 downto 0);
+        if_id_sig.rdest <= instr_in(8 downto 6);
+        if_id_sig.rsrc  <= instr_in(5 downto 3);
+
+        --other signals
         pc_addr <= PC_addr_in;
         format <= get_instrformat(opcode); 
     
@@ -142,96 +204,96 @@ begin
         
         --A1
         when "0000001" =>  --ADD
-            reg1_addr <= rb_addr_sig; 
-            reg2_addr <= rc_addr_sig;
-            op_pass <= "000000"&ra_addr_sig;        
+            reg1_addr <= if_id_sig.rb_addr; 
+            reg2_addr <= if_id_sig.rc_addr;
+            op_pass <= "000000"&if_id_sig.ra_addr;        
         when "0000010" =>  --SUB
-            reg1_addr <= rb_addr_sig; 
-            reg2_addr <= rc_addr_sig;
-            op_pass <=  "000000"&ra_addr_sig;        
+            reg1_addr <= if_id_sig.rb_addr; 
+            reg2_addr <= if_id_sig.rc_addr;
+            op_pass <= "000000"&if_id_sig.ra_addr;             
         when "0000011" =>  --MUL
-            reg1_addr <= rb_addr_sig; 
-            reg2_addr <= rc_addr_sig;
-            op_pass <= "000000"&ra_addr_sig;            
+            reg1_addr <= if_id_sig.rb_addr; 
+            reg2_addr <= if_id_sig.rc_addr;
+            op_pass <= "000000"&if_id_sig.ra_addr;                 
         when "0000100" =>  --NAND
-            reg1_addr <= rb_addr_sig; 
-            reg2_addr <= rc_addr_sig;
-            op_pass <= "000000"&ra_addr_sig;
+            reg1_addr <= if_id_sig.rb_addr; 
+            reg2_addr <= if_id_sig.rc_addr;
+            op_pass <= "000000"&if_id_sig.ra_addr;     
             
         --A2
         when "0000101" =>  --SHL
-            reg1_addr <= ra_addr_sig; 
-            reg2_addr <= default_reg; --Not needed here
+            reg1_addr <= if_id_sig.ra_addr; 
+            reg2_addr <= "000"; --Not needed here
             op_pass <= "00000"&c1_sig; --pass padded c1,
         when "0000110" => --SHR
-            reg1_addr <= ra_addr_sig; 
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= "00000"&c1_sig; --pass padded c1,
+            reg1_addr <= if_id_sig.ra_addr; 
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= "00000"&if_id_sig.c1; --pass padded c1,
             
         --A3
         when "0000111" =>  --TEST
-            reg1_addr <= ra_addr_sig; 
-            reg2_addr <= default_reg; --Not needed here
+            reg1_addr <= if_id_sig.ra_addr; 
+            reg2_addr <= "000"; --Not needed here
             op_pass <= (others => '0'); --Not needed here
         when "0100000" =>  --OUT
-            reg1_addr <= ra_addr_sig; 
-            reg2_addr <= default_reg; --Not needed here
+            reg1_addr <= if_id_sig.ra_addr; 
+            reg2_addr <= "000"; --Not needed here
             op_pass <= (others => '0'); --Not needed here
         when "0100001" =>  --IN
-            reg1_addr <= ra_addr_sig; 
-            reg2_addr <= default_reg; --Not needed here
+            reg1_addr <= if_id_sig.ra_addr; 
+            reg2_addr <= "000"; --Not needed here
             op_pass <= (others => '0'); --Not needed here
             
         --B1
         when "1000000" =>  --BRR
-            reg1_addr <= default_reg; --Not needed here
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= disp1; --pass disp1
+            reg1_addr <= "000"; --Not needed here
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= if_id_sig.displ; --pass disp1
         when "1000001" =>  --BRR.N
-            reg1_addr <= default_reg; --Not needed here
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= disp1; --pass disp1
+            reg1_addr <= "000"; --Not needed here
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= if_id_sig.displ; --pass disp1
         when "1000010" =>  --BRR.Z
-            reg1_addr <= default_reg; --Not needed here
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= disp1; --pass disp1
+            reg1_addr <= "000"; --Not needed here
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= if_id_sig.displ; --pass disp1
                     
         --B2
         when "1000011" =>  --BR
-            reg1_addr <= ra_addr_sig;
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= "000"&disps; --pass disp1 padded with zeros
+            reg1_addr <= if_id_sig.ra_addr;
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= "000"&if_id_sig.disps; --pass disp1 padded with zeros
         when "1000100" =>  --BR.N
-            reg1_addr <= ra_addr_sig;
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= "000"&disps; --pass disp1 padded with zeros
+            reg1_addr <= if_id_sig.ra_addr;
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= "000"&if_id_sig.disps; --pass disp1 padded with zeros
         when "1000101" =>  --BR.Z
-             reg1_addr <= ra_addr_sig;
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= "000"&disps; --pass disp1 padded with zeros
+             reg1_addr <= if_id_sig.ra_addr;
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= "000"&if_id_sig.disps; --pass disp1 padded with zeros
         when "1000111" =>  --BR.SUB
-            reg1_addr <= ra_addr_sig;
-            reg2_addr <= default_reg; --Not needed here
-            op_pass <= "000"&disps; --pass disp1 padded with zeros
+            reg1_addr <= if_id_sig.ra_addr;
+            reg2_addr <= "000"; --Not needed here
+            op_pass <= "000"&if_id_sig.disps; --pass disp1 padded with zeros
         
         --L1
         when "0010010" =>  --LOADIMM
             reg1_addr <= "111"; --Always using reg7 for LOADIMM
-            reg2_addr <= default_reg;
-            op_pass <= "0"&imm; --Pass along the imm value
+            reg2_addr <= "000";
+            op_pass <= "0"&if_id_sig.imm; --Pass along the imm value
         
         --L2
         when "0010000" =>  --LOAD
-            reg1_addr <= rdest;
-            reg1_addr <= rsrc;
+            reg1_addr <= if_id_sig.rdest;
+            reg1_addr <= rsrif_id_sig.rsrc;
             op_pass <= (others => '0');
         when "0010001" =>  --STORE
-            reg1_addr <= rdest;
-            reg1_addr <= rsrc;
+            reg1_addr <= if_id_sig.rdest;
+            reg1_addr <= if_id_sig.rsrc;
             op_pass <= (others => '0');
         when "0010011" =>  --MOV
-            reg1_addr <= rdest;
-            reg1_addr <= rsrc;
+            reg1_addr <= if_id_sig.rdest;
+            reg1_addr <= if_id_sig.rsrc;
             op_pass <= (others => '0');
         
         --Default to A0 (NOP,RETURN)
@@ -241,8 +303,7 @@ begin
             op_pass <= (others => '0');
         end case;
         
-        
-        op_code <= opcode; --to ALU
+        op_code <= if_id_sig.opcode; --to ALU
         instr_format <= format; --to ID/EX
         PC_addr_out <= pc_addr; --to ID/EX
 
