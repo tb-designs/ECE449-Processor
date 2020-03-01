@@ -7,7 +7,7 @@ use xpm.vcomponents.all;
 --Wrapper around Xilinx RAM and ROM modules
 
 entity mem_interface is
-Port (addr1,addr2 : in std_logic_vector (15 downto 0); -- addr1 is r/w, addr2 is r only
+port (addr1,addr2 : in std_logic_vector (15 downto 0); -- addr1 is r/w, addr2 is r only
       wr_data : in std_logic_vector(15 downto 0);
       clk,rst : in std_logic;
       wr_en : in std_logic_vector(1 downto 0);
