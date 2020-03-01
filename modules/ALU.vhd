@@ -19,13 +19,13 @@
 ----------------------------------------------------------------------------------
 
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use ieee.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_misc.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use ieee.numeric_std.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -33,102 +33,81 @@ use ieee.std_logic_unsigned.all;
 --use UNISIM.VComponents.all;
 
 entity ALU is
-    Port ( in_1 : in STD_LOGIC_VECTOR (15 downto 0);
-           in_2 : in STD_LOGIC_VECTOR (15 downto 0);
-           alu_mode : in STD_LOGIC_VECTOR (2 downto 0);
-           rst : in STD_LOGIC;
-           result : out STD_LOGIC_VECTOR (15 downto 0);
-           z_flag : out STD_LOGIC;
-           n_flag : out STD_LOGIC);
+    port (
+        in1 : in std_logic_vector (15 downto 0);
+        in2 : in std_logic_vector (15 downto 0);
+        alu_mode : in std_logic_vector (2 downto 0);
+        rst : in std_logic;
+        result : out std_logic_vector (15 downto 0);
+        z_flag : out std_logic;
+        n_flag : out std_logic
+    );
 end ALU;
 
-architecture Behavioral of ALU is
+architecture behavioral of ALU is
 
---Functions
-
---to_int, used to determine amount of shift needed
-function to_int(sig : std_logic_vector) return integer is
-    variable num : integer := 0;
+-- Functions
+function slice_slv(x : signed; s, e : integer)
+return std_logic_vector is
 begin
-    for i in sig'range loop
-        if sig(i) = '1' then
-            num := num*2+1;
-        else
-            num := num*2;
-        end if;
-    end loop;
-    return num;
-end function to_int;
+	return std_logic_vector(x(s downto e));
+end slice_slv;
+
+-- Components
+component dadda_mult is
+	Port ( A : in std_logic_vector(15 downto 0);
+	       B : in std_logic_vector(15 downto 0);
+	       prod : out std_logic_vector(31 downto 0));
+end component;
+
+component bshift is
+	Port ( left : in std_logic;
+	       shift : in std_logic_vector(3 downto 0);
+	       input : in std_logic_vector(15 downto 0);
+	       output : out std_logic_vector(15 downto 0));
+end component;
 
 --Signals
-signal result_buf : std_logic_vector(15 downto 0) := (others => '0');
+signal mult_buf : std_logic_vector(31 downto 0);
+signal out_buf : std_logic_vector(15 downto 0);
+signal shift_dir : std_logic;
 
 begin
-    process(in_1, in_2, alu_mode, rst)
-    begin
---Reset Behaviour
-    if (rst = '1') then
-      result_buf <= (others => '0'); 
-      z_flag <= '0'; 
-      n_flag <= '0'; 
-   elsif rst = '0' then
-         case alu_mode(2 downto 0) is
-         --NOP
-         when "000" => NULL;
-         --ADD
-         when "001" => 
-            result_buf <= in_1 + in_2;
-            
-            --Overflow Detection
-            --if (result_buf(16) = '1') then
-              --  z_flag <= '1'; 
-               -- n_flag <= '1';
-            --end if;
-            
-            
-         --SUB
-         when "010" =>
-            result_buf <= in_1 - in_2;
-         --MUL
-         when "011" =>
-            result_buf <= in_1(7 downto 0)*in_2(7 downto 0);
-            --Temp solution
-            --if (result_buf(16) = '1') then
-            --    z_flag <= '1'; 
-            --    n_flag <= '1';
-            --end if;
-            
-         --NAND
-         when "100" =>
-            result_buf <= in_1 NAND in_2;
-            
-         --SHL
-         when "101" =>
-            result_buf <= in_1((15 - to_int(in_2)) downto 0) & ((to_int(in_2)-1) downto 0 => '0');
-         
-         --SHR
-         when "110" => 
-            result_buf <= ((to_int(in_2)-1) downto 0 => '0') & in_1(15 downto to_int(in_2));
-         
-         --TEST
-         when "111" => 
-            if (in_1(15 downto 0) < X"0") then 
-                n_flag <= '1';
-            elsif(in_1(15 downto 0) = X"0") then
-                z_flag <= '1';
-            end if;
-         when others => NULL; end case;
-    end if;
-    end process;
-    result <= result_buf(15 downto 0);
-end Behavioral;
+	result <= (others => '0') when (rst = '1') else
+		  -- ADD
+		  std_logic_vector(signed(in1) + signed(in2)) when (alu_mode = "001") else
+		  -- SUB
+		  std_logic_vector(signed(in1) - signed(in2)) when (alu_mode = "010") else
+		  -- MUL
+		  mult_buf(15 downto 0) when (alu_mode = "011") else
+		  -- NAND
+		  in1 nand in2 when (alu_mode = "100") else
+		  -- SHL and SHR
+		  out_buf when (alu_mode = "101") or (alu_mode = "110") else
+		  -- default
+		  (others => '0');
+		  
+  -- TODO: add overflow reg
 
+	z_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) /= 0)) else
+		  '1' when (alu_mode = "111") and (signed(in1) = 0);
 
+	n_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) >= 0)) else
+		  '1' when (alu_mode = "111") and (signed(in1) < 0);
+		  
+    shift_dir <= '0' when (alu_mode = "110") else '1';
 
+	mult : dadda_mult port map (
+	   A =>in1,
+	   B => in2,
+	   prod => mult_buf
+	);
+	
+	shifter : bshift port map (
+	   left => shift_dir,
+	   shift => in2(3 downto 0),
+	   input => in1,
+	   output => out_buf
+    );
 
-
-
-
-
-
-
+end behavioral;
