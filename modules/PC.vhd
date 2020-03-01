@@ -32,37 +32,31 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity pc is
-    Port ( clk : in STD_LOGIC;
-           rst : in STD_LOGIC;
-           en : in STD_LOGIC;
-           addr_in : in std_logic_vector(15 downto 0);
-           addr_out : out std_logic_vector(15 downto 0)  
-          );
+    port (
+        clk : in std_logic;
+        rst : in std_logic;
+        pc_in : in std_logic_vector(15 downto 0);
+        pc_out : out std_logic_vector(15 downto 0)  
+    );
 end pc;
 
-architecture Behavioral of pc is
+architecture behavioral of pc is
+-- Signals
+signal cur_pc : std_logic_vector(15 downto 0) := (others => '0');
 
-    --Signals
-    signal current_addr : std_logic_vector(15 downto 0) := (others => '0');
-
-    begin
-    process(clk)
-    begin
-        if rst='1' then
-            --Reset to base address
-            current_addr <= X"0000";
-            addr_out <= X"0000";
-        end if;
+begin
+process(clk, rst)
+begin
+    if (rst= '1') then
+        --Reset to base address
+        cur_pc <= (others => '0');
+        pc_out <= (others => '0');
+    end if;
     
-        if(clk='0' and clk'event) then
-            --Rising edge, set outputs
-            addr_out <= current_addr;
-        elsif (clk='1' and clk'event) then
-            --Falling Edge, store inputs
-            current_addr <= addr_in;
-        end if;
-        
-        
-        
-    end process;
-end Behavioral;
+    if rising_edge(clk) then
+        pc_out <= cur_pc;
+    elsif falling_edge(clk) then
+        cur_pc <= pc_in;
+    end if;  
+end process;
+end behavioral;

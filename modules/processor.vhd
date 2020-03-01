@@ -19,12 +19,12 @@
 ----------------------------------------------------------------------------------
 
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use ieee.numeric_std.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -47,22 +47,10 @@ component pc is
     port (
         clk : in std_logic;
         rst : in std_logic;
-        en : in std_logic;
-        addr_in : in std_logic_vector(15 downto 0);
-        addr_out : out std_logic_vector(15 downto 0)  
+        pc_in : in std_logic_vector(15 downto 0);
+        pc_out : out std_logic_vector(15 downto 0)  
     );
 end component;
-
---PC Incrementor
-component pc_incr is
-    port (
-        prev_addr : in std_logic_vector (15 downto 0);
-        clk : in std_logic;
-        rst : in std_logic;
-        new_addr  : out std_logic_vector (15 downto 0)
-    );
-end component;
-
 
 -- Memory Interface
 component mem_interface is
@@ -160,14 +148,16 @@ component MEM_WB is
     );
 end component;
 
---Signals (internal connections)
+-- Constants
+constant instr_mem_size : integer := 2; -- each instr is 2 bytes
 
 --GLOBAL
 signal clk_sig : std_logic;
 signal rst_sig : std_logic;
 
 --INSTRUCTION FETCH
-signal pc_addr_out      : std_logic_vector (15 downto 0);
+signal pc_addr : std_logic_vector(15 downto 0);
+signal pc_next_addr : std_logic_vector(15 downto 0);
 signal instr_mem_output : std_logic_vector (15 downto 0);
 signal ifid_pc_addr_out : std_logic_vector (15 downto 0);
 signal ifid_op_pass_out : std_logic_vector (15 downto 0);
@@ -191,19 +181,17 @@ signal ifid_wb_oper_out : std_logic_vector (6 downto 0);
 
 
 
---Connections
 begin
 
+-- Component instantiations
+pc0 : pc port map (
+    clk => clk,
+    rst => rst,
+    pc_in => pc_next_addr,
+    pc_out => pc_addr
+);
 
-
---TODO
-
-
-
-
-
-
-
-
+-- Combinational logic
+pc_next_addr <= std_logic_vector(unsigned(pc_addr) + instr_mem_size);
 
 end behavioral;
