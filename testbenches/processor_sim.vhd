@@ -51,7 +51,7 @@ signal rst : std_logic := '0';
 signal in_port : std_logic_vector(15 downto 0) := (others => '0');
 
 -- Outputs
-signal out_port : std_logic_vector := (others => '0');
+signal out_port : std_logic_vector(15 downto 0) := (others => '0');
 
 constant clk_period : time := 20 us;
 

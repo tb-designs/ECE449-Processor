@@ -41,21 +41,19 @@ entity pc is
 end pc;
 
 architecture behavioral of pc is
--- Signals
-signal cur_pc : std_logic_vector(15 downto 0) := (others => '0');
 
 begin
 process(clk, rst)
 begin
     if (rst= '1') then
         --Reset to base address
-        cur_pc <= (others => '0');
         pc_out <= (others => '0');
     end if;
     
-    if (clk='0' and clk'event) then
+    if falling_edge(clk) then
         pc_out <= pc_in;
     end if;
     
 end process;
+
 end behavioral;
