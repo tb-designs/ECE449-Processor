@@ -41,6 +41,7 @@ entity IF_ID is
         instr_format : out std_logic_vector (2 downto 0);
         reg1_addr    : out std_logic_vector (2 downto 0); --To Reg File
         reg2_addr    : out std_logic_vector (2 downto 0); --To Reg File
+        ra_addr_out  : out std_logic_vector (2 downto 0); --to ID/EX for forwarding
         mem_oper_out : out std_logic;
         wb_oper_out  : out std_logic;
         clk, rst     : in std_logic
