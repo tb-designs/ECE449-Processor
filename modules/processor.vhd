@@ -289,7 +289,7 @@ idex0 : id_ex port map (
     wb_oper_in => ifid_wb_oper_out,
     
     operand1 => idex_operand1_out,
-    operand2 => idex_operand1_out,
+    operand2 => idex_operand2_out,
     opcode_out => idex_opcode_out,
     alu_mode_out => idex_alu_mode_out,
     instr_form_out => idex_instr_form_out,
