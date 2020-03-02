@@ -8,6 +8,7 @@ entity ID_EX is
        operand_3     : in std_logic_vector (15 downto 0);
        opcode_in     : in std_logic_vector (6 downto 0);
        instr_form_in : in std_logic_vector (2 downto 0);
+       ra_addr_in    : in std_logic_vector (2 downto 0);
        PC_addr_in    : in std_logic_vector (15 downto 0);
        mem_oper_in   : in std_logic;
        wb_oper_in    : in std_logic;
@@ -66,6 +67,7 @@ type id_ex is record
     reg2_data  : std_logic_vector(15 downto 0);
     op3        : std_logic_vector (15 downto 0);
     alu_mode   : std_logic_vector (2 downto 0);
+    ra_addr    : std_logic_vector (2 downto 0);
     opcode     : std_logic_vector (6 downto 0);
     instr_form : std_logic_vector (2 downto 0);
     pc_addr    : std_logic_vector (15 downto 0);
@@ -79,6 +81,7 @@ constant ID_EX_INIT : id_ex := (
     reg2_data => (others => '0'),
     op3 => (others => '0'),
     alu_mode => (others => '0'),
+    ra_addr => (others => '0'),
     opcode => (others => '0'),
     instr_form => (others => '0'),
     pc_addr => (others => '0'),
@@ -116,7 +119,7 @@ begin
         id_ex_sig.pc_addr <= pc_addr_in;
         id_ex_sig.mem_opr <= mem_oper_in;
         id_ex_sig.wb_opr <= wb_oper_in;
-        
+        id_ex_sig.ra_addr <= ra_addr_in;
               
         if(clk='0' and clk'event) then
         --reset behaviour    
@@ -145,7 +148,7 @@ begin
                 --A3
                 operand1 <= id_ex_sig.reg1_data; --ra data
                 operand2 <= (others => '0'); --Dont care
-
+                ra_addr_out <= id_ex_sig.ra_addr; --ra address
             when "100" =>
                 --B1
                 operand1 <= id_ex_sig.pc_addr; --PC address
