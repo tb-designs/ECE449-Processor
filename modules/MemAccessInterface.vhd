@@ -53,7 +53,7 @@ ram_dina <= wr_data;
 
 ram_addra <= (addr1 and addr_mask) when rst = '0' and addr1 >= X"0400" and addr1 <= X"07FF";
 ram_addrb <= (addr2 and addr_mask) when rst = '0' and addr2 >= X"0400" and addr1 <= X"07FF";
-rom_addra <= addr2 when rst = '0' and addr2 >= X"0000" and addr2 <= X"03FF";
+rom_addra <= ('0' & addr2(15 downto 1)) when rst = '0' and addr2 >= X"0000" and addr2 <= X"03FF";
 
 err <= '1' when (addr1 > X"07FF" and addr1 < X"FFF0") or (addr1 > X"FFF3") or (addr2 > X"07FF" and addr2 < X"FFF0") or (addr2 > X"FFF3") else
        '0' when rst = '1' else
@@ -136,7 +136,7 @@ generic map (
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
   MEMORY_INIT_FILE => "none", -- String
-  MEMORY_INIT_PARAM => "0", -- String
+  MEMORY_INIT_PARAM => "4280,0000,0000,0000,0000,0000,0000,0000,0000", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String
   MEMORY_SIZE => 8192, -- DECIMAL

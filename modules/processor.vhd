@@ -358,7 +358,6 @@ memwb0: mem_wb port map (
     
 );
 
-
 -- Combinational logic
 pc_next_addr <= std_logic_vector(unsigned(pc_addr) + instr_mem_size);
 
