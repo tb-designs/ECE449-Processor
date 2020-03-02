@@ -79,6 +79,8 @@ begin
     in_port <= X"0004";
     wait for 40 us;
     rst <= '0';
+    wait for 125 us;
+    in_port <= X"0002";
     wait;
 end process;
     

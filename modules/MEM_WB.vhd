@@ -60,7 +60,7 @@ constant MEM_WB_INIT : mem_wb := (
     
     --if the clock is falling we latch
     --if the clock is rising we gate
-    if(clk='0' and clk'event) then
+    if(clk='1' and clk'event) then
        --rising edge set output
 
         ra_addr_out <= mem_wb_sig.ra_addr;
@@ -70,8 +70,13 @@ constant MEM_WB_INIT : mem_wb := (
       if mem_wb_sig.opcode = "0010000" then
         --LOAD
         wb_data_out <= mem_wb_sig.mem_data;
+        
+      elsif mem_wb_sig.opcode = "0100001" then
+        --IN
+        wb_data_out <= mem_wb_sig.mem_data;
+        
       else
-        --NOT LOAD
+        --NOT LOAD/IN
         wb_data_out <= mem_wb_sig.alu_result;  
       end if;
         

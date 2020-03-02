@@ -136,7 +136,7 @@ generic map (
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
   MEMORY_INIT_FILE => "none", -- String
-  MEMORY_INIT_PARAM => "4280,0000,0000,0000,0000,0000,0000,0000,0000", -- String
+  MEMORY_INIT_PARAM => "4280,42C0,0000,0000,0000,0000,0000,0000,0000", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String
   MEMORY_SIZE => 8192, -- DECIMAL

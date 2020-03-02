@@ -121,7 +121,7 @@ begin
         id_ex_sig.wb_opr <= wb_oper_in;
         id_ex_sig.ra_addr <= ra_addr_in;
               
-        if(clk='0' and clk'event) then
+        if(clk='1' and clk'event) then
         --reset behaviour    
 
        --rising edge set output depending on the instruction format

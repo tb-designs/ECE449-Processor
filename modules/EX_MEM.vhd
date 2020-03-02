@@ -75,7 +75,7 @@ constant EX_MEM_INIT : ex_mem := (
 
     --if the clock is falling we latch
     --if the clock is rising we gate 
-    if(clk='0' and clk'event) then
+    if(clk='1' and clk'event) then
       --rising edge set output
 
       --pass-through values

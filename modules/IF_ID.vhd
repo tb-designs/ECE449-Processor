@@ -170,7 +170,7 @@ begin
         pc_addr <= PC_addr_in;
         format <= get_instrformat(if_id_sig.opcode); 
     
-    if(clk='0' and clk'event) then
+    if(clk='1' and clk'event) then
         --rising edge set output depending on format and opcode        
         case if_id_sig.opcode is
         
@@ -232,7 +232,7 @@ begin
         when "0100001" =>  --IN
             reg1_addr <= if_id_sig.ra_addr; 
             reg2_addr <= "000"; --Not needed here
-            op_pass <= X"FFF0"; --Not needed here
+            op_pass <= X"FFF0"; 
             mem_oper_out <= '1';
             wb_oper_out  <= '1';
             

@@ -150,63 +150,63 @@ component MEM_WB is
 end component;
 
 -- Constants
-constant instr_mem_size : integer := 2; -- each instr is 2 bytes
+constant instr_mem_size : integer := 1; -- each instr is 2 bytes
 
 --GLOBAL
 signal clk_sig : std_logic;
 signal rst_sig : std_logic;
 
 --INSTRUCTION FETCH
-signal instr_mem_output : std_logic_vector (15 downto 0);
-signal ifid_pc_addr_out : std_logic_vector (15 downto 0);
-signal ifid_op_pass_out : std_logic_vector (15 downto 0);
-signal ifid_opcode_out : std_logic_vector (6 downto 0);
-signal ifid_instr_format_out : std_logic_vector (2 downto 0);
-signal ifid_reg1_addr_out : std_logic_vector (2 downto 0);
-signal ifid_reg2_addr_out : std_logic_vector (2 downto 0);
-signal if_id_ra_addr_out  : std_logic_vector (2 downto 0);
+signal instr_mem_output : std_logic_vector (15 downto 0) := (others => '0');
+signal ifid_pc_addr_out : std_logic_vector (15 downto 0):= (others => '0');
+signal ifid_op_pass_out : std_logic_vector (15 downto 0):= (others => '0');
+signal ifid_opcode_out : std_logic_vector (6 downto 0):= (others => '0');
+signal ifid_instr_format_out : std_logic_vector (2 downto 0):= (others => '0');
+signal ifid_reg1_addr_out : std_logic_vector (2 downto 0):= (others => '0');
+signal ifid_reg2_addr_out : std_logic_vector (2 downto 0):= (others => '0');
+signal if_id_ra_addr_out  : std_logic_vector (2 downto 0):= (others => '0');
 signal ifid_mem_oper_out : std_logic;
 signal ifid_wb_oper_out : std_logic;
 
 --INSTRUCTION DECODE
-signal regfile_reg1_data_out : std_logic_vector (15 downto 0);
-signal regfile_reg2_data_out : std_logic_vector (15 downto 0);
-signal idex_operand1_out : std_logic_vector (15 downto 0);
-signal idex_operand2_out : std_logic_vector (15 downto 0);
-signal idex_opcode_out : std_logic_vector (6 downto 0);
-signal idex_alu_mode_out : std_logic_vector (2 downto 0);
-signal idex_instr_form_out : std_logic_vector (2 downto 0);
-signal idex_pc_addr_out : std_logic_vector (15 downto 0);
-signal idex_dest_mem_data_out : std_logic_vector (15 downto 0);
-signal idex_src_mem_data_out : std_logic_vector (15 downto 0);
-signal idex_ra_addr_out : std_logic_vector (2 downto 0);
+signal regfile_reg1_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal regfile_reg2_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal idex_operand1_out : std_logic_vector (15 downto 0):= (others => '0');
+signal idex_operand2_out : std_logic_vector (15 downto 0):= (others => '0');
+signal idex_opcode_out : std_logic_vector (6 downto 0):= (others => '0');
+signal idex_alu_mode_out : std_logic_vector (2 downto 0):= (others => '0');
+signal idex_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
+signal idex_pc_addr_out : std_logic_vector (15 downto 0):= (others => '0');
+signal idex_dest_mem_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal idex_src_mem_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal idex_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_mem_oper_out : std_logic;
 signal idex_wb_oper_out : std_logic;
 
 --EXECUTE
-signal alu_result_out : std_logic_vector (15 downto 0);
+signal alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
 signal alu_z_flag : std_logic;
 signal alu_n_flag : std_logic;
-signal exmem_alu_result_out : std_logic_vector (15 downto 0);
-signal exmem_pc_addr_out : std_logic_vector (15 downto 0);
-signal exmem_dest_data_out : std_logic_vector (15 downto 0);
-signal exmem_src_data_out : std_logic_vector (15 downto 0);
-signal exmem_opcode_out : std_logic_vector (6 downto 0);
-signal exmem_instr_form_out : std_logic_vector (2 downto 0);
-signal exmem_ra_addr_out : std_logic_vector (2 downto 0);
-signal exmem_mem_oper_out : std_logic_vector (1 downto 0);
+signal exmem_alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
+signal exmem_pc_addr_out : std_logic_vector (15 downto 0):= (others => '0');
+signal exmem_dest_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal exmem_src_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal exmem_opcode_out : std_logic_vector (6 downto 0):= (others => '0');
+signal exmem_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
+signal exmem_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
+signal exmem_mem_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 signal exmem_wb_oper_out : std_logic;
 
 --MEMORY/WB
-signal data_mem_output : std_logic_vector (15 downto 0);
-signal memwb_data_out : std_logic_vector (15 downto 0);
-signal memwb_ra_addr_out : std_logic_vector (2 downto 0);
+signal data_mem_output : std_logic_vector (15 downto 0):= (others => '0');
+signal memwb_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal memwb_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal memwb_wb_oper_out : std_logic;
 
 
 --PC behaviour
-signal pc_addr : std_logic_vector(15 downto 0);
-signal pc_next_addr : std_logic_vector(15 downto 0);
+signal pc_addr : std_logic_vector(15 downto 0):= (others => '0');
+signal pc_next_addr : std_logic_vector(15 downto 0):= (others => '0');
 
 
 begin
@@ -361,9 +361,10 @@ memwb0: mem_wb port map (
     
 );
 
--- Combinational logic
-pc_next_addr <= std_logic_vector(unsigned(pc_addr) + instr_mem_size) when rst = '0' else pc_addr;
 
+-- Combinational logic
+
+    pc_next_addr <= std_logic_vector(unsigned(pc_addr) + instr_mem_size);
 
 
 
