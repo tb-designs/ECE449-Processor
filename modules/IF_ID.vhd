@@ -147,6 +147,7 @@ begin
         instr_format <= (others => '0');
         reg1_addr    <= (others => '0');
         reg2_addr    <= (others => '0');
+        ra_addr_out  <= (others => '0');
     end if;
    
      --if the clock is rising we gate
@@ -328,6 +329,7 @@ begin
         op_code <= if_id_sig.opcode; --to ALU
         instr_format <= format; --to ID/EX
         PC_addr_out <= pc_addr; --to ID/EX
+        ra_addr_out <= if_id_sig.ra_addr;
 
      end if;
     end process;
