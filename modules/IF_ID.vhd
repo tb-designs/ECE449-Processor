@@ -148,10 +148,8 @@ begin
         reg2_addr    <= (others => '0');
     end if;
    
-     --if the clock is falling we latch
      --if the clock is rising we gate
-    if(clk='1' and clk'event) then
-        --falling edge store input and compute instr format
+     --falling edge store input and compute instr format
         
         --Decode Instruction
         if_id_sig.opcode  <= instr_in(15 downto 9);
@@ -170,7 +168,7 @@ begin
         pc_addr <= PC_addr_in;
         format <= get_instrformat(if_id_sig.opcode); 
     
-    elsif(clk='0' and clk'event) then
+    if(clk='0' and clk'event) then
         --rising edge set output depending on format and opcode        
         case if_id_sig.opcode is
         

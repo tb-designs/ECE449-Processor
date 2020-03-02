@@ -92,7 +92,6 @@ signal id_ex_sig : id_ex := ID_EX_INIT;
 begin
     process(clk,rst)
     begin
-
         --reset behaviour
         if rst = '1' then
             operand1 <= (others => '0');
@@ -105,8 +104,23 @@ begin
             mem_oper_out <= '0';
             wb_oper_out <= '0';
         end if;
-    
+
+        --falling edge store the input in the register
+        -- also compute the alu_mode
+        id_ex_sig.reg1_data <= data_1;
+        id_ex_sig.reg2_data <= data_2;
+        id_ex_sig.op3 <= operand_3;
+        id_ex_sig.alu_mode <= getalumode(opcode_in); --produce alu_mode
+        id_ex_sig.opcode <= opcode_in;
+        id_ex_sig.instr_form <= instr_form_in;
+        id_ex_sig.pc_addr <= pc_addr_in;
+        id_ex_sig.mem_opr <= mem_oper_in;
+        id_ex_sig.wb_opr <= wb_oper_in;
+        
+              
         if(clk='0' and clk'event) then
+        --reset behaviour    
+
        --rising edge set output depending on the instruction format
 
         alu_mode_out <= id_ex_sig.alu_mode;
@@ -194,22 +208,8 @@ begin
         end if;
 
         
-    elsif(clk='1' and clk'event) then
-      --falling edge store the input in the register
-      -- also compute the alu_mode
-
-      id_ex_sig.reg1_data <= data_1;
-      id_ex_sig.reg2_data <= data_2;
-      id_ex_sig.op3 <= operand_3;
-      id_ex_sig.alu_mode <= getalumode(opcode_in); --produce alu_mode
-      id_ex_sig.opcode <= opcode_in;
-      id_ex_sig.instr_form <= instr_form_in;
-      id_ex_sig.pc_addr <= pc_addr_in;
-      id_ex_sig.mem_opr <= mem_oper_in;
-      id_ex_sig.wb_opr <= wb_oper_in;
-      
-     
     end if;
+
     end process;
   
   end Behavioral;
