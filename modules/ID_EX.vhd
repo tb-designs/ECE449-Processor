@@ -204,10 +204,6 @@ begin
             --For store, pass along the register data as-is
             dest_mem_data <= id_ex_sig.reg1_data;
             src_mem_data <= id_ex_sig.reg2_data;
-        else
-            -- for all other formats we don't care
-            dest_mem_data <= (others => '0');
-            src_mem_data <=  (others => '0');
         end if;
 
         
