@@ -75,7 +75,8 @@ constant MEM_WB_INIT : mem_wb := (
         wb_data_out <= mem_wb_sig.alu_result;  
       end if;
         
-    elsif(clk='1' and clk'event) then
+    end if;
+    
        --falling edge store input
        mem_wb_sig.mem_data <= mem_data_in;
        mem_wb_sig.alu_result <= alu_result_in;
@@ -85,6 +86,6 @@ constant MEM_WB_INIT : mem_wb := (
        mem_wb_sig.ra_addr <= ra_addr_in;
        mem_wb_sig.wb_opr <= wb_oper_in;
 
-    end if;
+
   end process;   
 end Behavioral;

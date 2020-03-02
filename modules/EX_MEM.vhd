@@ -69,7 +69,7 @@ constant EX_MEM_INIT : ex_mem := (
           src_data       <= (others => '0');
           instr_form_out <= (others => '0');
           ra_addr_out    <= (others => '0');
-          mem_oper_out   <= "0";
+          mem_oper_out   <= "00";
           wb_oper_out    <= '0';
       end if;
 
@@ -123,7 +123,7 @@ constant EX_MEM_INIT : ex_mem := (
 
       end if;
       
-    elsif(clk='1' and clk'event) then
+    end if;
         --falling edge store input
         ex_mem_sig.alu_res    <= alu_result;
         ex_mem_sig.instr_form <= instr_form_in;
@@ -135,7 +135,6 @@ constant EX_MEM_INIT : ex_mem := (
         ex_mem_sig.mem_opr    <= mem_oper_in;
         ex_mem_sig.wb_opr     <= wb_oper_in;
                   
-    end if;
     end process;
 
   end Behavioral;

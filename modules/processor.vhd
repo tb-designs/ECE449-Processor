@@ -111,8 +111,8 @@ end component;
 --ALU
 component ALU is
     port (
-        in_1 : in std_logic_vector (15 downto 0);
-        in_2 : in std_logic_vector (15 downto 0);
+        in1 : in std_logic_vector (15 downto 0);
+        in2 : in std_logic_vector (15 downto 0);
         alu_mode : in std_logic_vector (2 downto 0);
         rst : in std_logic;
         result : out std_logic_vector (15 downto 0);
@@ -192,7 +192,7 @@ signal exmem_dest_data_out : std_logic_vector (15 downto 0);
 signal exmem_src_data_out : std_logic_vector (15 downto 0);
 signal exmem_opcode_out : std_logic_vector (6 downto 0);
 signal exmem_instr_form_out : std_logic_vector (2 downto 0);
-signal exmem_ra_addr_out : std_logic_vector (15 downto 0);
+signal exmem_ra_addr_out : std_logic_vector (2 downto 0);
 signal exmem_mem_oper_out : std_logic_vector (1 downto 0);
 signal exmem_wb_oper_out : std_logic;
 
@@ -305,8 +305,8 @@ idex0 : id_ex port map (
 --ALU
 alu0: alu port map (
     rst => rst,
-    in_1 => idex_operand1_out,
-    in_2 => idex_operand2_out,
+    in1 => idex_operand1_out,
+    in2 => idex_operand2_out,
     alu_mode => idex_alu_mode_out,
     result => alu_result_out,
     z_flag => alu_z_flag,

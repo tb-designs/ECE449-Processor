@@ -194,7 +194,7 @@ begin
         end if;
 
         
-    elsif(clk='1' and clk'event) then
+    end if;
       --falling edge store the input in the register
       -- also compute the alu_mode
 
@@ -209,7 +209,6 @@ begin
       id_ex_sig.wb_opr <= wb_oper_in;
       
      
-    end if;
     end process;
   
   end Behavioral;
