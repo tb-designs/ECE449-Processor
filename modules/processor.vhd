@@ -151,13 +151,17 @@ component MEM_WB is
     );
 end component;
 
---Type containing all flags needed (so far)
-type flag_storage is record
-    n_flag : std_logic;
-    z_flag : std_logic;
-    br_flag: std_logic;
-end record flag_storage; 
-
+--STATUS REGISTER
+component status_reg is
+    port ( n_flag_in : in std_logic;
+          z_flag_in : in std_logic;
+          br_flag_in : in std_logic;
+          clear_test_flags : in std_logic;
+          n_flag_out : out std_logic;
+          z_flag_out : out std_logic;
+          br_flag_out : out std_logic
+    );
+end component;
 
 -- Constants
 constant instr_mem_size : integer := 1; -- each instr is 2 bytes
@@ -206,6 +210,7 @@ signal exmem_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_mem_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 signal exmem_wb_oper_out : std_logic;
+signal exmem_br_flag_out : std_logic;
 
 --MEMORY/WB
 signal data_mem_output : std_logic_vector (15 downto 0):= (others => '0');
@@ -221,10 +226,11 @@ signal exmem_br_trig_out : std_logic := '0';
 signal pc_addr : std_logic_vector(15 downto 0):= (others => '0');
 signal pc_next_addr : std_logic_vector(15 downto 0):= (others => '0');
 
---Branch Storage
-signal flagstore_n_out : std_logic;
-signal flagstore_z_out : std_logic;
-signal flagstore_br_out : std_logic;
+--STATUS REGISTER
+signal stat_reg_n_out : std_logic;
+signal stat_reg_z_out : std_logic;
+signal stat_reg_br_out : std_logic;
+signal stat_reg_clr_flag_in : std_logic;
 
 begin
 -- Component port mappings
@@ -378,6 +384,16 @@ memwb0: mem_wb port map (
     
 );
 
+--STATUS REGISTER
+sr0: status_reg port map (
+     n_flag_in => alu_n_flag_out;
+     z_flag_in => alu_z_flag_out;
+     br_flag_in => exmem_br_flag_out;
+     clear_test_flags => stat_reg_clr_flag_in;
+     n_flag_out =>
+     z_flag_out =>
+     br_flag_out =>
+);
 
 
 
