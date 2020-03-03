@@ -33,8 +33,15 @@ begin -- behavioral
 
 	mult_process : process
 	begin
+	    wait until clk'event and clk = '1';
 		A <= X"0004";
 		B <= X"0005";
+		wait until clk'event and clk = '1';
+        A <= X"0016";
+        B <= X"0008";
+        wait until clk'event and clk = '1';
+        A <= X"00A9";
+        B <= X"003F";
 		wait until clk'event and clk = '1';
 		A <= X"FFFF";
 		B <= X"0002";

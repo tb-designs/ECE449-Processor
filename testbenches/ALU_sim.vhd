@@ -12,10 +12,10 @@ component ALU port(rst : in std_logic;
 in1, in2: in std_logic_vector(15 downto 0);
 alu_mode: in std_logic_vector(2 downto 0);
 result: out std_logic_vector(15 downto 0); 
-n_flag, z_flag: out std_logic);
+n_flag, z_flag, v_flag : out std_logic);
 end component;
 
-signal rst, n_flag, z_flag: std_logic; 
+signal rst, n_flag, z_flag, v_flag : std_logic;
 signal alu_mode: std_logic_vector(2 downto 0); 
 signal in1, in2, result: std_logic_vector(15 downto 0); 
 
@@ -28,7 +28,8 @@ u0 : ALU port map(
     alu_mode => alu_mode,
     result => result,
     n_flag => n_flag,
-    z_flag => z_flag
+    z_flag => z_flag,
+    v_flag => v_flag
 );
 
 process begin

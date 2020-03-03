@@ -118,7 +118,7 @@ component ALU is
         result : out std_logic_vector (15 downto 0);
         z_flag : out std_logic;
         n_flag : out std_logic;
-        v_flag : out std_logic;
+        v_flag : out std_logic
     );
 end component;
 
@@ -157,7 +157,7 @@ type flag_storage is record
     n_flag : std_logic;
     z_flag : std_logic;
     br_flag: std_logic;
-end record flag_storage; 
+end record flag_storage;
 
 
 -- Constants

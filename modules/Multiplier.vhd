@@ -132,8 +132,8 @@ prod(26) <= s026;
 prod(27) <= s027;
 prod(28) <= s028;
 prod(29) <= s029;
-prod(30) <= s030;
-prod(31) <= c030;
+prod(30) <= c029;
+prod(31) <= p15(15);
 
 -- stage d6 = 13
 ha613 : half_adder port map(p13(0),p12(1),s613,c613);
@@ -387,6 +387,6 @@ fa026 : full_adder port map(c025,s226,s126,s026,c026);
 fa027 : full_adder port map(c026,s227,s127,s027,c027);
 fa028 : full_adder port map(c027,s228,s128,s028,c028);
 fa029 : full_adder port map(c028,p14(15),s129,s029,c029);
-fa030 : full_adder port map(c029,p15(15),'1',s030,c030);
+--ha030 : half_adder port map(c029,p15(15),s030,c030);
 -- end dadda
 end behavioral;

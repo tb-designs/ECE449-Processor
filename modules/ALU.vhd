@@ -94,20 +94,20 @@ begin
 	n_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) >= 0)) else
 		  '1' when (alu_mode = "111") and (signed(in1) < 0);
 
-	v_flag <= '1' when (alu_mode = "011") and (to_integer(signed(mult_buf(31 downto 16))) > 0) else
+	v_flag <= '1' when (alu_mode = "011") and (unsigned(mult_buf(31 downto 16)) > 0) else
 		  '0' when (rst = '1') else
 		  '0';
 
         shift_dir <= '0' when (alu_mode = "110") else '1';
 
 	mult : dadda_mult port map (
-	   A => signed(in1),
-	   B => signed(in2),
+	   A => in1,
+	   B => in2,
 	   prod => mult_buf
 	);
 	
 	shifter : bshift port map (
-	   left => unsigned(shift_dir),
+	   left => shift_dir,
 	   shift => in2(3 downto 0),
 	   input => in1,
 	   output => out_buf
