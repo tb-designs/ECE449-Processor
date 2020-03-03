@@ -117,8 +117,7 @@ component ALU is
         rst : in std_logic;
         result : out std_logic_vector (15 downto 0);
         z_flag : out std_logic;
-        n_flag : out std_logic;
-        v_flag : out std_logic;
+        n_flag : out std_logic
     );
 end component;
 
@@ -337,8 +336,7 @@ alu0: alu port map (
     alu_mode => idex_alu_mode_out,
     result => alu_result_out,
     z_flag => alu_z_flag_out,
-    n_flag => alu_n_flag_out,
-    v_flag => open
+    n_flag => alu_n_flag_out
 );
 
 --EX/MEM
@@ -413,6 +411,10 @@ sr0: status_reg port map (
     
     pc_next_addr <= exmem_br_addr_out when exmem_br_trig_out = '1' else 
                     std_logic_vector(unsigned(pc_addr) + instr_mem_size);
+    
+    --set clear on succesful branch
+    stat_reg_clr_flag_in <= '1' when exmem_br_trig_out = '1' else '0';
+   
 
 
 
