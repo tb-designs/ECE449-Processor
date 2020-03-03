@@ -132,7 +132,9 @@ component EX_MEM is
         opcode_out : out std_logic_vector (6 downto 0);
         instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
         wb_oper_out : out std_logic;
-        mem_oper_out : out std_logic_vector (1 downto 0)
+        mem_oper_out : out std_logic_vector (1 downto 0);
+        n_flag     : in std_logic; --Inputs from the global storage, checked when branch instr reaches ex/mem
+        z_flag     : in std_logic
     );
 end component;
 
@@ -148,6 +150,14 @@ component MEM_WB is
         wb_oper_out    : out std_logic
     );
 end component;
+
+--Type containing all flags needed (so far)
+type flag_storage is record
+    n_flag : std_logic;
+    z_flag : std_logic;
+    br_flag: std_logic;
+end record flag_storage; 
+
 
 -- Constants
 constant instr_mem_size : integer := 1; -- each instr is 2 bytes
@@ -185,8 +195,8 @@ signal idex_wb_oper_out : std_logic;
 
 --EXECUTE
 signal alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
-signal alu_z_flag : std_logic;
-signal alu_n_flag : std_logic;
+signal alu_z_flag_out : std_logic;
+signal alu_n_flag_out : std_logic;
 signal exmem_alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
 signal exmem_pc_addr_out : std_logic_vector (15 downto 0):= (others => '0');
 signal exmem_dest_data_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -211,6 +221,10 @@ signal exmem_br_trig_out : std_logic := '0';
 signal pc_addr : std_logic_vector(15 downto 0):= (others => '0');
 signal pc_next_addr : std_logic_vector(15 downto 0):= (others => '0');
 
+--Branch Storage
+signal flagstore_n_out : std_logic;
+signal flagstore_z_out : std_logic;
+signal flagstore_br_out : std_logic;
 
 begin
 -- Component port mappings
@@ -315,8 +329,8 @@ alu0: alu port map (
     in2 => idex_operand2_out,
     alu_mode => idex_alu_mode_out,
     result => alu_result_out,
-    z_flag => alu_z_flag,
-    n_flag => alu_n_flag
+    z_flag => alu_z_flag_out,
+    n_flag => alu_n_flag_out
 );
 
 --EX/MEM
@@ -364,10 +378,12 @@ memwb0: mem_wb port map (
     
 );
 
---Branching Control
---Takes in br_flag
---Get n_flag, z_flag, opcode, alu_res from MEM stage
 
+
+
+--Combinational logic
+
+    
 
     -- Detected branch, 
     -- if BR.SUB, store the PC_address in r7 and use new pc addr from R[ra]
