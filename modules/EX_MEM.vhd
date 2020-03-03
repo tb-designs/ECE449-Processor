@@ -85,24 +85,31 @@ constant EX_MEM_INIT : ex_mem := (
     if(clk='1' and clk'event) then
       --rising edge set output
 
-      --pass-through values
-      alu_result_out <= ex_mem_sig.alu_res;
+
+      --if BR.SUB then we store the current_PC + 2 in the regfile
+      if ex_mem_sig.opcode = "1000111" then
+        wb_oper_out <= '1'; --enable writeBack
+        ra_addr_out <= "111"; --r7 is reserved for subroutine return address
+        alu_result_out <= ex_mem_sig.pc_addr + 2; -- pass the incremented PC value to be stored in the next stage (Or increment in return stage?)
+      else
+        alu_result_out <= ex_mem_sig.alu_res;
+        wb_oper_out    <= ex_mem_sig.wb_opr;
+      end if;
+
+      --Pass Through Values              
       instr_form_out <= ex_mem_sig.instr_form;
       opcode_out     <= ex_mem_sig.opcode;
       PC_addr_out    <= ex_mem_sig.pc_addr;
       ra_addr_out    <= ex_mem_sig.ra_addr;
       
-      --quick fix for wb_oper needing to be 0-length vector
+      --Fix for mem_oper needing to be 0-length vector
       if ex_mem_sig.mem_opr = '1' then
         mem_oper_out   <= "11";
       else
         mem_oper_out   <= "00";
       end if;
       
-      wb_oper_out    <= ex_mem_sig.wb_opr;
-
       --Data memory outputs depend on if LOAD/IN or STORE/OUT instruction
-      --Branch instructions have 
       case ex_mem_sig.opcode is 
       when "0010000" =>
         --LOAD
@@ -126,6 +133,8 @@ constant EX_MEM_INIT : ex_mem := (
           src_data  <= (others => '0');
       end case;    
           
+          
+      --Format Specific Operations (Mostly for Branching behaviour)
       case ex_mem_sig.instr_form is
       when "100" =>
         --BRR, BRR.Z, BRR.N
@@ -134,15 +143,7 @@ constant EX_MEM_INIT : ex_mem := (
       when "101" =>
         --BR, BR.N, BR.Z, BR.SUB
         new_pc_addr_out <= ex_mem_sig.alu_res;
-        br_trigger <= '1';
-        
-        --if BR.SUB then we store the current_PC + 2 in the regfile
-        if ex_mem_sig.opcode = "1000111" then
-            wb_oper_out <= ex_mem_sig.wb_opr; --enable writeBack
-            ra_addr_out <= "111";
-            alu_result_out <= ex_mem_sig.pc_addr + 2; -- pass the PC value to be stored in the next stage
-        end if;
-                
+        br_trigger <= '1';        
       when others =>
         new_pc_addr_out <= (others => '0');          
         br_trigger <= '0';
