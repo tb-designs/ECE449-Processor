@@ -40,7 +40,8 @@ entity ALU is
         rst : in std_logic;
         result : out std_logic_vector (15 downto 0);
         z_flag : out std_logic;
-        n_flag : out std_logic
+        n_flag : out std_logic;
+        v_flag : out std_logic -- result overflow output
     );
 end ALU;
 
@@ -86,25 +87,27 @@ begin
 		  out_buf when (alu_mode = "101") or (alu_mode = "110") else
 		  -- default
 		  (others => '0');
-		  
-  -- TODO: add overflow reg
 
 	z_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) /= 0)) else
 		  '1' when (alu_mode = "111") and (signed(in1) = 0);
 
 	n_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) >= 0)) else
 		  '1' when (alu_mode = "111") and (signed(in1) < 0);
-		  
-    shift_dir <= '0' when (alu_mode = "110") else '1';
+
+	v_flag <= '1' when (alu_mode = "011") and (to_integer(signed(mult_buf(31 downto 16))) > 0) else
+		  '0' when (rst = '1') else
+		  '0';
+
+        shift_dir <= '0' when (alu_mode = "110") else '1';
 
 	mult : dadda_mult port map (
-	   A =>in1,
-	   B => in2,
+	   A => signed(in1),
+	   B => signed(in2),
 	   prod => mult_buf
 	);
 	
 	shifter : bshift port map (
-	   left => shift_dir,
+	   left => unsigned(shift_dir),
 	   shift => in2(3 downto 0),
 	   input => in1,
 	   output => out_buf
