@@ -203,6 +203,9 @@ signal memwb_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal memwb_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal memwb_wb_oper_out : std_logic;
 
+--BRANCHING
+signal exmem_br_addr_out : std_logic_vector (15 downto 0) := (others => '0');
+signal exmem_br_trig_out : std_logic := '0';
 
 --PC behaviour
 signal pc_addr : std_logic_vector(15 downto 0):= (others => '0');
@@ -361,28 +364,25 @@ memwb0: mem_wb port map (
     
 );
 
-
-
 --Branching Control
-
---Process runs whenever alu_res is updated
-process(alu_result_out)
+--Takes in br_flag
+--Get n_flag, z_flag, opcode, alu_res from MEM stage
+process(exmem_br_trig_out)
 begin
 
+if exmem_br_trig_out = '1' then
+    -- Detected branch, 
+    -- if BR.SUB, store the PC_address in r7 and use new pc addr from R[ra]
+    -- r7 <= exmem_pc_addr_out + int_mem_size
+    -- (store incremented address)
+    
+    pc_next_addr <= exmem_br_addr_out;
 
-
---Get n_flag, z_flag, opcode, alu_res from MEM stage
- 
-
-
-
-
--- Combinational logic
-
+else 
+    -- Otherwise, increment as normal
     pc_next_addr <= std_logic_vector(unsigned(pc_addr) + instr_mem_size);
 
-
-
-
+end if;
+end process;
 
 end behavioral;
