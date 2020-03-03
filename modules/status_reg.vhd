@@ -32,9 +32,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity status_reg is
-    Port ( n_flag_in : in STD_LOGIC;
-           z_flag_in : in STD_LOGIC;
-           br_flag_in : in STD_LOGIC;
+    Port ( n_flag_in : in std_logic;
+           z_flag_in : in std_logic;
+           br_flag_in : in std_logic;
            clear_test_flags : in std_logic;
            n_flag_out : out std_logic;
            z_flag_out : out std_logic;
@@ -44,7 +44,44 @@ end status_reg;
 
 architecture Behavioral of status_reg is
 
+--Type containing all flags needed (so far)
+type status_reg is record
+    n_flag : std_logic;
+    z_flag : std_logic;
+    br_flag: std_logic;
+end record status_reg; 
+
+constant STATUS_REG_INIT : status_reg := (n_flag => '0',
+                                          z_flag => '0',
+                                          br_flag => '0'
+                                          );
+
+--Signals
+signal stat_reg_sig : status_reg := STATUS_REG_INIT;
+
 begin
+
+--Clear Behaviour
+process(clear_test_flags)
+begin
+
+    if clear_test_flags = '1' then
+        stat_reg_sig.n_flag <= '0';
+        stat_reg_sig.z_flag <= '0';
+        stat_reg_sig.br_flag <= '0';
+    end if;
+
+end process;
+
+    --store flags here
+    stat_reg_sig.n_flag  <= '1' when n_flag_in = '1'; --no else, want these to be sticky until the clear
+    stat_reg_sig.z_flag  <= '1' when z_flag_in = '1';
+    stat_reg_sig.br_flag <= '1' when br_flag_in = '1';
+    
+    --Output
+    n_flag_out <= stat_reg_sig.n_flag;
+    z_flag_out <= stat_reg_sig.z_flag;
+    br_flag_out <= stat_reg_sig.br_flag;
 
 
 end Behavioral;

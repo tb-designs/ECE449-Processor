@@ -134,8 +134,8 @@ component EX_MEM is
         instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
         wb_oper_out : out std_logic;
         mem_oper_out : out std_logic_vector (1 downto 0);
-        n_flag     : in std_logic; --Inputs from the global storage, checked when branch instr reaches ex/mem
-        z_flag     : in std_logic
+        n_flag_in     : in std_logic; --Inputs from the global storage, checked when branch instr reaches ex/mem
+        z_flag_in    : in std_logic
     );
 end component;
 
@@ -152,13 +152,17 @@ component MEM_WB is
     );
 end component;
 
---Type containing all flags needed (so far)
-type flag_storage is record
-    n_flag : std_logic;
-    z_flag : std_logic;
-    br_flag: std_logic;
-end record flag_storage;
-
+--STATUS REGISTER
+component status_reg is
+    port ( n_flag_in : in std_logic;
+          z_flag_in : in std_logic;
+          br_flag_in : in std_logic;
+          clear_test_flags : in std_logic;
+          n_flag_out : out std_logic;
+          z_flag_out : out std_logic;
+          br_flag_out : out std_logic
+    );
+end component;
 
 -- Constants
 constant instr_mem_size : integer := 1; -- each instr is 2 bytes
@@ -207,6 +211,7 @@ signal exmem_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_mem_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 signal exmem_wb_oper_out : std_logic;
+signal exmem_br_flag_out : std_logic;
 
 --MEMORY/WB
 signal data_mem_output : std_logic_vector (15 downto 0):= (others => '0');
@@ -222,10 +227,11 @@ signal exmem_br_trig_out : std_logic := '0';
 signal pc_addr : std_logic_vector(15 downto 0):= (others => '0');
 signal pc_next_addr : std_logic_vector(15 downto 0):= (others => '0');
 
---Branch Storage
-signal flagstore_n_out : std_logic;
-signal flagstore_z_out : std_logic;
-signal flagstore_br_out : std_logic;
+--STATUS REGISTER
+signal stat_reg_n_out : std_logic;
+signal stat_reg_z_out : std_logic;
+signal stat_reg_br_out : std_logic;
+signal stat_reg_clr_flag_in : std_logic;
 
 begin
 -- Component port mappings
@@ -331,8 +337,7 @@ alu0: alu port map (
     alu_mode => idex_alu_mode_out,
     result => alu_result_out,
     z_flag => alu_z_flag_out,
-    n_flag => alu_n_flag_out,
-    v_flag => open
+    n_flag => alu_n_flag_out
 );
 
 --EX/MEM
@@ -349,6 +354,9 @@ exmem0: ex_mem port map (
     ra_addr_in => idex_ra_addr_out,
     mem_oper_in => idex_mem_oper_out,
     wb_oper_in => idex_wb_oper_out,
+    n_flag_in => stat_reg_n_out,
+    z_flag_in => stat_reg_z_out,
+    
     
     alu_result_out => exmem_alu_result_out,
     pc_addr_out => exmem_pc_addr_out,
@@ -380,6 +388,16 @@ memwb0: mem_wb port map (
     
 );
 
+--STATUS REGISTER
+sr0: status_reg port map (
+     n_flag_in => alu_n_flag_out,
+     z_flag_in => alu_z_flag_out,
+     br_flag_in => exmem_br_flag_out,
+     clear_test_flags => stat_reg_clr_flag_in,
+     n_flag_out  => stat_reg_n_out,
+     z_flag_out  => stat_reg_z_out,
+     br_flag_out => stat_reg_br_out
+);
 
 
 
@@ -394,6 +412,10 @@ memwb0: mem_wb port map (
     
     pc_next_addr <= exmem_br_addr_out when exmem_br_trig_out = '1' else 
                     std_logic_vector(unsigned(pc_addr) + instr_mem_size);
+    
+    --set clear on succesful branch
+    stat_reg_clr_flag_in <= '1' when exmem_br_trig_out = '1' else '0';
+   
 
 
 
