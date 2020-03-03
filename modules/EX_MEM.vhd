@@ -136,7 +136,7 @@ constant EX_MEM_INIT : ex_mem := (
         new_pc_addr_out <= ex_mem_sig.alu_res;
         br_trigger <= '1';
         
-        --if BR.SUB then we store the current PC + 2 in the regfile
+        --if BR.SUB then we store the current_PC + 2 in the regfile
         if ex_mem_sig.opcode = "1000111" then
             wb_oper_out <= ex_mem_sig.wb_opr; --enable writeBack
             ra_addr_out <= "111";
