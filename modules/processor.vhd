@@ -165,8 +165,8 @@ signal ifid_instr_format_out : std_logic_vector (2 downto 0):= (others => '0');
 signal ifid_reg1_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal ifid_reg2_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal if_id_ra_addr_out  : std_logic_vector (2 downto 0):= (others => '0');
-signal ifid_mem_oper_out : std_logic;
-signal ifid_wb_oper_out : std_logic;
+signal ifid_mem_oper_out : std_logic := '0';
+signal ifid_wb_oper_out : std_logic := '0';
 
 --INSTRUCTION DECODE
 signal regfile_reg1_data_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -360,6 +360,21 @@ memwb0: mem_wb port map (
     wb_oper_out => memwb_wb_oper_out
     
 );
+
+
+
+--Branching Control
+
+--Process runs whenever alu_res is updated
+process(alu_result_out)
+begin
+
+
+
+--Get n_flag, z_flag, opcode, alu_res from MEM stage
+ 
+
+
 
 
 -- Combinational logic

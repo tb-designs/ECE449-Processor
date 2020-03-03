@@ -144,6 +144,7 @@ begin
                 --A2
                 operand1 <= id_ex_sig.reg1_data; --ra data
                 operand2 <= id_ex_sig.op3; --c1
+                ra_addr_out <= id_ex_sig.ra_addr;
             when "011" =>
                 --A3
                 operand1 <= id_ex_sig.reg1_data; --ra data

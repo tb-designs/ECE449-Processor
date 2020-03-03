@@ -148,6 +148,8 @@ begin
         reg1_addr    <= (others => '0');
         reg2_addr    <= (others => '0');
         ra_addr_out  <= (others => '0');
+        mem_oper_out <= '0';
+        wb_oper_out <= '0';
     end if;
    
      --if the clock is rising we gate
