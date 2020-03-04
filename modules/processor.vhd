@@ -134,7 +134,7 @@ component EX_MEM is
         instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
         wb_oper_out : out std_logic;
         mem_oper_out : out std_logic_vector (1 downto 0);
-        n_flag_in     : in std_logic; --Inputs from the global storage, checked when branch instr reaches ex/mem
+        n_flag_in     : in std_logic; --Inputs from the status register, checked when branch instr reaches ex/mem
         z_flag_in    : in std_logic
     );
 end component;
@@ -414,7 +414,7 @@ sr0: status_reg port map (
                     std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch
-    stat_reg_clr_flag_in <= '1' when exmem_br_trig_out = '1' else '0';
+    stat_reg_clr_flag_in <= '1' when stat_reg_br_out = '1' else '0';
    
 
 
