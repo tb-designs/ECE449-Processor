@@ -45,8 +45,6 @@ type ex_mem is record
     z_flag     : std_logic;
     mem_opr    : std_logic;
     wb_opr     : std_logic;
-    n_flag     : std_logic;
-    z_flag     : std_logic;
 end record ex_mem;
 
 --Specify init value for the type
@@ -61,9 +59,7 @@ constant EX_MEM_INIT : ex_mem := (
     n_flag     => '0',
     z_flag     => '0',
     mem_opr    => '0',
-    wb_opr     => '0',
-    n_flag     => '0',
-    z_flag     => '0'
+    wb_opr     => '0'
     );
 
 

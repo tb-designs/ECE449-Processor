@@ -32,56 +32,37 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity status_reg is
-    Port ( n_flag_in : in std_logic;
-           z_flag_in : in std_logic;
-           br_flag_in : in std_logic;
-           clear_test_flags : in std_logic;
-           n_flag_out : out std_logic;
-           z_flag_out : out std_logic;
-           br_flag_out : out std_logic
-           );
+    port (clk : in std_logic;
+          n_flag_in : in std_logic;
+          z_flag_in : in std_logic;
+          br_flag_in : in std_logic;
+          clear_test_flags : in std_logic;
+          n_flag_out : out std_logic;
+          z_flag_out : out std_logic;
+          br_flag_out : out std_logic
+          );
 end status_reg;
 
 architecture Behavioral of status_reg is
 
---Type containing all flags needed (so far)
-type status_reg is record
-    n_flag : std_logic;
-    z_flag : std_logic;
-    br_flag: std_logic;
-end record status_reg; 
-
-constant STATUS_REG_INIT : status_reg := (n_flag => '0',
-                                          z_flag => '0',
-                                          br_flag => '0'
-                                          );
-
---Signals
-signal stat_reg_sig : status_reg := STATUS_REG_INIT;
-
 begin
-
---Clear Behaviour
-process(clear_test_flags)
-begin
-
-    if clear_test_flags = '1' then
-        stat_reg_sig.n_flag <= '0';
-        stat_reg_sig.z_flag <= '0';
-        stat_reg_sig.br_flag <= '0';
-    end if;
-
-end process;
-
-    --store flags here
-    stat_reg_sig.n_flag  <= '1' when n_flag_in = '1'; --no else, want these to be sticky until the clear
-    stat_reg_sig.z_flag  <= '1' when z_flag_in = '1';
-    stat_reg_sig.br_flag <= '1' when br_flag_in = '1';
-    
-    --Output
-    n_flag_out <= stat_reg_sig.n_flag;
-    z_flag_out <= stat_reg_sig.z_flag;
-    br_flag_out <= stat_reg_sig.br_flag;
-
+    process(clk, n_flag_in, z_flag_in, clear_test_flags)
+    begin
+        if clear_test_flags = '1' then
+            n_flag_out <= '0';
+            z_flag_out <= '0';
+            br_flag_out <= '0';
+        elsif (clk = '1' and clk'event) then
+           if (n_flag_in = '1') then
+               n_flag_out <= '1';
+           end if;
+           if (z_flag_in = '1') then
+               z_flag_out <= '1';
+           end if;
+           if (br_flag_in = '1') then
+               br_flag_out <= '1';
+           end if;           
+        end if;
+    end process;
 
 end Behavioral;
