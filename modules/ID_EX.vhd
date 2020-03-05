@@ -93,6 +93,20 @@ constant ID_EX_INIT : id_ex := (
 signal id_ex_sig : id_ex := ID_EX_INIT;
     
 begin
+
+        --falling edge store the input in the register
+        -- also compute the alu_mode
+        id_ex_sig.reg1_data <= data_1;
+        id_ex_sig.reg2_data <= data_2;
+        id_ex_sig.op3 <= operand_3;
+        id_ex_sig.alu_mode <= getalumode(opcode_in); --produce alu_mode
+        id_ex_sig.opcode <= opcode_in;
+        id_ex_sig.instr_form <= instr_form_in;
+        id_ex_sig.pc_addr <= pc_addr_in;
+        id_ex_sig.mem_opr <= mem_oper_in;
+        id_ex_sig.wb_opr <= wb_oper_in;
+        id_ex_sig.ra_addr <= ra_addr_in;
+
     process(clk,rst)
     begin
         --reset behaviour
@@ -108,18 +122,7 @@ begin
             wb_oper_out <= '0';
         end if;
 
-        --falling edge store the input in the register
-        -- also compute the alu_mode
-        id_ex_sig.reg1_data <= data_1;
-        id_ex_sig.reg2_data <= data_2;
-        id_ex_sig.op3 <= operand_3;
-        id_ex_sig.alu_mode <= getalumode(opcode_in); --produce alu_mode
-        id_ex_sig.opcode <= opcode_in;
-        id_ex_sig.instr_form <= instr_form_in;
-        id_ex_sig.pc_addr <= pc_addr_in;
-        id_ex_sig.mem_opr <= mem_oper_in;
-        id_ex_sig.wb_opr <= wb_oper_in;
-        id_ex_sig.ra_addr <= ra_addr_in;
+
               
         if(clk='1' and clk'event) then   
        --rising edge set output depending on the instruction format
@@ -145,8 +148,8 @@ begin
                 ra_addr_out <= id_ex_sig.ra_addr;
             when "011" =>
                 --A3
-                operand1 <= id_ex_sig.reg1_data; --ra data
-                operand2 <= (others => '0'); --zero
+                operand1 <= X"0000"; --ra data
+                operand2 <= (others => '0'); --Dont care
                 ra_addr_out <= id_ex_sig.ra_addr; --ra address
             when "100" =>
                 --B1
