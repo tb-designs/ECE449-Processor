@@ -170,7 +170,7 @@ constant instr_mem_size : integer := 1; -- each instr is 2 bytes
 
 --GLOBAL
 signal clk_sig : std_logic;
-signal rst_sig : std_logic;
+signal rst_sig : std_logic := '0';
 
 --INSTRUCTION FETCH
 signal instr_mem_output : std_logic_vector (15 downto 0) := (others => '0');
@@ -268,7 +268,7 @@ mem0 : mem_interface port map (
 --IF/ID
 ifid0: if_id port map(
     clk => clk,
-    rst => rst,
+    rst => rst_sig,
     
     instr_in => instr_mem_output,
     pc_addr_in => pc_addr,
@@ -304,7 +304,7 @@ rf0: register_file port map (
 --ID/EX
 idex0 : id_ex port map (
     clk => clk,
-    rst => rst,
+    rst => rst_sig,
     
     data_1 => regfile_reg1_data_out,
     data_2 => regfile_reg2_data_out,
@@ -401,24 +401,21 @@ sr0: status_reg port map (
      br_flag_out => stat_reg_br_out
 );
 
-
-
 --Combinational logic
-
-    
 
     -- Detected branch, 
     -- if BR.SUB, store the PC_address in r7 and use new pc addr from R[ra]
-    -- r7 <= exmem_pc_addr_out + int_mem_size
+    -- r7 <= exmem_pc_addr_out + instr_mem_size
     -- (store incremented address)
-    
     pc_next_addr <= exmem_br_addr_out when exmem_br_trig_out = '1' else 
                     std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch
     stat_reg_clr_flag_in <= '1' when stat_reg_br_out = '1' else '0';
+    
+    rst_sig <= '1' when exmem_br_trig_out = '1' else -- reset if/id and id/ex when branching
+                rst; -- follow processor reset otherwise
    
-
-
+--Processes
 
 end behavioral;
