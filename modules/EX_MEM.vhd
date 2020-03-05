@@ -67,6 +67,21 @@ constant EX_MEM_INIT : ex_mem := (
   signal ex_mem_sig : ex_mem := EX_MEM_INIT;
   
   begin
+  
+  --falling edge store input
+  ex_mem_sig.alu_res    <= alu_result;
+  ex_mem_sig.instr_form <= instr_form_in;
+  ex_mem_sig.opcode     <= opcode_in;
+  ex_mem_sig.pc_addr    <= pc_addr_in;
+  ex_mem_sig.dest_data  <= dest_data_in;
+  ex_mem_sig.src_data   <= src_data_in;
+  ex_mem_sig.ra_addr    <= ra_addr_in;
+  ex_mem_sig.mem_opr    <= mem_oper_in;
+  ex_mem_sig.wb_opr     <= wb_oper_in;
+  ex_mem_sig.n_flag     <= n_flag_in;
+  ex_mem_sig.z_flag     <= z_flag_in;                  
+            
+  
     process(clk,rst)
     begin
       --reset behaviour, all outputs to zero
@@ -184,20 +199,6 @@ constant EX_MEM_INIT : ex_mem := (
       end case;
       
     end if;
-        --falling edge store input
-        ex_mem_sig.alu_res    <= alu_result;
-        ex_mem_sig.instr_form <= instr_form_in;
-        ex_mem_sig.opcode     <= opcode_in;
-        ex_mem_sig.pc_addr    <= pc_addr_in;
-        ex_mem_sig.dest_data  <= dest_data_in;
-        ex_mem_sig.src_data   <= src_data_in;
-        ex_mem_sig.ra_addr    <= ra_addr_in;
-        ex_mem_sig.mem_opr    <= mem_oper_in;
-        ex_mem_sig.n_flag     <= n_flag_in;
-        ex_mem_sig.z_flag     <= z_flag_in;
-        ex_mem_sig.wb_opr     <= wb_oper_in;
-        ex_mem_sig.n_flag     <= n_flag_in;
-        ex_mem_sig.z_flag     <= z_flag_in;                  
     end process;
 
   end Behavioral;

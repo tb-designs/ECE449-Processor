@@ -166,7 +166,7 @@ component status_reg is
 end component;
 
 -- Constants
-constant instr_mem_size : integer := 1; -- each instr is 2 bytes
+constant instr_mem_size : integer := 2; -- each instr is 2 bytes
 
 --GLOBAL
 signal clk_sig : std_logic;
@@ -407,7 +407,8 @@ sr0: status_reg port map (
     -- if BR.SUB, store the PC_address in r7 and use new pc addr from R[ra]
     -- r7 <= exmem_pc_addr_out + instr_mem_size
     -- (store incremented address)
-    pc_next_addr <= exmem_br_addr_out when exmem_br_trig_out = '1' else 
+    pc_next_addr <= (others => '0') when rst = '1' else 
+		    exmem_br_addr_out when exmem_br_trig_out = '1' else 
                     std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch
