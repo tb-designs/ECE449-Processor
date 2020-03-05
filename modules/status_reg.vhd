@@ -46,7 +46,7 @@ end status_reg;
 architecture Behavioral of status_reg is
 
 begin
-    process(clk, n_flag_in, z_flag_in, clear_test_flags)
+    process(clk, clear_test_flags)
     begin
         if clear_test_flags = '1' then
             n_flag_out <= '0';

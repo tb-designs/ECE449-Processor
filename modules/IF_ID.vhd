@@ -25,7 +25,7 @@ use ieee.std_logic_unsigned.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -76,7 +76,7 @@ function get_instrformat(op : std_logic_vector(6 downto 0)) return std_logic_vec
         when "1000011" => format := "101"; --BR
         when "1000100" => format := "101"; --BR.N
         when "1000101" => format := "101"; --BR.Z
-        when "1000111" => format := "101"; --BR.SUB
+        when "1000110" => format := "101"; --BR.SUB
         --L1
         when "0010010" => format := "110"; --LOADIMM
         --L2
@@ -157,7 +157,7 @@ process(clk,rst)
 begin
     --reset behaviour
     if rst = '1' then
-        PC_addr_out  <= (others => '0');
+        --PC_addr_out  <= (others => '0');
         op_pass      <= (others => '0');
         op_code      <= (others => '0');
         instr_format <= (others => '0');
@@ -178,7 +178,7 @@ begin
         when "0000001" =>  --ADD
             reg1_addr <= if_id_sig.rb_addr; 
             reg2_addr <= if_id_sig.rc_addr;
-            op_pass <= "0000000000000"&if_id_sig.ra_addr;  
+            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.ra_addr), 16));  
             mem_oper_out <= '0';
             wb_oper_out  <= '1';      
         when "0000010" =>  --SUB
@@ -283,7 +283,7 @@ begin
         when "1000111" =>  --BR.SUB
             reg1_addr <= if_id_sig.ra_addr;
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "0000000000"&if_id_sig.disps; --pass disp1 padded with zeros
+            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.disps), 16)); --pass disp1 padded with zeros
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
                     
