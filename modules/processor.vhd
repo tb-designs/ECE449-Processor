@@ -150,7 +150,7 @@ component MEM_WB is
 end component;
 
 -- Constants
-constant instr_mem_size : integer := 1; -- each instr is 2 bytes
+constant instr_mem_size : integer := 2; -- each instr is 2 bytes
 
 --GLOBAL
 signal clk_sig : std_logic;
@@ -366,8 +366,6 @@ memwb0: mem_wb port map (
 --Branching Control
 
 --Process runs whenever alu_res is updated
-process(alu_result_out)
-begin
 
 
 
@@ -379,7 +377,10 @@ begin
 
 -- Combinational logic
 
-    pc_next_addr <= std_logic_vector(unsigned(pc_addr) + instr_mem_size);
+ 
+
+    pc_next_addr <= (others => '0') when rst = '1' else
+                    std_logic_vector(unsigned(pc_addr) + instr_mem_size);
 
 
 

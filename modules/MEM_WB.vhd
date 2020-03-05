@@ -48,6 +48,17 @@ constant MEM_WB_INIT : mem_wb := (
   signal mem_wb_sig : mem_wb := MEM_WB_INIT;
 
   begin
+      
+     --falling edge store input
+     mem_wb_sig.mem_data <= mem_data_in;
+     mem_wb_sig.alu_result <= alu_result_in;
+     mem_wb_sig.instr_format <= instr_format_in;
+     mem_wb_sig.pc_addr <= pc_addr_in;
+     mem_wb_sig.opcode <= opcode_in;
+     mem_wb_sig.ra_addr <= ra_addr_in;
+     mem_wb_sig.wb_opr <= wb_oper_in;
+
+  
     process(clk,rst)
     begin
       --reset behaviour, all outputs to zero
@@ -81,15 +92,6 @@ constant MEM_WB_INIT : mem_wb := (
       end if;
         
     end if;
-    
-       --falling edge store input
-       mem_wb_sig.mem_data <= mem_data_in;
-       mem_wb_sig.alu_result <= alu_result_in;
-       mem_wb_sig.instr_format <= instr_format_in;
-       mem_wb_sig.pc_addr <= pc_addr_in;
-       mem_wb_sig.opcode <= opcode_in;
-       mem_wb_sig.ra_addr <= ra_addr_in;
-       mem_wb_sig.wb_opr <= wb_oper_in;
 
 
   end process;   

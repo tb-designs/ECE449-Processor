@@ -90,53 +90,69 @@ function get_instrformat(op : std_logic_vector(6 downto 0)) return std_logic_vec
     return format;
 end function get_instrformat;
 
-    --Type declaration for easier modification
-    type if_id is record
-        --A1,A3
-        opcode  : std_logic_vector(6 downto 0);
-        ra_addr : std_logic_vector (2 downto 0);
-        rb_addr : std_logic_vector (2 downto 0);
-        rc_addr : std_logic_vector (2 downto 0);
-        --A2
-        c1      : std_logic_vector (3 downto 0);
-        --B1
-        displ   : std_logic_vector (8 downto 0);
-        --B2
-        disps   : std_logic_vector (5 downto 0);
-        --L1
-        m1      : std_logic;
-        imm     : std_logic_vector (7 downto 0);
-        --L2
-        rdest   : std_logic_vector (2 downto 0);
-        rsrc    : std_logic_vector (2 downto 0);
-    end record if_id;
+--Type declaration for easier modification
+type if_id is record
+     --A1,A3
+     opcode  : std_logic_vector(6 downto 0);
+     ra_addr : std_logic_vector (2 downto 0);
+     rb_addr : std_logic_vector (2 downto 0);
+     rc_addr : std_logic_vector (2 downto 0);
+     --A2
+     c1      : std_logic_vector (3 downto 0);
+     --B1
+     displ   : std_logic_vector (8 downto 0);
+     --B2
+     disps   : std_logic_vector (5 downto 0);
+     --L1
+     m1      : std_logic;
+     imm     : std_logic_vector (7 downto 0);
+     --L2
+     rdest   : std_logic_vector (2 downto 0);
+     rsrc    : std_logic_vector (2 downto 0);
+end record if_id;
 
-    constant IF_ID_INIT : if_id := (
-        opcode  => (others => '0'),
-        ra_addr => (others => '0'),
-        rb_addr => (others => '0'),
-        rc_addr => (others => '0'),
-        --A2
-        c1      => (others => '0'),
-        --B1
-        displ   => (others => '0'),
-        --B2
-        disps   => (others => '0'),
-        --L1
-        m1      => '0',
-        imm     => (others => '0'),
-        --L2
-        rdest   => (others => '0'),
-        rsrc    => (others => '0')
-        );
+constant IF_ID_INIT : if_id := (
+     opcode  => (others => '0'),
+     ra_addr => (others => '0'),
+     rb_addr => (others => '0'),
+     rc_addr => (others => '0'),
+     --A2
+     c1      => (others => '0'),
+     --B1
+     displ   => (others => '0'),
+     --B2
+     disps   => (others => '0'),
+     --L1
+     m1      => '0',
+     imm     => (others => '0'),
+     --L2
+     rdest   => (others => '0'),
+     rsrc    => (others => '0')
+     );
 
 
-  --Signals
-  signal if_id_sig : if_id := IF_ID_INIT;
-  signal pc_addr   : std_logic_vector (15 downto 0) := (others => '0');
-  signal format    : std_logic_vector (2 downto 0)  := (others => '0');
+--Signals
+signal if_id_sig : if_id := IF_ID_INIT;
+signal pc_addr   : std_logic_vector (15 downto 0) := (others => '0');
+signal format    : std_logic_vector (2 downto 0)  := (others => '0');
   
 begin
+     --Decode Instruction
+     if_id_sig.opcode  <= instr_in(15 downto 9);
+     if_id_sig.ra_addr <= instr_in (8 downto 6);
+     if_id_sig.rb_addr <= instr_in (5 downto 3);
+     if_id_sig.rc_addr <= instr_in (2 downto 0);
+     if_id_sig.c1    <= instr_in(3 downto 0);
+     if_id_sig.displ <= instr_in(8 downto 0);
+     if_id_sig.disps <= instr_in (5 downto 0);
+     if_id_sig.m1    <= instr_in (8);
+     if_id_sig.imm   <= instr_in(7 downto 0);
+     if_id_sig.rdest <= instr_in(8 downto 6);
+     if_id_sig.rsrc  <= instr_in(5 downto 3);
+        
+     pc_addr <= PC_addr_in;
+     format <= get_instrformat(instr_in(15 downto 9)); 
+        
 process(clk,rst)
 begin
     --reset behaviour
@@ -153,25 +169,7 @@ begin
     end if;
    
      --if the clock is rising we gate
-     --falling edge store input and compute instr format
-        
-        --Decode Instruction
-        if_id_sig.opcode  <= instr_in(15 downto 9);
-        if_id_sig.ra_addr <= instr_in (8 downto 6);
-        if_id_sig.rb_addr <= instr_in (5 downto 3);
-        if_id_sig.rc_addr <= instr_in (2 downto 0);
-        if_id_sig.c1    <= instr_in(3 downto 0);
-        if_id_sig.displ <= instr_in(8 downto 0);
-        if_id_sig.disps <= instr_in (5 downto 0);
-        if_id_sig.m1    <= instr_in (8);
-        if_id_sig.imm   <= instr_in(7 downto 0);
-        if_id_sig.rdest <= instr_in(8 downto 6);
-        if_id_sig.rsrc  <= instr_in(5 downto 3);
-
-        --other signals
-        pc_addr <= PC_addr_in;
-        format <= get_instrformat(if_id_sig.opcode); 
-    
+     --falling edge store input and compute instr format  
     if(clk='1' and clk'event) then
         --rising edge set output depending on format and opcode        
         case if_id_sig.opcode is
