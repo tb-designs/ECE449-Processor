@@ -184,19 +184,19 @@ begin
         when "0000010" =>  --SUB
             reg1_addr <= if_id_sig.rb_addr; 
             reg2_addr <= if_id_sig.rc_addr;
-            op_pass <= "0000000000000"&if_id_sig.ra_addr;
+            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.ra_addr), 16));
             mem_oper_out <= '0';
             wb_oper_out  <= '1';               
         when "0000011" =>  --MUL
             reg1_addr <= if_id_sig.rb_addr; 
             reg2_addr <= if_id_sig.rc_addr;
-            op_pass <= "0000000000000"&if_id_sig.ra_addr;
+            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.ra_addr), 16));
             mem_oper_out <= '0';
             wb_oper_out  <= '1';                   
         when "0000100" =>  --NAND
             reg1_addr <= if_id_sig.rb_addr; 
             reg2_addr <= if_id_sig.rc_addr;
-            op_pass <= "0000000000000"&if_id_sig.ra_addr;
+            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.ra_addr), 16));
             mem_oper_out <= '0';
             wb_oper_out  <= '1';       
             
@@ -204,13 +204,13 @@ begin
         when "0000101" =>  --SHL
             reg1_addr <= if_id_sig.ra_addr; 
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "000000000000"&if_id_sig.c1; --pass padded c1,
+            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.c1), 16)); --pass padded c1,
             mem_oper_out <= '0';
             wb_oper_out  <= '1';  
         when "0000110" => --SHR
             reg1_addr <= if_id_sig.ra_addr; 
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "000000000000"&if_id_sig.c1; --pass padded c1,
+            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.c1), 16)); --pass padded c1,
             mem_oper_out <= '0';
             wb_oper_out  <= '1'; 
             
@@ -240,21 +240,21 @@ begin
         when "1000000" =>  --BRR
             reg1_addr <= "000"; --Not needed here
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "0000000"&if_id_sig.displ; --pass disp1
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.displ), 16)); --pass disp1
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
             
         when "1000001" =>  --BRR.N
             reg1_addr <= "000"; --Not needed here
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "0000000"&if_id_sig.displ; --pass disp1
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.displ), 16)); --pass disp1
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
 
         when "1000010" =>  --BRR.Z
             reg1_addr <= "000"; --Not needed here
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "0000000"&if_id_sig.displ; --pass disp1
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.displ), 16)); --pass disp1
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
                     
@@ -262,28 +262,28 @@ begin
         when "1000011" =>  --BR
             reg1_addr <= if_id_sig.ra_addr;
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "0000000000"&if_id_sig.disps; --pass disps padded with zeros
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.disps), 16)); --pass disps padded with zeros
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
 
         when "1000100" =>  --BR.N
             reg1_addr <= if_id_sig.ra_addr;
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "0000000000"&if_id_sig.disps; --pass disps padded with zeros
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.disps), 16)); --pass disps padded with zeros
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
 
         when "1000101" =>  --BR.Z
              reg1_addr <= if_id_sig.ra_addr;
             reg2_addr <= "000"; --Not needed here
-            op_pass <= "0000000000"&if_id_sig.disps; --pass disp1 padded with zeros
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.disps), 16)); --pass disp1 padded with zeros
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
 
-        when "1000111" =>  --BR.SUB
+        when "1000110" =>  --BR.SUB
             reg1_addr <= if_id_sig.ra_addr;
             reg2_addr <= "000"; --Not needed here
-            op_pass <= std_logic_vector(resize(unsigned(if_id_sig.disps), 16)); --pass disp1 padded with zeros
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.disps), 16)); --pass disp1 padded with zeros
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
                     
@@ -291,7 +291,7 @@ begin
         when "0010010" =>  --LOADIMM
             reg1_addr <= "111"; --Always using reg7 for LOADIMM
             reg2_addr <= "000";
-            op_pass <= "00000000"&if_id_sig.imm; --Pass along the imm value
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.imm), 16)); --Pass along the imm value (resized to 16 bits)
             mem_oper_out <= '0';
             wb_oper_out  <= '1';        
  

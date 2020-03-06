@@ -154,12 +154,12 @@ begin
             when "100" =>
                 --B1
                 operand1 <= id_ex_sig.pc_addr; --PC address
-                operand2 <= id_ex_sig.op3(15 downto 1)&"0"; -- 2*disp.l = shl(disp.l)
+                operand2 <= id_ex_sig.op3(14 downto 0)&"0"; -- 2*disp.l = shl(disp.l)
 
             when "101" =>
                 --B2
                 operand1 <= id_ex_sig.reg1_data; --ra data
-                operand2 <= id_ex_sig.op3(15 downto 1)&"0"; --2*disp.s = shl(disp.s)
+                operand2 <= id_ex_sig.op3(14 downto 0)&"0"; --2*disp.s = shl(disp.s)
 
             when others =>
                 --A0,L1, and L2 skip this stage so treat like a NOP   
