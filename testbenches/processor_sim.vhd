@@ -83,19 +83,20 @@ begin
     in_port <= X"0002";
     wait for 3.5*clk_period;
     in_port <= X"0003";
-    wait for 3.5*clk_period;
+    wait for clk_period;
     in_port <= X"0001";
-    wait for 3.5*clk_period;
+    wait for clk_period;
     in_port <= X"0005";
-    wait for 3.5*clk_period;
+    wait for clk_period;
     in_port <= X"0000";
-    wait for 3.5*clk_period;
+    wait for clk_period;
     in_port <= X"0001";
-    wait for 3.5*clk_period;
+    wait for clk_period;
     in_port <= X"0005";
+    wait for clk_period;
+    in_port <= X"0000";
     wait;
-    wait for 3.5*clk_period;
-    in_port <= X"0000";
+
 end process;
     
 

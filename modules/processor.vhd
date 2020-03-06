@@ -155,7 +155,7 @@ end component;
 
 --STATUS REGISTER
 component status_reg is
-    port (clk : in std_logic;
+    port (clk, rst : in std_logic;
           n_flag_in : in std_logic;
           z_flag_in : in std_logic;
           br_flag_in : in std_logic;
@@ -394,6 +394,7 @@ memwb0: mem_wb port map (
 --STATUS REGISTER
 sr0: status_reg port map (
      clk => clk,
+     rst => rst,
      n_flag_in => alu_n_flag_out,
      z_flag_in => alu_z_flag_out,
      br_flag_in => exmem_br_trig_out,

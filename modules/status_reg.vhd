@@ -32,7 +32,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity status_reg is
-    port (clk : in std_logic;
+    port (clk, rst : in std_logic;
           n_flag_in : in std_logic;
           z_flag_in : in std_logic;
           br_flag_in : in std_logic;
@@ -46,8 +46,15 @@ end status_reg;
 architecture Behavioral of status_reg is
 
 begin
-    process(clk, clear_test_flags)
+    process(clk, rst, clear_test_flags)
     begin
+        -- Reset Behaviour
+        if (rst = '1') then
+            n_flag_out <= '0';
+            z_flag_out <= '0';
+            br_flag_out <= '0';
+        end if;
+    
         if clear_test_flags = '1' then
             n_flag_out <= '0';
             z_flag_out <= '0';
