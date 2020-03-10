@@ -101,7 +101,7 @@ constant EX_MEM_INIT : ex_mem := (
       --rising edge set output
 
       --if BR.SUB then we store the current_PC + 2 in the regfile
-      if ex_mem_sig.opcode = "1000111" then
+      if ex_mem_sig.opcode = "1000110" then
         wb_oper_out <= '1'; --enable writeBack to reg 7
         ra_addr_out <= "111"; --r7 is reserved for subroutine return address
         alu_result_out <= ex_mem_sig.pc_addr + X"0002"; -- pass the 2's complement of 2 + current pc_addr
