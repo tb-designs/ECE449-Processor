@@ -99,7 +99,8 @@ begin
         id_ex_sig.reg1_data <= data_1;
         id_ex_sig.reg2_data <= data_2;
         id_ex_sig.op3 <= operand_3;
-        id_ex_sig.alu_mode <= getalumode(opcode_in); --produce alu_mode
+        id_ex_sig.alu_mode <= "001" when opcode_in = "1000111" else
+                              getalumode(opcode_in); --produce alu_mode (make it ADD if a RETURN instruction)
         id_ex_sig.opcode <= opcode_in;
         id_ex_sig.instr_form <= instr_form_in;
         id_ex_sig.pc_addr <= pc_addr_in;
@@ -160,7 +161,11 @@ begin
                 --B2
                 operand1 <= id_ex_sig.reg1_data; --ra data
                 operand2 <= id_ex_sig.op3(14 downto 0)&"0"; --2*disp.s = shl(disp.s)
-
+            when "000" =>
+                --A0, need explicit for RETURN
+                operand1 <= id_ex_sig.reg1_data; --r7 data
+                operand2 <= (others => '0'); --add with 0
+            
             when others =>
                 --A0,L1, and L2 skip this stage so treat like a NOP   
                 operand1 <= (others => '0'); --Dont Care
