@@ -53,7 +53,8 @@ function getalumode(op : std_logic_vector(6 downto 0)) return std_logic_vector i
         when "1000011" => mode := "001"; --BR
         when "1000100" => mode := "001"; --BR.N
         when "1000101" => mode := "001"; --BR.Z
-        when "1000111" => mode := "001"; --BR.SUB
+        when "1000110" => mode := "001"; --BR.SUB
+        when "1000111" => mode := "001"; --RETURN
         --Default to NOP
         when others => mode := "000";
         end case; 
@@ -99,8 +100,7 @@ begin
         id_ex_sig.reg1_data <= data_1;
         id_ex_sig.reg2_data <= data_2;
         id_ex_sig.op3 <= operand_3;
-        id_ex_sig.alu_mode <= "001" when opcode_in = "1000111" else
-                              getalumode(opcode_in); --produce alu_mode (make it ADD if a RETURN instruction)
+        id_ex_sig.alu_mode <= getalumode(opcode_in); --produce alu_mode (make it ADD if a RETURN instruction)
         id_ex_sig.opcode <= opcode_in;
         id_ex_sig.instr_form <= instr_form_in;
         id_ex_sig.pc_addr <= pc_addr_in;
