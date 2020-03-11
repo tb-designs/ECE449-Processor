@@ -193,6 +193,9 @@ constant EX_MEM_INIT : ex_mem := (
       when "101" =>
         --BR, BR.N, BR.Z, BR.SUB
         new_pc_addr_out <= ex_mem_sig.alu_res;       
+      when "000" =>
+        --RETURN
+        new_pc_addr_out <= ex_mem_sig.alu_res;
       when others =>
         new_pc_addr_out <= (others => '0');          
         br_trigger <= '0';
