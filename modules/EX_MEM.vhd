@@ -179,10 +179,16 @@ constant EX_MEM_INIT : ex_mem := (
         end if;
         dest_data <= (others => '0');
         src_data  <= (others => '0');
+      when "1000111" =>
+          --RETURN
+          br_trigger <= '1';
+          dest_data <= (others => '0');
+          src_data  <= (others => '0');
       when others =>
         --OTHER
         dest_data <= (others => '0');
         src_data  <= (others => '0');
+        br_trigger <= '0';
       end case;    
           
       --Format Specific Operations (Mostly for Branching behaviour)
@@ -198,7 +204,6 @@ constant EX_MEM_INIT : ex_mem := (
         new_pc_addr_out <= ex_mem_sig.alu_res;
       when others =>
         new_pc_addr_out <= (others => '0');          
-        br_trigger <= '0';
       end case;
       
     end if;
