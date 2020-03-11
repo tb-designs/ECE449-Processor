@@ -23,7 +23,7 @@ entity EX_MEM is
        opcode_out     : out std_logic_vector (6 downto 0);
        instr_form_out : out std_logic_vector (2 downto 0);
        ra_addr_out    : out std_logic_vector (2 downto 0);
-       mem_oper_out   : out std_logic_vector (1 downto 0); --Mem interface requires vector
+       mem_oper_out   : out std_logic_vector (1 downto 0); --Mem interface requires vector input
        wb_oper_out    : out std_logic;
        br_trigger     : out std_logic --Notifies elements that a branch is occuring (reset by PC once new address is in place)
   );
@@ -123,8 +123,7 @@ constant EX_MEM_INIT : ex_mem := (
         mem_oper_out   <= "00";
       end if;
       
-      --Data memory outputs depend on if LOAD/IN or STORE/OUT instruction
-      --also deal with branch logic here
+      --Opcode specific behaviour
       case ex_mem_sig.opcode is 
       when "0010000" =>
         --LOAD
@@ -180,10 +179,10 @@ constant EX_MEM_INIT : ex_mem := (
         dest_data <= (others => '0');
         src_data  <= (others => '0');
       when "1000111" =>
-          --RETURN
-          br_trigger <= '1';
-          dest_data <= (others => '0');
-          src_data  <= (others => '0');
+        --RETURN
+        br_trigger <= '1';
+        dest_data <= (others => '0');
+        src_data  <= (others => '0');
       when others =>
         --OTHER
         dest_data <= (others => '0');
@@ -200,7 +199,7 @@ constant EX_MEM_INIT : ex_mem := (
         --BR, BR.N, BR.Z, BR.SUB
         new_pc_addr_out <= ex_mem_sig.alu_res;       
       when "000" =>
-        --RETURN
+        --RETURN (or NOP, but br_trig is not set so doesnt matter)
         new_pc_addr_out <= ex_mem_sig.alu_res;
       when others =>
         new_pc_addr_out <= (others => '0');          
