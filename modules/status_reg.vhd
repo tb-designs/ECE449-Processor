@@ -60,16 +60,17 @@ begin
                n_flag_out <= '0';
                z_flag_out <= '0';
                br_flag_out <= '0';
-           end if;
-           if (n_flag_in = '1') then
-               n_flag_out <= '1';
-           end if;
-           if (z_flag_in = '1') then
-               z_flag_out <= '1';
-           end if;
-           if (br_flag_in = '1') then
-               br_flag_out <= '1';
-           end if;           
+           else
+               if (n_flag_in = '1') then
+                   n_flag_out <= '1';
+               end if;
+               if (z_flag_in = '1') then
+                   z_flag_out <= '1';
+               end if;
+               if (br_flag_in = '1') then
+                   br_flag_out <= '1';
+               end if;           
+            end if;
         end if;
     end process;
 

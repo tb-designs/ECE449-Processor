@@ -137,6 +137,7 @@ component EX_MEM is
         mem_oper_out : out std_logic_vector (1 downto 0);
         n_flag_in     : in std_logic; --Inputs from the status register, checked when branch instr reaches ex/mem
         z_flag_in    : in std_logic;
+        br_flag_in   : in std_logic;
         br_trigger     : out std_logic
     );
 end component;
@@ -359,7 +360,7 @@ exmem0: ex_mem port map (
     wb_oper_in => idex_wb_oper_out,
     n_flag_in => stat_reg_n_out,
     z_flag_in => stat_reg_z_out,
-    
+    br_flag_in => stat_reg_br_out,
     
     alu_result_out => exmem_alu_result_out,
     pc_addr_out => exmem_pc_addr_out,
@@ -417,7 +418,7 @@ sr0: status_reg port map (
                     std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch
-    stat_reg_clr_flag_in <= '1' when exmem_br_trig_out = '1' else '0';
+    stat_reg_clr_flag_in <= '1' when stat_reg_br_out = '1' else '0';
     
     rst_sig <= '1' when exmem_br_trig_out = '1' else -- reset if/id and id/ex when branching
                 rst; -- follow processor reset otherwise

@@ -14,6 +14,7 @@ entity EX_MEM is
        wb_oper_in     : in std_logic;
        n_flag_in      : in std_logic;
        z_flag_in      : in std_logic;
+       br_flag_in     : in std_logic;
        clk,rst        : in std_logic;
        alu_result_out : out std_logic_vector (15 downto 0);
        PC_addr_out    : out std_logic_vector (15 downto 0);
@@ -85,7 +86,7 @@ constant EX_MEM_INIT : ex_mem := (
     process(clk,rst)
     begin
       --reset behaviour, all outputs to zero
-      if rst = '1' then
+      if rst = '1' or br_flag_in = '1' then
           alu_result_out <= (others => '0');
           PC_addr_out    <= (others => '0');
           new_pc_addr_out <= (others => '0');
@@ -95,6 +96,7 @@ constant EX_MEM_INIT : ex_mem := (
           ra_addr_out    <= (others => '0');
           mem_oper_out   <= "00";
           wb_oper_out    <= '0';
+          br_trigger     <= '0';
       end if;
 
     if(clk='1' and clk'event) then
@@ -199,9 +201,8 @@ constant EX_MEM_INIT : ex_mem := (
         new_pc_addr_out <= (others => '0');  
       end case;    
       
-      
-      
-      
+      --Check for if already branched previously
+      --TODO: add branch input
       
     end if;
     end process;
