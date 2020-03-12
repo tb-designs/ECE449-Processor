@@ -8,6 +8,8 @@ entity ID_EX is
        operand_3     : in std_logic_vector (15 downto 0);
        opcode_in     : in std_logic_vector (6 downto 0);
        instr_form_in : in std_logic_vector (2 downto 0);
+       reg1_addr_in  : in std_logic_vector (2 downto 0);
+       reg2_addr_in  : in std_logic_vector (2 downto 0);
        ra_addr_in    : in std_logic_vector (2 downto 0);
        PC_addr_in    : in std_logic_vector (15 downto 0);
        mem_oper_in   : in std_logic;
@@ -18,6 +20,8 @@ entity ID_EX is
        opcode_out    : out std_logic_vector (6 downto 0);
        alu_mode_out  : out std_logic_vector (2 downto 0);
        instr_form_out: out std_logic_vector (2 downto 0);
+       reg1_addr_out : out std_logic_vector (2 downto 0);
+       reg2_addr_out : out std_logic_vector (2 downto 0);
        PC_addr_out   : out std_logic_vector (15 downto 0);
        dest_mem_data : out std_logic_vector (15 downto 0);
        src_mem_data  : out std_logic_vector (15 downto 0);
@@ -69,6 +73,8 @@ type id_ex is record
     op3        : std_logic_vector (15 downto 0);
     alu_mode   : std_logic_vector (2 downto 0);
     ra_addr    : std_logic_vector (2 downto 0);
+    r1_addr    : std_logic_vector (2 downto 0);
+    r2_addr    : std_logic_vector (2 downto 0);
     opcode     : std_logic_vector (6 downto 0);
     instr_form : std_logic_vector (2 downto 0);
     pc_addr    : std_logic_vector (15 downto 0);
@@ -83,6 +89,8 @@ constant ID_EX_INIT : id_ex := (
     op3 => (others => '0'),
     alu_mode => (others => '0'),
     ra_addr => (others => '0'),
+    r1_addr => (others => '0'),
+    r2_addr => (others => '0'),
     opcode => (others => '0'),
     instr_form => (others => '0'),
     pc_addr => (others => '0'),
@@ -95,6 +103,10 @@ signal id_ex_sig : id_ex := ID_EX_INIT;
     
 begin
 
+
+
+    id_ex_sig.r1_addr <= reg1_addr_in;
+    id_ex_sig.r2_addr <= reg2_addr_in;
     id_ex_sig.reg1_data <= data_1;
     id_ex_sig.reg2_data <= data_2;
     id_ex_sig.op3 <= operand_3;
@@ -131,6 +143,8 @@ begin
         PC_addr_out <= id_ex_sig.pc_addr;
         instr_form_out <= id_ex_sig.instr_form;
         opcode_out <= id_ex_sig.opcode;
+        reg1_addr_out <= id_ex_sig.r1_addr;
+        reg2_addr_out <= id_ex_sig.r2_addr;
   
         --Need to decide what operands to give the ALU
         case id_ex_sig.instr_form is                
