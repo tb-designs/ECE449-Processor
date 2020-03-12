@@ -95,18 +95,16 @@ signal id_ex_sig : id_ex := ID_EX_INIT;
     
 begin
 
-        --falling edge store the input in the register
-        -- also compute the alu_mode
-        id_ex_sig.reg1_data <= data_1;
-        id_ex_sig.reg2_data <= data_2;
-        id_ex_sig.op3 <= operand_3;
-        id_ex_sig.alu_mode <= getalumode(opcode_in); --produce alu_mode (make it ADD if a RETURN instruction)
-        id_ex_sig.opcode <= opcode_in;
-        id_ex_sig.instr_form <= instr_form_in;
-        id_ex_sig.pc_addr <= pc_addr_in;
-        id_ex_sig.mem_opr <= mem_oper_in;
-        id_ex_sig.wb_opr <= wb_oper_in;
-        id_ex_sig.ra_addr <= ra_addr_in;
+    id_ex_sig.reg1_data <= data_1;
+    id_ex_sig.reg2_data <= data_2;
+    id_ex_sig.op3 <= operand_3;
+    id_ex_sig.alu_mode <= getalumode(opcode_in);
+    id_ex_sig.opcode <= opcode_in;
+    id_ex_sig.instr_form <= instr_form_in;
+    id_ex_sig.pc_addr <= pc_addr_in;
+    id_ex_sig.mem_opr <= mem_oper_in;
+    id_ex_sig.wb_opr <= wb_oper_in;
+    id_ex_sig.ra_addr <= ra_addr_in;
 
     process(clk,rst)
     begin
@@ -124,7 +122,6 @@ begin
         end if;
 
 
-              
         if(clk='1' and clk'event) then   
        --rising edge set output depending on the instruction format
 
@@ -136,7 +133,11 @@ begin
         opcode_out <= id_ex_sig.opcode;
   
         --Need to decide what operands to give the ALU
-        case id_ex_sig.instr_form is
+        case id_ex_sig.instr_form is                
+            when "000" =>
+                --A0, need made explicit for RETURN
+                operand1 <= id_ex_sig.reg1_data; --r7 data
+                operand2 <= (others => '0'); --add with 0
             when "001" =>
                 --A1
                 operand1 <= id_ex_sig.reg1_data; --rb data
@@ -156,18 +157,12 @@ begin
                 --B1
                 operand1 <= id_ex_sig.pc_addr; --PC address
                 operand2 <= id_ex_sig.op3(14 downto 0)&"0"; -- 2*disp.l = shl(disp.l)
-
             when "101" =>
                 --B2
                 operand1 <= id_ex_sig.reg1_data; --ra data
                 operand2 <= id_ex_sig.op3(14 downto 0)&"0"; --2*disp.s = shl(disp.s)
-            when "000" =>
-                --A0, need explicit for RETURN
-                operand1 <= id_ex_sig.reg1_data; --r7 data
-                operand2 <= (others => '0'); --add with 0
-            
             when others =>
-                --A0,L1, and L2 skip this stage so treat like a NOP   
+                --L1, and L2 skip this stage so treat like a NOP   
                 operand1 <= (others => '0'); --Dont Care
                 operand2 <= (others => '0'); --Dont Care
         end case;
@@ -175,16 +170,16 @@ begin
         --Set dest and src mem outputs
         case id_ex_sig.opcode is
         when "0100000" =>
-        --OUT
-        --out port mapped to X"FFF2"
-        dest_mem_data <= id_ex_sig.op3; --Address of OUT port
-        src_mem_data <= id_ex_sig.reg1_data; --Data to send out
+            --OUT
+            --out port mapped to X"FFF2"
+            dest_mem_data <= id_ex_sig.op3; --Address of OUT port
+            src_mem_data <= id_ex_sig.reg1_data; --Data to send out
         
         when "0100001" =>
-        --IN
-        --in port mapped to X"FFF0"
-        dest_mem_data <= id_ex_sig.op3; --Address of IN port
-        src_mem_data <= (others => '0');       
+            --IN
+            --in port mapped to X"FFF0"
+            dest_mem_data <= id_ex_sig.op3; --Address of IN port
+            src_mem_data <= (others => '0');       
         
         when "0010000" =>
         --LOAD
@@ -200,22 +195,7 @@ begin
             dest_mem_data <= (others => '0');
             src_mem_data <=  (others => '0');
         
-        end case;
-    
-
-        if id_ex_sig.instr_form = "110" then
-            --For load, pass along the register data as-is
-            dest_mem_data <= id_ex_sig.reg1_data;
-            src_mem_data <= id_ex_sig.reg2_data;
-        elsif id_ex_sig.instr_form = "111" then
-            --For store, pass along the register data as-is
-            dest_mem_data <= id_ex_sig.reg1_data;
-            src_mem_data <= id_ex_sig.reg2_data;
-        end if;
-
-        
+        end case;       
     end if;
-
-    end process;
-  
+    end process;  
   end Behavioral;

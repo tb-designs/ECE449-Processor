@@ -132,6 +132,7 @@ component EX_MEM is
         alu_result_out, pc_addr_out, dest_data, src_data : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
+        new_pc_addr_out: out std_logic_vector (15 downto 0);
         wb_oper_out : out std_logic;
         mem_oper_out : out std_logic_vector (1 downto 0);
         n_flag_in     : in std_logic; --Inputs from the status register, checked when branch instr reaches ex/mem
@@ -369,7 +370,8 @@ exmem0: ex_mem port map (
     ra_addr_out => exmem_ra_addr_out,
     mem_oper_out => exmem_mem_oper_out,
     wb_oper_out => exmem_wb_oper_out,
-    br_trigger => exmem_br_trig_out
+    br_trigger => exmem_br_trig_out,
+    new_pc_addr_out => exmem_br_addr_out
 );
 
 --MEM/WB
@@ -411,11 +413,11 @@ sr0: status_reg port map (
     -- r7 <= exmem_pc_addr_out + instr_mem_size
     -- (store incremented address)
     pc_next_addr <= (others => '0') when rst = '1' else 
-		    exmem_br_addr_out when exmem_br_trig_out = '1' else 
+		    exmem_br_addr_out when exmem_br_trig_out = '1' else
                     std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch
-    stat_reg_clr_flag_in <= '1' when stat_reg_br_out = '1' else '0';
+    stat_reg_clr_flag_in <= '1' when exmem_br_trig_out = '1' else '0';
     
     rst_sig <= '1' when exmem_br_trig_out = '1' else -- reset if/id and id/ex when branching
                 rst; -- follow processor reset otherwise
