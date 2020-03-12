@@ -79,7 +79,7 @@ constant EX_MEM_INIT : ex_mem := (
   ex_mem_sig.mem_opr    <= mem_oper_in;
   ex_mem_sig.wb_opr     <= wb_oper_in;
   ex_mem_sig.n_flag     <= n_flag_in;
-  ex_mem_sig.z_flag     <= z_flag_in;                  
+  ex_mem_sig.z_flag     <= z_flag_in;                 
             
   
     process(clk,rst)
@@ -105,6 +105,10 @@ constant EX_MEM_INIT : ex_mem := (
         wb_oper_out <= '1'; --enable writeBack to reg 7
         ra_addr_out <= "111"; --r7 is reserved for subroutine return address
         alu_result_out <= ex_mem_sig.pc_addr + X"0002"; -- pass the 2's complement of 2 + current pc_addr
+      elsif ex_mem_sig.opcode = "0010010" or ex_mem_sig.opcode = "0010011" then
+        --if LOADIMM or MOV src data needs to be put in a register
+        alu_result_out <= ex_mem_sig.src_data;
+        wb_oper_out    <= ex_mem_sig.wb_opr;
       else
         alu_result_out <= ex_mem_sig.alu_res;
         wb_oper_out    <= ex_mem_sig.wb_opr;
@@ -124,11 +128,19 @@ constant EX_MEM_INIT : ex_mem := (
       end if;
       
       --Opcode specific behaviour
-      case ex_mem_sig.opcode is 
+      case ex_mem_sig.opcode is
+      when "0010010" =>
+      --LOADIMM
+        dest_data  <= ex_mem_sig.dest_data;
+        src_data <= (others => '0');
+      when "0010011" =>
+      --MOV
+        dest_data  <= ex_mem_sig.dest_data;
+        src_data <= (others => '0');
       when "0010000" =>
         --LOAD
-        src_data  <= ex_mem_sig.dest_data;
-        dest_data <= ex_mem_sig.src_data;
+        dest_data  <= ex_mem_sig.dest_data;
+        src_data <= ex_mem_sig.src_data;
       when "0010001" =>
         --STORE
         dest_data <= ex_mem_sig.dest_data;
@@ -136,7 +148,7 @@ constant EX_MEM_INIT : ex_mem := (
       when "0100000" =>
         --OUT
         dest_data <= ex_mem_sig.dest_data;
-        src_data  <= ex_mem_sig.src_data;               
+        src_data  <= ex_mem_sig.src_data;        
       when "0100001" =>
         --IN
         dest_data <= ex_mem_sig.dest_data;

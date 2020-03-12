@@ -73,8 +73,8 @@ component IF_ID is
         clk,rst : in  std_logic;
         pc_addr_out,op_pass : out std_logic_vector (15 downto 0);
         op_code: out std_logic_vector (6 downto 0);
-        instr_format, reg1_addr, reg2_addr,ra_addr_out : out std_logic_vector (2 downto 0);
-        mem_oper_out, wb_oper_out : out std_logic
+        instr_format, reg1_addr, reg2_addr, ra_addr_out : out std_logic_vector (2 downto 0);
+        mem_oper_out, wb_oper_out, m1_out : out std_logic
     );
 end component;
 
@@ -100,7 +100,7 @@ component ID_EX is
         data_1, data_2, operand_3, pc_addr_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_form_in, ra_addr_in : in std_logic_vector (2 downto 0);
-        mem_oper_in, wb_oper_in, clk, rst : in std_logic;
+        mem_oper_in, wb_oper_in, m1_in, clk, rst : in std_logic;
         operand1, operand2, pc_addr_out, dest_mem_data, src_mem_data : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         alu_mode_out, instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
@@ -185,6 +185,7 @@ signal ifid_reg2_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal if_id_ra_addr_out  : std_logic_vector (2 downto 0):= (others => '0');
 signal ifid_mem_oper_out : std_logic := '0';
 signal ifid_wb_oper_out : std_logic := '0';
+signal ifid_m1_out : std_logic := '0';
 
 --INSTRUCTION DECODE
 signal regfile_reg1_data_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -282,6 +283,7 @@ ifid0: if_id port map(
     reg2_addr => ifid_reg2_addr_out,
     mem_oper_out => ifid_mem_oper_out,
     wb_oper_out => ifid_wb_oper_out,
+    m1_out => ifid_m1_out,
     ra_addr_out => if_id_ra_addr_out
 );
 
@@ -316,6 +318,7 @@ idex0 : id_ex port map (
     pc_addr_in => ifid_pc_addr_out,
     mem_oper_in => ifid_mem_oper_out,
     wb_oper_in => ifid_wb_oper_out,
+    m1_in => ifid_m1_out,
     
     operand1 => idex_operand1_out,
     operand2 => idex_operand2_out,

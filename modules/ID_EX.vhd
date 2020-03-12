@@ -12,6 +12,7 @@ entity ID_EX is
        PC_addr_in    : in std_logic_vector (15 downto 0);
        mem_oper_in   : in std_logic;
        wb_oper_in    : in std_logic;
+       m1_in         : in std_logic;
        clk, rst      : in std_logic;
        operand1      : out std_logic_vector (15 downto 0);
        operand2      : out std_logic_vector (15 downto 0);
@@ -73,7 +74,8 @@ type id_ex is record
     instr_form : std_logic_vector (2 downto 0);
     pc_addr    : std_logic_vector (15 downto 0);
     mem_opr    : std_logic;
-    wb_opr    : std_logic;
+    wb_opr     : std_logic;
+    m1         : std_logic;
 end record id_ex;
 
 --Specify init value for the type
@@ -87,7 +89,8 @@ constant ID_EX_INIT : id_ex := (
     instr_form => (others => '0'),
     pc_addr => (others => '0'),
     mem_opr => '0',
-    wb_opr => '0'
+    wb_opr => '0',
+    m1 => '0'
     );
 
 --Signal
@@ -107,6 +110,7 @@ begin
         id_ex_sig.mem_opr <= mem_oper_in;
         id_ex_sig.wb_opr <= wb_oper_in;
         id_ex_sig.ra_addr <= ra_addr_in;
+        id_ex_sig.m1 <= m1_in;
 
     process(clk,rst)
     begin
@@ -165,9 +169,18 @@ begin
                 --A0, need explicit for RETURN
                 operand1 <= id_ex_sig.reg1_data; --r7 data
                 operand2 <= (others => '0'); --add with 0
-            
+            when "110" =>
+                --L1
+                operand1 <= (others => '0');
+                operand2 <= (others => '0');
+                ra_addr_out <= id_ex_sig.ra_addr; --ra address
+            when "111" =>
+                --L2
+                operand1 <= (others => '0');
+                operand2 <= (others => '0');
+                ra_addr_out <= id_ex_sig.ra_addr; --ra address
             when others =>
-                --A0,L1, and L2 skip this stage so treat like a NOP   
+                --A0 skip this stage so treat like a NOP   
                 operand1 <= (others => '0'); --Dont Care
                 operand2 <= (others => '0'); --Dont Care
         end case;
@@ -184,35 +197,37 @@ begin
         --IN
         --in port mapped to X"FFF0"
         dest_mem_data <= id_ex_sig.op3; --Address of IN port
-        src_mem_data <= (others => '0');       
+        src_mem_data <= (others => '0');
+        
+        when "0010010" =>
+        --LOADIMM
+        dest_mem_data <= (others => '0');
+        if id_ex_sig.m1 = '1' then
+            src_mem_data <= id_ex_sig.op3(7 downto 0)&id_ex_sig.reg1_data(7 downto 0); --immediate upper
+        else
+            src_mem_data <= id_ex_sig.reg1_data(15 downto 8)&id_ex_sig.op3(7 downto 0); --immediate lower
+        end if;
         
         when "0010000" =>
         --LOAD
-            dest_mem_data <= id_ex_sig.reg1_data;
-            src_mem_data <= id_ex_sig.reg2_data;
+        dest_mem_data <= id_ex_sig.reg1_data; --mem address
+        src_mem_data <= (others => '0');
+        
+        when "0010011" =>
+        --MOV
+        dest_mem_data <= (others => '0');
+        src_mem_data <= id_ex_sig.reg1_data; --data to move
         
         when "0010001" =>
         --STORE
-            dest_mem_data <= id_ex_sig.reg1_data;
-            src_mem_data <= id_ex_sig.reg2_data;
+        dest_mem_data <= id_ex_sig.reg1_data; --mem address
+        src_mem_data <= id_ex_sig.reg2_data; --data to store
         
         when others =>
-            dest_mem_data <= (others => '0');
-            src_mem_data <=  (others => '0');
+        dest_mem_data <= (others => '0');
+        src_mem_data <=  (others => '0');
         
         end case;
-    
-
-        if id_ex_sig.instr_form = "110" then
-            --For load, pass along the register data as-is
-            dest_mem_data <= id_ex_sig.reg1_data;
-            src_mem_data <= id_ex_sig.reg2_data;
-        elsif id_ex_sig.instr_form = "111" then
-            --For store, pass along the register data as-is
-            dest_mem_data <= id_ex_sig.reg1_data;
-            src_mem_data <= id_ex_sig.reg2_data;
-        end if;
-
         
     end if;
 

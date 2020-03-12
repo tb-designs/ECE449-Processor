@@ -44,6 +44,7 @@ entity IF_ID is
         ra_addr_out  : out std_logic_vector (2 downto 0); --to ID/EX for forwarding
         mem_oper_out : out std_logic;
         wb_oper_out  : out std_logic;
+        m1_out       : out std_logic;
         clk, rst     : in std_logic
       );
 end IF_ID;
@@ -167,7 +168,8 @@ begin
         reg2_addr    <= (others => '0');
         ra_addr_out  <= (others => '0');
         mem_oper_out <= '0';
-        wb_oper_out <= '0';
+        wb_oper_out  <= '0';
+        m1_out       <= '0';
     end if;
    
      --if the clock is rising we gate
@@ -240,7 +242,7 @@ begin
             wb_oper_out  <= '0';
 
         when "0100001" =>  --IN
-            reg1_addr <= if_id_sig.ra_addr; 
+            reg1_addr <= "000"; 
             reg2_addr <= "000"; --Not needed here
             ra_addr_out <= if_id_sig.ra_addr;
             op_pass <= X"FFF0"; 
@@ -307,33 +309,33 @@ begin
                     
         --L1
         when "0010010" =>  --LOADIMM
-            reg1_addr <= "111"; --Always using reg7 for LOADIMM
+            reg1_addr <= "111";
             reg2_addr <= "000";
-            ra_addr_out <= "111";
-            op_pass <= std_logic_vector(resize(signed(if_id_sig.imm), 16)); --Pass along the imm value (resized to 16 bits)
+            ra_addr_out <= "111"; --Always using reg7 for LOADIMM
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.imm), 16));
             mem_oper_out <= '0';
             wb_oper_out  <= '1';        
  
         --L2
         when "0010000" =>  --LOAD
-            reg1_addr <= if_id_sig.rdest;
-            reg1_addr <= if_id_sig.rsrc;
+            reg1_addr <= if_id_sig.rsrc; --get memory address for load
+            reg2_addr <= "000"; --unused
             ra_addr_out <= if_id_sig.ra_addr;
             op_pass <= (others => '0');
             mem_oper_out <= '1';
             wb_oper_out  <= '1';
  
         when "0010001" =>  --STORE
-            reg1_addr <= if_id_sig.rdest;
-            reg1_addr <= if_id_sig.rsrc;
-            ra_addr_out <= if_id_sig.ra_addr;
+            reg1_addr <= if_id_sig.rdest; --get memory address to store to
+            reg2_addr <= if_id_sig.rsrc; --data to store
+            ra_addr_out <= (others => '0'); --unused
             op_pass <= (others => '0');
             mem_oper_out <= '1';
-            wb_oper_out  <= '1';
+            wb_oper_out  <= '0';
 
         when "0010011" =>  --MOV
-            reg1_addr <= if_id_sig.rdest;
             reg1_addr <= if_id_sig.rsrc;
+            reg2_addr <= "000"; --unused
             ra_addr_out <= if_id_sig.ra_addr;
             op_pass <= (others => '0');
             mem_oper_out <= '0';
@@ -360,6 +362,7 @@ begin
         op_code <= if_id_sig.opcode; --to ALU
         instr_format <= format; --to ID/EX
         PC_addr_out <= if_id_sig.pc_addr; --to ID/EX
+        m1_out <= if_id_sig.m1;
         
 
      end if;

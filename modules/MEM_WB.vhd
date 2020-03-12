@@ -88,7 +88,7 @@ constant MEM_WB_INIT : mem_wb := (
         
       else
         --NOT LOAD/IN
-        wb_data_out <= mem_wb_sig.alu_result;  
+        wb_data_out <= mem_wb_sig.alu_result;
       end if;
         
     end if;
