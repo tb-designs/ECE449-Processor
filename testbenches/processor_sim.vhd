@@ -77,7 +77,7 @@ stim_process : process
 begin
     rst <= '1';
     in_port <= X"0000";
-    wait for clk_period;
+    wait for 2*clk_period;
     rst <= '0';
     wait for clk_period/2;
     in_port <= X"0002";
@@ -88,7 +88,7 @@ begin
     wait for clk_period;
     in_port <= X"0005";
     wait for clk_period;
-    in_port <= X"0000";
+    in_port <= X"0012";
     wait for clk_period;
     in_port <= X"0001";
     wait for clk_period;

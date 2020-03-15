@@ -15,6 +15,7 @@ entity EX_MEM is
        m1_in          : in std_logic;
        n_flag_in      : in std_logic;
        z_flag_in      : in std_logic;
+       br_flag_in     : in std_logic;
        clk,rst        : in std_logic;
        alu_result_out : out std_logic_vector (15 downto 0);
        PC_addr_out    : out std_logic_vector (15 downto 0);
@@ -85,11 +86,11 @@ constant EX_MEM_INIT : ex_mem := (
   ex_mem_sig.m1         <= m1_in;
   ex_mem_sig.n_flag     <= n_flag_in;
   ex_mem_sig.z_flag     <= z_flag_in;
-  
+
 process(clk,rst)
 begin
     --reset behaviour, all outputs to zero
-    if rst = '1' then
+    if rst = '1' or br_flag_in = '1' then
         alu_result_out <= (others => '0');
         PC_addr_out    <= (others => '0');
         new_pc_addr_out <= (others => '0');
@@ -127,6 +128,7 @@ begin
       opcode_out     <= ex_mem_sig.opcode;
       PC_addr_out    <= ex_mem_sig.pc_addr;
       m1_out         <= ex_mem_sig.m1;
+
       
       --Fix for mem_oper needing to be 0-length vector
       if ex_mem_sig.mem_opr = '1' then
@@ -167,69 +169,70 @@ begin
         dest_data <= ex_mem_sig.dest_data;
         src_data  <= ex_mem_sig.src_data;
         br_trigger <= '0';
+      when "1000000" =>
+        --BRR
+        dest_data <= ex_mem_sig.dest_data;
+        src_data  <= ex_mem_sig.src_data;
+        new_pc_addr_out <= ex_mem_sig.alu_res;  
+        br_trigger <= '1';
       when "1000001" =>
         --BRR.N
         --Check the n and z flags to decide if branch is taken
         if ex_mem_sig.n_flag = '1' then
           br_trigger <= '1';
-        else
-          br_trigger <= '0';
         end if;
         dest_data <= (others => '0');
         src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res;  
       when "1000010" =>
         --BRR.Z
         if ex_mem_sig.z_flag = '1' then
           br_trigger <= '1';
-        else
-          br_trigger <= '0';
         end if;
         dest_data <= (others => '0');
         src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res;        
+      when "1000011" =>
+        --BR
+        dest_data <= (others => '0');
+        src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res;          
       when "1000100" =>
         --BR.N
         if ex_mem_sig.n_flag = '1' then
           br_trigger <= '1';
-        else
-          br_trigger <= '0';
         end if;
         dest_data <= (others => '0');
         src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res;  
       when "1000101" =>
         --BR.Z
         if ex_mem_sig.z_flag = '1' then
           br_trigger <= '1';
-        else
-          br_trigger <= '0';
         end if;
         dest_data <= (others => '0');
         src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res; 
+      when "1000110" =>
+        --BR.SUB  
+        wb_oper_out <= '1'; --enable writeBack to reg 7
+        ra_addr_out <= "111"; --r7 is reserved for subroutine return address
+        alu_result_out <= ex_mem_sig.pc_addr + X"0002"; -- pass the 2's complement of 2 + current pc_addr
+        new_pc_addr_out <= ex_mem_sig.alu_res;
+        br_trigger <= '1';  
       when "1000111" =>
         --RETURN
         br_trigger <= '1';
         dest_data <= (others => '0');
         src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res;  
       when others =>
         --OTHER
         dest_data <= (others => '0');
         src_data  <= (others => '0');
         br_trigger <= '0';
+        new_pc_addr_out <= (others => '0');  
       end case;    
-          
-      --Format Specific Operations (Mostly for Branching behaviour)
-      case ex_mem_sig.instr_form is
-      when "100" =>
-        --BRR, BRR.Z, BRR.N
-        new_pc_addr_out <= ex_mem_sig.alu_res;                        
-      when "101" =>
-        --BR, BR.N, BR.Z, BR.SUB
-        new_pc_addr_out <= ex_mem_sig.alu_res;       
-      when "000" =>
-        --RETURN (or NOP, but br_trig is not set so doesnt matter)
-        new_pc_addr_out <= ex_mem_sig.alu_res;
-      when others =>
-        new_pc_addr_out <= (others => '0');          
-      end case;
       
     end if;
 end process;

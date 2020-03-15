@@ -55,20 +55,22 @@ begin
             br_flag_out <= '0';
         end if;
     
-        if clear_test_flags = '1' then
-            n_flag_out <= '0';
-            z_flag_out <= '0';
-            br_flag_out <= '0';
-        elsif (clk = '1' and clk'event) then
-           if (n_flag_in = '1') then
-               n_flag_out <= '1';
-           end if;
-           if (z_flag_in = '1') then
-               z_flag_out <= '1';
-           end if;
-           if (br_flag_in = '1') then
-               br_flag_out <= '1';
-           end if;           
+        if (clk = '1' and clk'event) then
+           if clear_test_flags = '1' then
+               n_flag_out <= '0';
+               z_flag_out <= '0';
+               br_flag_out <= '0';
+           else
+               if (n_flag_in = '1') then
+                   n_flag_out <= '1';
+               end if;
+               if (z_flag_in = '1') then
+                   z_flag_out <= '1';
+               end if;
+               if (br_flag_in = '1') then
+                   br_flag_out <= '1';
+               end if;           
+            end if;
         end if;
     end process;
 

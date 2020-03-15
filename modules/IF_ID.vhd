@@ -174,9 +174,8 @@ begin
      --if the clock is rising we gate
      --falling edge store input and compute instr format  
     elsif(clk='1' and clk'event) then
-        --rising edge set output depending on format and opcode        
+        --rising edge set output depending on format and opcode          
         case if_id_sig.opcode is
-        
         --A1
         when "0000001" =>  --ADD
             reg1_addr <= if_id_sig.rb_addr; 
