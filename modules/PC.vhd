@@ -45,17 +45,15 @@ architecture behavioral of pc is
 signal next_pc : std_logic_vector (15 downto 0) := (others => '0');
 
 begin
+
+next_pc <= pc_in;
+
 process(clk, rst, pc_in)
 begin
     if (rst= '1') then
         --Reset to base address
         pc_out <= (others => '0');
-    end if;
-    
-    
-    next_pc <= pc_in;
-    
-    if rising_edge(clk) then
+    elsif rising_edge(clk) then
         pc_out <= next_pc;
     end if;
     

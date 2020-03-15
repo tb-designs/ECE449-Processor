@@ -51,9 +51,12 @@ r2_data <= ram_doutb when rst = '1' or (addr2 >= X"0400" and addr2 <= X"07FF") e
         
 ram_dina <= wr_data;
 
-ram_addra <= (addr1 and addr_mask) when rst = '0' and addr1 >= X"0400" and addr1 <= X"07FF";
-ram_addrb <= (addr2 and addr_mask) when rst = '0' and addr2 >= X"0400" and addr1 <= X"07FF";
-rom_addra <= ('0' & addr2(15 downto 1)) when rst = '0' and addr2 >= X"0000" and addr2 <= X"03FF";
+ram_addra <= (addr1 and addr_mask) when rst = '0' and addr1 >= X"0400" and addr1 <= X"07FF" else
+             (others => '0');
+ram_addrb <= (addr2 and addr_mask) when rst = '0' and addr2 >= X"0400" and addr1 <= X"07FF" else
+             (others => '0');
+rom_addra <= ('0' & addr2(15 downto 1)) when rst = '0' and addr2 >= X"0000" and addr2 <= X"03FF" else
+             (others => '0');
 
 err <= '1' when (addr1 > X"07FF" and addr1 < X"FFF0") or (addr1 > X"FFF3") or (addr2 > X"07FF" and addr2 < X"FFF0") or (addr2 > X"FFF3") else
        '0' when rst = '1' else
@@ -136,7 +139,7 @@ generic map (
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
   MEMORY_INIT_FILE => "none", -- String
-  MEMORY_INIT_PARAM => "4200,4240,4280,42C0,4300,4340,4380,43C0,028D,05B2,02F4,0000,0000,0000,0000,0000,0000,0000,0000,0000,0000", -- String
+  MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String
   MEMORY_SIZE => 8192, -- DECIMAL
