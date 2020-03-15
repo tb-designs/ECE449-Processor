@@ -68,8 +68,7 @@ alu_operand2 <= (others => '0') when rst = '1' else
                 memwb_alu_result when ((memwb_wb_oper = '1') and (memwb_ra_addr = idex_reg2_addr) and (exmem_ra_addr /= idex_reg2_addr or exmem_wb_oper /= '0')) else
                 idex_reg2_data;
 
---Stall in case when Load followed by arith instr using result
---Stall for single clock cycle          
+--Stall in case when Load followed by arith instr using result          
 stall_out <= '1' when exmem_opcode_in = X"0040" and (exmem_ra_addr = idex_reg1_addr or exmem_ra_addr = idex_reg2_addr) else
              '0';         
 
