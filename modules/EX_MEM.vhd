@@ -86,23 +86,24 @@ constant EX_MEM_INIT : ex_mem := (
   ex_mem_sig.n_flag     <= n_flag_in;
   ex_mem_sig.z_flag     <= z_flag_in;
   
-    process(clk,rst)
-    begin
-      --reset behaviour, all outputs to zero
-      if rst = '1' then
-          alu_result_out <= (others => '0');
-          PC_addr_out    <= (others => '0');
-          new_pc_addr_out <= (others => '0');
-          dest_data      <= (others => '0');
-          src_data       <= (others => '0');
-          instr_form_out <= (others => '0');
-          ra_addr_out    <= (others => '0');
-          mem_oper_out   <= "00";
-          wb_oper_out    <= '0';
-          m1_out         <= '0';
-      end if;
+process(clk,rst)
+begin
+    --reset behaviour, all outputs to zero
+    if rst = '1' then
+        alu_result_out <= (others => '0');
+        PC_addr_out    <= (others => '0');
+        new_pc_addr_out <= (others => '0');
+        dest_data      <= (others => '0');
+        src_data       <= (others => '0');
+        opcode_out     <= (others => '0');
+        instr_form_out <= (others => '0');
+        ra_addr_out    <= (others => '0');
+        mem_oper_out   <= "00";
+        wb_oper_out    <= '0';
+        m1_out         <= '0';
+        br_trigger     <= '0';
 
-    if(clk='1' and clk'event) then
+    elsif(clk='1' and clk'event) then
       --rising edge set output
 
       --if BR.SUB then we store the current_PC + 2 in the regfile
@@ -114,16 +115,17 @@ constant EX_MEM_INIT : ex_mem := (
         --if LOADIMM or MOV src data needs to be put in a register
         alu_result_out <= ex_mem_sig.src_data;
         wb_oper_out    <= ex_mem_sig.wb_opr;
+        ra_addr_out    <= ex_mem_sig.ra_addr;
       else
         alu_result_out <= ex_mem_sig.alu_res;
         wb_oper_out    <= ex_mem_sig.wb_opr;
+        ra_addr_out    <= ex_mem_sig.ra_addr;
       end if;
 
       --Pass Through Values              
       instr_form_out <= ex_mem_sig.instr_form;
       opcode_out     <= ex_mem_sig.opcode;
       PC_addr_out    <= ex_mem_sig.pc_addr;
-      ra_addr_out    <= ex_mem_sig.ra_addr;
       m1_out         <= ex_mem_sig.m1;
       
       --Fix for mem_oper needing to be 0-length vector
@@ -139,26 +141,32 @@ constant EX_MEM_INIT : ex_mem := (
       --LOADIMM
         dest_data  <= ex_mem_sig.dest_data;
         src_data <= (others => '0');
+        br_trigger <= '0';
       when "0010011" =>
       --MOV
         dest_data  <= ex_mem_sig.dest_data;
         src_data <= (others => '0');
+        br_trigger <= '0';
       when "0010000" =>
         --LOAD
         dest_data  <= ex_mem_sig.dest_data;
         src_data <= ex_mem_sig.src_data;
+        br_trigger <= '0';
       when "0010001" =>
         --STORE
         dest_data <= ex_mem_sig.dest_data;
         src_data  <= ex_mem_sig.src_data;
+        br_trigger <= '0';
       when "0100000" =>
         --OUT
         dest_data <= ex_mem_sig.dest_data;
-        src_data  <= ex_mem_sig.src_data;        
+        src_data  <= ex_mem_sig.src_data;
+        br_trigger <= '0';        
       when "0100001" =>
         --IN
         dest_data <= ex_mem_sig.dest_data;
         src_data  <= ex_mem_sig.src_data;
+        br_trigger <= '0';
       when "1000001" =>
         --BRR.N
         --Check the n and z flags to decide if branch is taken
@@ -224,6 +232,6 @@ constant EX_MEM_INIT : ex_mem := (
       end case;
       
     end if;
-    end process;
+end process;
 
-  end Behavioral;
+end Behavioral;

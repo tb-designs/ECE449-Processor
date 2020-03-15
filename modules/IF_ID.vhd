@@ -160,7 +160,7 @@ process(clk,rst)
 begin
     --reset behaviour
     if rst = '1' then
-        --PC_addr_out  <= (others => '0');
+        PC_addr_out  <= (others => '0');
         op_pass      <= (others => '0');
         op_code      <= (others => '0');
         instr_format <= (others => '0');
@@ -170,11 +170,10 @@ begin
         mem_oper_out <= '0';
         wb_oper_out  <= '0';
         m1_out       <= '0';
-    end if;
    
      --if the clock is rising we gate
      --falling edge store input and compute instr format  
-    if(clk='1' and clk'event) then
+    elsif(clk='1' and clk'event) then
         --rising edge set output depending on format and opcode        
         case if_id_sig.opcode is
         
@@ -365,7 +364,7 @@ begin
         m1_out <= if_id_sig.m1;
         
 
-     end if;
-    end process;
+    end if;
+end process;
 
 end Behavioral;

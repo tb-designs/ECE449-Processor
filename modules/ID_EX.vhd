@@ -119,7 +119,9 @@ begin
         if rst = '1' then
             operand1 <= (others => '0');
             operand2 <= (others => '0');
-            alu_mode_out <= (others => '0');
+            opcode_out <= (others => '0');
+            PC_addr_out <= (others => '0');
+            instr_form_out <= (others => '0');
             dest_mem_data <= (others => '0');
             src_mem_data <= (others => '0');
             alu_mode_out <= (others => '0');
@@ -127,11 +129,8 @@ begin
             mem_oper_out <= '0';
             wb_oper_out <= '0';
             m1_out <= '0';
-        end if;
-
-
               
-        if(clk='1' and clk'event) then   
+        elsif(clk='1' and clk'event) then
        --rising edge set output depending on the instruction format
 
         alu_mode_out <= id_ex_sig.alu_mode;
@@ -163,15 +162,17 @@ begin
                 --B1
                 operand1 <= id_ex_sig.pc_addr; --PC address
                 operand2 <= id_ex_sig.op3(14 downto 0)&"0"; -- 2*disp.l = shl(disp.l)
-
+                ra_addr_out <= (others => '0');
             when "101" =>
                 --B2
                 operand1 <= id_ex_sig.reg1_data; --ra data
                 operand2 <= id_ex_sig.op3(14 downto 0)&"0"; --2*disp.s = shl(disp.s)
+                ra_addr_out <= (others => '0');
             when "000" =>
                 --A0, need explicit for RETURN
                 operand1 <= id_ex_sig.reg1_data; --r7 data
                 operand2 <= (others => '0'); --add with 0
+                ra_addr_out <= (others => '0');
             when "110" =>
                 --L1
                 operand1 <= (others => '0');
@@ -186,6 +187,7 @@ begin
                 --A0 skip this stage so treat like a NOP   
                 operand1 <= (others => '0'); --Dont Care
                 operand2 <= (others => '0'); --Dont Care
+                ra_addr_out <= (others => '0');
         end case;
 
         --Set dest and src mem outputs
@@ -229,7 +231,5 @@ begin
         end case;
         
     end if;
-
-    end process;
-  
-  end Behavioral;
+end process;
+end Behavioral;

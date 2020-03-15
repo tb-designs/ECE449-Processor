@@ -63,19 +63,17 @@ constant MEM_WB_INIT : mem_wb := (
      mem_wb_sig.m1 <= m1_in;
 
   
-    process(clk,rst)
-    begin
-      --reset behaviour, all outputs to zero
-      if rst = '1' then
-          wb_data_out <= (others => '0');
-          ra_addr_out <= (others => '0');
-          wb_oper_out <= "00";
-      end if;
-
+process(clk,rst)
+begin
+    --reset behaviour, all outputs to zero
+    if rst = '1' then
+       wb_data_out <= (others => '0');
+       ra_addr_out <= (others => '0');
+       wb_oper_out <= "00";
     
     --if the clock is falling we latch
     --if the clock is rising we gate
-    if(clk='1' and clk'event) then
+    elsif(clk='1' and clk'event) then
       --rising edge set output
       ra_addr_out <= mem_wb_sig.ra_addr;
 
@@ -101,5 +99,5 @@ constant MEM_WB_INIT : mem_wb := (
       end if;      
     end if;
 
-  end process;   
+end process;   
 end Behavioral;
