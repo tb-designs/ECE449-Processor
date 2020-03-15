@@ -1,10 +1,11 @@
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 entity register_file is
-port(rst : in std_logic; clk: in std_logic;
+port(
+rst : in std_logic;
+clk: in std_logic;
 --read signals
 rd_index1: in std_logic_vector(2 downto 0); 
 rd_index2: in std_logic_vector(2 downto 0); 
@@ -12,7 +13,9 @@ rd_data1: out std_logic_vector(15 downto 0);
 rd_data2: out std_logic_vector(15 downto 0);
 --write signals
 wr_index: in std_logic_vector(2 downto 0); 
-wr_data: in std_logic_vector(15 downto 0); wr_enable: in std_logic);
+wr_data: in std_logic_vector(15 downto 0);
+wr_enable: in std_logic_vector(1 downto 0)
+);
 end register_file;
 
 architecture behavioural of register_file is
@@ -29,7 +32,7 @@ begin
       for i in 0 to 7 loop
          reg_file(i) <= (others => '0');
       end loop;
-   elsif(wr_enable='1') then
+   elsif(wr_enable = "11") then
       case wr_index(2 downto 0) is
       when "000" => reg_file(0) <= wr_data;
       when "001" => reg_file(1) <= wr_data;
@@ -39,7 +42,30 @@ begin
       when "101" => reg_file(5) <= wr_data;
       when "110" => reg_file(6) <= wr_data;
       when "111" => reg_file(7) <= wr_data;
-      
+      when others => NULL;
+      end case;
+   elsif(wr_enable = "01") then
+      case wr_index(2 downto 0) is
+      when "000" => reg_file(0)(7 downto 0) <= wr_data(7 downto 0);
+      when "001" => reg_file(1)(7 downto 0) <= wr_data(7 downto 0);
+      when "010" => reg_file(2)(7 downto 0) <= wr_data(7 downto 0);
+      when "011" => reg_file(3)(7 downto 0) <= wr_data(7 downto 0);
+      when "100" => reg_file(4)(7 downto 0) <= wr_data(7 downto 0);
+      when "101" => reg_file(5)(7 downto 0) <= wr_data(7 downto 0);
+      when "110" => reg_file(6)(7 downto 0) <= wr_data(7 downto 0);
+      when "111" => reg_file(7)(7 downto 0) <= wr_data(7 downto 0);
+      when others => NULL;
+      end case;
+   elsif(wr_enable = "10") then
+      case wr_index(2 downto 0) is
+      when "000" => reg_file(0)(15 downto 8) <= wr_data(7 downto 0);
+      when "001" => reg_file(1)(15 downto 8) <= wr_data(7 downto 0);
+      when "010" => reg_file(2)(15 downto 8) <= wr_data(7 downto 0);
+      when "011" => reg_file(3)(15 downto 8) <= wr_data(7 downto 0);
+      when "100" => reg_file(4)(15 downto 8) <= wr_data(7 downto 0);
+      when "101" => reg_file(5)(15 downto 8) <= wr_data(7 downto 0);
+      when "110" => reg_file(6)(15 downto 8) <= wr_data(7 downto 0);
+      when "111" => reg_file(7)(15 downto 8) <= wr_data(7 downto 0);     
       when others => NULL;
       end case;
     end if; 
@@ -54,16 +80,17 @@ reg_file(2) when(rd_index1="010") else
 reg_file(3) when(rd_index1="011") else
 reg_file(4) when(rd_index1="100") else
 reg_file(5) when(rd_index1="101") else
-reg_file(6) when(rd_index1="110") else reg_file(7);
+reg_file(6) when(rd_index1="110") else
+reg_file(7);
 
 rd_data2 <=
---fill this part
 reg_file(0) when(rd_index2="000") else
 reg_file(1) when(rd_index2="001") else
 reg_file(2) when(rd_index2="010") else
 reg_file(3) when(rd_index2="011") else
 reg_file(4) when(rd_index2="100") else
 reg_file(5) when(rd_index2="101") else
-reg_file(6) when(rd_index2="110") else reg_file(7);
+reg_file(6) when(rd_index2="110") else
+reg_file(7);
 
 end behavioural;

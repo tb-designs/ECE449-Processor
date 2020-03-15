@@ -90,7 +90,7 @@ component register_file is
         --write signals
         wr_index: in std_logic_vector(2 downto 0); 
         wr_data: in std_logic_vector(15 downto 0);
-        wr_enable: in std_logic
+        wr_enable: in std_logic_vector(1 downto 0)
     );
 end component;
 
@@ -104,7 +104,7 @@ component ID_EX is
         operand1, operand2, pc_addr_out, dest_mem_data, src_mem_data : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         alu_mode_out, instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
-        mem_oper_out, wb_oper_out : out std_logic
+        mem_oper_out, wb_oper_out, m1_out : out std_logic
         );
 end component;
 
@@ -128,11 +128,12 @@ component EX_MEM is
         alu_result, pc_addr_in, dest_data_in, src_data_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_form_in, ra_addr_in : in std_logic_vector (2 downto 0);
-        mem_oper_in, wb_oper_in, clk, rst : in std_logic;
+        mem_oper_in, wb_oper_in, m1_in, clk, rst : in std_logic;
         alu_result_out, pc_addr_out, dest_data, src_data : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
         wb_oper_out : out std_logic;
+        m1_out : out std_logic;
         mem_oper_out : out std_logic_vector (1 downto 0);
         n_flag_in     : in std_logic; --Inputs from the status register, checked when branch instr reaches ex/mem
         z_flag_in    : in std_logic;
@@ -146,10 +147,10 @@ component MEM_WB is
         mem_data_in, alu_result_in, pc_addr_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_format_in, ra_addr_in : in std_logic_vector (2 downto 0);
-        wb_oper_in, clk, rst : in std_logic;
+        wb_oper_in, m1_in, clk, rst : in std_logic;
         wb_data_out   : out std_logic_vector (15 downto 0);
         ra_addr_out    : out std_logic_vector (2 downto 0);
-        wb_oper_out    : out std_logic
+        wb_oper_out    : out std_logic_vector (1 downto 0)
     );
 end component;
 
@@ -201,6 +202,7 @@ signal idex_src_mem_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal idex_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_mem_oper_out : std_logic;
 signal idex_wb_oper_out : std_logic;
+signal idex_m1_out : std_logic := '0';
 
 --EXECUTE
 signal alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -215,12 +217,13 @@ signal exmem_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_mem_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 signal exmem_wb_oper_out : std_logic;
+signal exmem_m1_out : std_logic := '0';
 
 --MEMORY/WB
 signal data_mem_output : std_logic_vector (15 downto 0):= (others => '0');
 signal memwb_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal memwb_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
-signal memwb_wb_oper_out : std_logic;
+signal memwb_wb_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 
 --BRANCHING
 signal exmem_br_addr_out : std_logic_vector (15 downto 0) := (others => '0');
@@ -330,8 +333,8 @@ idex0 : id_ex port map (
     src_mem_data => idex_src_mem_data_out,
     ra_addr_out => idex_ra_addr_out,
     mem_oper_out => idex_mem_oper_out,
-    wb_oper_out => idex_wb_oper_out
-   
+    wb_oper_out => idex_wb_oper_out,
+    m1_out => idex_m1_out   
 );
 
 --ALU
@@ -359,6 +362,7 @@ exmem0: ex_mem port map (
     ra_addr_in => idex_ra_addr_out,
     mem_oper_in => idex_mem_oper_out,
     wb_oper_in => idex_wb_oper_out,
+    m1_in => idex_m1_out,
     n_flag_in => stat_reg_n_out,
     z_flag_in => stat_reg_z_out,
     
@@ -372,6 +376,7 @@ exmem0: ex_mem port map (
     ra_addr_out => exmem_ra_addr_out,
     mem_oper_out => exmem_mem_oper_out,
     wb_oper_out => exmem_wb_oper_out,
+    m1_out => exmem_m1_out,
     br_trigger => exmem_br_trig_out
 );
 
@@ -387,6 +392,7 @@ memwb0: mem_wb port map (
     opcode_in => exmem_opcode_out,
     ra_addr_in => exmem_ra_addr_out,
     wb_oper_in => exmem_wb_oper_out,
+    m1_in => exmem_m1_out,
     
     wb_data_out => memwb_data_out,
     ra_addr_out => memwb_ra_addr_out,

@@ -24,7 +24,8 @@ entity ID_EX is
        src_mem_data  : out std_logic_vector (15 downto 0);
        ra_addr_out   : out std_logic_vector (2 downto 0);
        mem_oper_out  : out std_logic;
-       wb_oper_out   : out std_logic
+       wb_oper_out   : out std_logic;
+       m1_out        : out std_logic
        );
 
 end ID_EX;
@@ -125,6 +126,7 @@ begin
             ra_addr_out <= (others => '0');
             mem_oper_out <= '0';
             wb_oper_out <= '0';
+            m1_out <= '0';
         end if;
 
 
@@ -138,6 +140,7 @@ begin
         PC_addr_out <= id_ex_sig.pc_addr;
         instr_form_out <= id_ex_sig.instr_form;
         opcode_out <= id_ex_sig.opcode;
+        m1_out <= id_ex_sig.m1; --passthrough m1 for LOADIMM
   
         --Need to decide what operands to give the ALU
         case id_ex_sig.instr_form is
@@ -202,11 +205,7 @@ begin
         when "0010010" =>
         --LOADIMM
         dest_mem_data <= (others => '0');
-        if id_ex_sig.m1 = '1' then
-            src_mem_data <= id_ex_sig.op3(7 downto 0)&id_ex_sig.reg1_data(7 downto 0); --immediate upper
-        else
-            src_mem_data <= id_ex_sig.reg1_data(15 downto 8)&id_ex_sig.op3(7 downto 0); --immediate lower
-        end if;
+        src_mem_data <= id_ex_sig.op3; --immediate
         
         when "0010000" =>
         --LOAD
