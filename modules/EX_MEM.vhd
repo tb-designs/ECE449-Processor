@@ -201,9 +201,6 @@ constant EX_MEM_INIT : ex_mem := (
         new_pc_addr_out <= (others => '0');  
       end case;    
       
-      --Check for if already branched previously
-      --TODO: add branch input
-      
     end if;
     end process;
 

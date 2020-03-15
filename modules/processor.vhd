@@ -109,8 +109,9 @@ component ID_EX is
 end component;
 
 --FWD_UNIT
-component FWD_UNIT is
+component fwdunit is
     port(
+        rst              : in STD_LOGIC;
         memwb_ra_addr    : in STD_LOGIC_VECTOR (2 downto 0);
         exmem_ra_addr    : in STD_LOGIC_VECTOR (2 downto 0);
         idex_reg1_addr   : in STD_LOGIC_VECTOR (2 downto 0);
@@ -363,7 +364,8 @@ idex0 : id_ex port map (
 );
 
 --FWD_UNIT
-fu0: fwd_unit port map (
+fu0: fwdunit port map (
+    rst => rst_sig,
     idex_reg1_data => idex_reg1_data_out,
     idex_reg2_data => idex_reg2_data_out,
     alu_operand1 =>fwd_unit_operand1_out,

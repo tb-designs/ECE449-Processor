@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="296355001185fs"></ZoomStartTime>
-      <ZoomEndTime time="403779962121fs"></ZoomEndTime>
-      <Cursor1Time time="330000000000fs"></Cursor1Time>
+      <ZoomStartTime time="186771201167fs"></ZoomStartTime>
+      <ZoomEndTime time="314171201168fs"></ZoomEndTime>
+      <Cursor1Time time="210000000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="167"></ValueColumnWidth>
+      <ValueColumnWidth column_width="163"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="87" />
+   <WVObjectSize size="102" />
    <wvobject fp_name="/processor_sim/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -99,7 +99,6 @@
    <wvobject fp_name="/processor_sim/u0/ifid0/if_id_sig" type="array">
       <obj_property name="ElementShortName">if_id_sig</obj_property>
       <obj_property name="ObjectShortName">if_id_sig</obj_property>
-      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/processor_sim/u0/ifid0/format" type="array">
       <obj_property name="ElementShortName">format[2:0]</obj_property>
@@ -369,5 +368,65 @@
    <wvobject fp_name="/processor_sim/u0/memwb0/MEM_WB_INIT" type="array">
       <obj_property name="ElementShortName">MEM_WB_INIT</obj_property>
       <obj_property name="ObjectShortName">MEM_WB_INIT</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider112">
+      <obj_property name="label">DATA_FWD</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/memwb_ra_addr" type="array">
+      <obj_property name="ElementShortName">memwb_ra_addr[2:0]</obj_property>
+      <obj_property name="ObjectShortName">memwb_ra_addr[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/exmem_ra_addr" type="array">
+      <obj_property name="ElementShortName">exmem_ra_addr[2:0]</obj_property>
+      <obj_property name="ObjectShortName">exmem_ra_addr[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/idex_reg1_addr" type="array">
+      <obj_property name="ElementShortName">idex_reg1_addr[2:0]</obj_property>
+      <obj_property name="ObjectShortName">idex_reg1_addr[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/idex_reg2_addr" type="array">
+      <obj_property name="ElementShortName">idex_reg2_addr[2:0]</obj_property>
+      <obj_property name="ObjectShortName">idex_reg2_addr[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/idex_reg1_data" type="array">
+      <obj_property name="ElementShortName">idex_reg1_data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">idex_reg1_data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/idex_reg2_data" type="array">
+      <obj_property name="ElementShortName">idex_reg2_data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">idex_reg2_data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/idex_instr_form" type="array">
+      <obj_property name="ElementShortName">idex_instr_form[2:0]</obj_property>
+      <obj_property name="ObjectShortName">idex_instr_form[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/exmem_alu_result" type="array">
+      <obj_property name="ElementShortName">exmem_alu_result[15:0]</obj_property>
+      <obj_property name="ObjectShortName">exmem_alu_result[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/memwb_alu_result" type="array">
+      <obj_property name="ElementShortName">memwb_alu_result[15:0]</obj_property>
+      <obj_property name="ObjectShortName">memwb_alu_result[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/exmem_wb_oper" type="logic">
+      <obj_property name="ElementShortName">exmem_wb_oper</obj_property>
+      <obj_property name="ObjectShortName">exmem_wb_oper</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/memwb_wb_oper" type="logic">
+      <obj_property name="ElementShortName">memwb_wb_oper</obj_property>
+      <obj_property name="ObjectShortName">memwb_wb_oper</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/alu_operand1" type="array">
+      <obj_property name="ElementShortName">alu_operand1[15:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_operand1[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/processor_sim/u0/fu0/alu_operand2" type="array">
+      <obj_property name="ElementShortName">alu_operand2[15:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_operand2[15:0]</obj_property>
    </wvobject>
 </wave_config>
