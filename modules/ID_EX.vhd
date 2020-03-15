@@ -14,6 +14,7 @@ entity ID_EX is
        PC_addr_in    : in std_logic_vector (15 downto 0);
        mem_oper_in   : in std_logic;
        wb_oper_in    : in std_logic;
+       mem_stall     : in std_logic;
        clk, rst      : in std_logic;
        operand1      : out std_logic_vector (15 downto 0);
        operand2      : out std_logic_vector (15 downto 0);
@@ -103,15 +104,14 @@ signal id_ex_sig : id_ex := ID_EX_INIT;
     
 begin
 
-
-
     id_ex_sig.r1_addr <= reg1_addr_in;
     id_ex_sig.r2_addr <= reg2_addr_in;
     id_ex_sig.reg1_data <= data_1;
     id_ex_sig.reg2_data <= data_2;
     id_ex_sig.op3 <= operand_3;
     id_ex_sig.alu_mode <= getalumode(opcode_in);
-    id_ex_sig.opcode <= opcode_in;
+    id_ex_sig.opcode <= "0000000" when mem_stall = '1' else
+                        opcode_in;
     id_ex_sig.instr_form <= instr_form_in;
     id_ex_sig.pc_addr <= pc_addr_in;
     id_ex_sig.mem_opr <= mem_oper_in;
