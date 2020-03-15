@@ -123,7 +123,7 @@ component fwdunit is
         exmem_opcode_in  : in STD_LOGIC_VECTOR (6 downto 0);
         memwb_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
         exmem_wb_oper    : in STD_LOGIC;
-        memwb_wb_oper    : in STD_LOGIC;
+        memwb_wb_oper    : in STD_LOGIC_VECTOR (1 downto 0);
         alu_operand1     : out STD_LOGIC_VECTOR (15 downto 0);
         alu_operand2     : out STD_LOGIC_VECTOR (15 downto 0);
         stall_out        : out STD_LOGIC
@@ -432,7 +432,7 @@ exmem0: ex_mem port map (
     mem_oper_out => exmem_mem_oper_out,
     wb_oper_out => exmem_wb_oper_out,
     m1_out => exmem_m1_out,
-    br_trigger => exmem_br_trig_out
+    br_trigger => exmem_br_trig_out,
     new_pc_addr_out => exmem_br_addr_out
 );
 

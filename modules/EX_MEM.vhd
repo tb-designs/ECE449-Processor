@@ -215,9 +215,6 @@ begin
         new_pc_addr_out <= ex_mem_sig.alu_res; 
       when "1000110" =>
         --BR.SUB  
-        wb_oper_out <= '1'; --enable writeBack to reg 7
-        ra_addr_out <= "111"; --r7 is reserved for subroutine return address
-        alu_result_out <= ex_mem_sig.pc_addr + X"0002"; -- pass the 2's complement of 2 + current pc_addr
         new_pc_addr_out <= ex_mem_sig.alu_res;
         br_trigger <= '1';  
       when "1000111" =>

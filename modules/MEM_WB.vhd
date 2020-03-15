@@ -37,14 +37,14 @@ end record mem_wb;
 
 --Specify init value for the type
 constant MEM_WB_INIT : mem_wb := (
-    mem_data    => (others => '0'),
-    alu_result => (others => '0'),
-    instr_format     => (others => '0'),
-    pc_addr    => (others => '0'),
-    opcode  => (others => '0'),
-    ra_addr   => (others => '0'),
-    wb_oper     => '0',
-    m1 => '0'
+    mem_data     => (others => '0'),
+    alu_result   => (others => '0'),
+    instr_format => (others => '0'),
+    pc_addr      => (others => '0'),
+    opcode       => (others => '0'),
+    ra_addr      => (others => '0'),
+    wb_oper      => '0',
+    m1            => '0'
     );
 
   --Signals(acting as our register)
