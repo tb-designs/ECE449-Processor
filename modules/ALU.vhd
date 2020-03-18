@@ -89,16 +89,18 @@ begin
 		  (others => '0');
 
 	z_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) /= 0)) else
-		  '1' when (alu_mode = "111") and (signed(in1) = 0);
+		  '1' when (alu_mode = "111") and (signed(in1) = 0) else
+		  '0';
 
 	n_flag <= '0' when (rst = '1') or ((alu_mode = "111") and (signed(in1) >= 0)) else
-		  '1' when (alu_mode = "111") and (signed(in1) < 0);
+		  '1' when (alu_mode = "111") and (signed(in1) < 0) else
+		  '0';
 
 	v_flag <= '1' when (alu_mode = "011") and (unsigned(mult_buf(31 downto 16)) > 0) else
 		  '0' when (rst = '1') else
 		  '0';
 
-        shift_dir <= '0' when (alu_mode = "110") else '1';
+    shift_dir <= '0' when (alu_mode = "110") else '1';
 
 	mult : dadda_mult port map (
 	   A => in1,

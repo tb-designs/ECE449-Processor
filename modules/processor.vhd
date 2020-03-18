@@ -73,8 +73,8 @@ component IF_ID is
         clk,rst : in  std_logic;
         pc_addr_out,op_pass : out std_logic_vector (15 downto 0);
         op_code: out std_logic_vector (6 downto 0);
-        instr_format, reg1_addr, reg2_addr,ra_addr_out : out std_logic_vector (2 downto 0);
-        mem_oper_out, wb_oper_out : out std_logic
+        instr_format, reg1_addr, reg2_addr, ra_addr_out : out std_logic_vector (2 downto 0);
+        mem_oper_out, wb_oper_out, m1_out : out std_logic
     );
 end component;
 
@@ -90,7 +90,7 @@ component register_file is
         --write signals
         wr_index: in std_logic_vector(2 downto 0); 
         wr_data: in std_logic_vector(15 downto 0);
-        wr_enable: in std_logic
+        wr_enable: in std_logic_vector(1 downto 0)
     );
 end component;
 
@@ -100,17 +100,18 @@ component ID_EX is
         data_1, data_2, operand_3, pc_addr_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_form_in, ra_addr_in, reg1_addr_in, reg2_addr_in : in std_logic_vector (2 downto 0);
-        mem_oper_in, wb_oper_in, clk, rst : in std_logic;
+        mem_oper_in, wb_oper_in, m1_in, clk, rst, mem_stall : in std_logic;
         operand1, operand2, pc_addr_out, dest_mem_data, src_mem_data : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         alu_mode_out, instr_form_out, ra_addr_out, reg1_addr_out, reg2_addr_out : out std_logic_vector (2 downto 0);
-        mem_oper_out, wb_oper_out : out std_logic
+        mem_oper_out, wb_oper_out, m1_out : out std_logic
         );
 end component;
 
 --FWD_UNIT
-component FWD_UNIT is
+component fwdunit is
     port(
+        rst              : in STD_LOGIC;
         memwb_ra_addr    : in STD_LOGIC_VECTOR (2 downto 0);
         exmem_ra_addr    : in STD_LOGIC_VECTOR (2 downto 0);
         idex_reg1_addr   : in STD_LOGIC_VECTOR (2 downto 0);
@@ -119,11 +120,13 @@ component FWD_UNIT is
         idex_reg2_data   : in STD_LOGIC_VECTOR (15 downto 0);
         idex_instr_form  : in STD_LOGIC_VECTOR (2 downto 0);
         exmem_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
+        exmem_opcode_in  : in STD_LOGIC_VECTOR (6 downto 0);
         memwb_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
         exmem_wb_oper    : in STD_LOGIC;
         memwb_wb_oper    : in STD_LOGIC;
         alu_operand1     : out STD_LOGIC_VECTOR (15 downto 0);
-        alu_operand2     : out STD_LOGIC_VECTOR (15 downto 0)
+        alu_operand2     : out STD_LOGIC_VECTOR (15 downto 0);
+        stall_out        : out STD_LOGIC
     );
 end component;
 
@@ -147,12 +150,13 @@ component EX_MEM is
         alu_result, pc_addr_in, dest_data_in, src_data_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_form_in, ra_addr_in : in std_logic_vector (2 downto 0);
-        mem_oper_in, wb_oper_in, clk, rst : in std_logic;
+        mem_oper_in, wb_oper_in, m1_in, clk, rst : in std_logic;
         alu_result_out, pc_addr_out, dest_data, src_data : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
         new_pc_addr_out: out std_logic_vector (15 downto 0);
         wb_oper_out : out std_logic;
+        m1_out : out std_logic;
         mem_oper_out : out std_logic_vector (1 downto 0);
         n_flag_in     : in std_logic; --Inputs from the status register, checked when branch instr reaches ex/mem
         z_flag_in    : in std_logic;
@@ -167,10 +171,10 @@ component MEM_WB is
         mem_data_in, alu_result_in, pc_addr_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_format_in, ra_addr_in : in std_logic_vector (2 downto 0);
-        wb_oper_in, clk, rst : in std_logic;
+        wb_oper_in, m1_in, clk, rst : in std_logic;
         wb_data_out   : out std_logic_vector (15 downto 0);
         ra_addr_out    : out std_logic_vector (2 downto 0);
-        wb_oper_out    : out std_logic
+        wb_oper_out    : out std_logic_vector (1 downto 0)
     );
 end component;
 
@@ -192,8 +196,9 @@ end component;
 constant instr_mem_size : integer := 2; -- each instr is 2 bytes
 
 --GLOBAL
-signal clk_sig : std_logic;
-signal rst_sig : std_logic := '0';
+signal clk_sig   : std_logic;
+signal rst_sig   : std_logic := '0';
+signal stall_sig : std_logic := '0';
 
 --INSTRUCTION FETCH
 signal instr_mem_output : std_logic_vector (15 downto 0) := (others => '0');
@@ -206,6 +211,7 @@ signal ifid_reg2_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal if_id_ra_addr_out  : std_logic_vector (2 downto 0):= (others => '0');
 signal ifid_mem_oper_out : std_logic := '0';
 signal ifid_wb_oper_out : std_logic := '0';
+signal ifid_m1_out : std_logic := '0';
 
 --INSTRUCTION DECODE
 signal regfile_reg1_data_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -223,9 +229,9 @@ signal idex_r1_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_r2_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_mem_oper_out : std_logic;
 signal idex_wb_oper_out : std_logic;
+signal idex_m1_out : std_logic := '0';
 signal fwd_unit_operand1_out : std_logic_vector (15 downto 0):= (others => '0');
 signal fwd_unit_operand2_out : std_logic_vector (15 downto 0):= (others => '0');
-
 
 --EXECUTE
 signal alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -240,12 +246,13 @@ signal exmem_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_mem_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 signal exmem_wb_oper_out : std_logic;
+signal exmem_m1_out : std_logic := '0';
 
 --MEMORY/WB
 signal data_mem_output : std_logic_vector (15 downto 0):= (others => '0');
 signal memwb_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal memwb_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
-signal memwb_wb_oper_out : std_logic;
+signal memwb_wb_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 
 --BRANCHING
 signal exmem_br_addr_out : std_logic_vector (15 downto 0) := (others => '0');
@@ -308,6 +315,7 @@ ifid0: if_id port map(
     reg2_addr => ifid_reg2_addr_out,
     mem_oper_out => ifid_mem_oper_out,
     wb_oper_out => ifid_wb_oper_out,
+    m1_out => ifid_m1_out,
     ra_addr_out => if_id_ra_addr_out
 );
 
@@ -344,10 +352,11 @@ idex0 : id_ex port map (
     pc_addr_in => ifid_pc_addr_out,
     mem_oper_in => ifid_mem_oper_out,
     wb_oper_in => ifid_wb_oper_out,
-
-
+    m1_in => ifid_m1_out,
+    mem_stall => stall_sig,
     operand1 => idex_reg1_data_out,
     operand2 => idex_reg2_data_out,
+
     opcode_out => idex_opcode_out,
     alu_mode_out => idex_alu_mode_out,
     instr_form_out => idex_instr_form_out,
@@ -358,12 +367,14 @@ idex0 : id_ex port map (
     reg1_addr_out => idex_r1_addr_out,
     reg2_addr_out => idex_r2_addr_out,
     mem_oper_out => idex_mem_oper_out,
-    wb_oper_out => idex_wb_oper_out
-   
+    wb_oper_out => idex_wb_oper_out,
+    m1_out => idex_m1_out   
 );
 
 --FWD_UNIT
-fu0: fwd_unit port map (
+fu0: fwdunit port map (
+    rst => rst_sig,
+    exmem_opcode_in => exmem_opcode_out,
     idex_reg1_data => idex_reg1_data_out,
     idex_reg2_data => idex_reg2_data_out,
     alu_operand1 =>fwd_unit_operand1_out,
@@ -376,7 +387,8 @@ fu0: fwd_unit port map (
     exmem_wb_oper => exmem_wb_oper_out,
     memwb_wb_oper => memwb_wb_oper_out,
     exmem_ra_addr => exmem_ra_addr_out,
-    memwb_ra_addr => memwb_ra_addr_out
+    memwb_ra_addr => memwb_ra_addr_out,
+    stall_out => stall_sig
 );
 
 
@@ -405,6 +417,7 @@ exmem0: ex_mem port map (
     ra_addr_in => idex_ra_addr_out,
     mem_oper_in => idex_mem_oper_out,
     wb_oper_in => idex_wb_oper_out,
+    m1_in => idex_m1_out,
     n_flag_in => stat_reg_n_out,
     z_flag_in => stat_reg_z_out,
     br_flag_in => stat_reg_br_out,
@@ -418,7 +431,8 @@ exmem0: ex_mem port map (
     ra_addr_out => exmem_ra_addr_out,
     mem_oper_out => exmem_mem_oper_out,
     wb_oper_out => exmem_wb_oper_out,
-    br_trigger => exmem_br_trig_out,
+    m1_out => exmem_m1_out,
+    br_trigger => exmem_br_trig_out
     new_pc_addr_out => exmem_br_addr_out
 );
 
@@ -434,6 +448,7 @@ memwb0: mem_wb port map (
     opcode_in => exmem_opcode_out,
     ra_addr_in => exmem_ra_addr_out,
     wb_oper_in => exmem_wb_oper_out,
+    m1_in => exmem_m1_out,
     
     wb_data_out => memwb_data_out,
     ra_addr_out => memwb_ra_addr_out,
@@ -462,7 +477,8 @@ sr0: status_reg port map (
     -- (store incremented address)
     pc_next_addr <= (others => '0') when rst = '1' else 
 		    exmem_br_addr_out when exmem_br_trig_out = '1' else
-                    std_logic_vector(unsigned(pc_addr) + instr_mem_size);
+		    pc_addr when stall_sig = '1' else
+            std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch
     stat_reg_clr_flag_in <= '1' when stat_reg_br_out = '1' else '0';
@@ -470,6 +486,6 @@ sr0: status_reg port map (
     rst_sig <= '1' when exmem_br_trig_out = '1' else -- reset if/id and id/ex when branching
                 rst; -- follow processor reset otherwise
    
---Processes
+    --STALL BEHAVIOUR
 
 end behavioral;
