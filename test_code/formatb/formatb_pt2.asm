@@ -1,0 +1,21 @@
+	ORG  0x0000
+
+	IN R0
+	IN R1
+	IN R2
+	IN R3
+	IN R4
+	IN R5
+	IN R6
+	IN R7
+	BR.SUB R4, 1
+	BRR -1
+	ADD R2, R1, R5
+	SUB R6, R6, R5
+	TEST R6
+	BR.z R4, 1 
+	BRR -5
+	RETURN 
+	
+	END
+
