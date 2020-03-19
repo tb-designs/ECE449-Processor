@@ -1,0 +1,10 @@
+	ORG 0x0000
+
+	IN R0
+	IN R1
+	IN R2
+	IN R3
+	MUL R6, R0, R3
+	BRR -1
+
+	END
