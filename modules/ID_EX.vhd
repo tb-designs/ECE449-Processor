@@ -61,6 +61,14 @@ function getalumode(op : std_logic_vector(6 downto 0)) return std_logic_vector i
         when "1000100" => mode := "001"; --BR.N
         when "1000101" => mode := "001"; --BR.Z
         when "1000110" => mode := "001"; --BR.SUB
+        --L1
+        when "0010000" => mode := "001";--LOAD
+        when "0010001" => mode := "001";--STORE
+        when "0010010" => mode := "001";--LOADIMM
+        when "0010011" => mode := "001";--MOV
+        
+        --L2
+        
         --A0
         when "1000111" => mode := "001"; --RETURN (used to add 0 in alu, result is then placed in PC in ex/mem)
         --Default to NOP

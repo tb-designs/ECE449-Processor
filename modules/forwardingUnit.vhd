@@ -46,7 +46,7 @@ entity fwdunit is
         exmem_opcode_in  : in STD_LOGIC_VECTOR (6 downto 0); --Use for Load->Arith special case
         memwb_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
         exmem_wb_oper    : in STD_LOGIC;
-        memwb_wb_oper    : in STD_LOGIC;
+        memwb_wb_oper    : in STD_LOGIC_VECTOR (1 downto 0);
         alu_operand1     : out STD_LOGIC_VECTOR (15 downto 0);
         alu_operand2     : out STD_LOGIC_VECTOR (15 downto 0);
         stall_out        : out STD_LOGIC
@@ -58,18 +58,20 @@ architecture Behavioral of fwdunit is
 
 begin
 --Mux Operation
+
+
 alu_operand1 <= (others => '0') when rst = '1' else 
                 exmem_alu_result when ((exmem_wb_oper = '1') and (exmem_ra_addr = idex_reg1_addr)) else
-                memwb_alu_result when ((memwb_wb_oper = '1') and (memwb_ra_addr = idex_reg1_addr) and (exmem_ra_addr /= idex_reg1_addr or exmem_wb_oper = '0')) else
+                memwb_alu_result when ((memwb_wb_oper /= "00") and (memwb_ra_addr = idex_reg1_addr) and (exmem_ra_addr /= idex_reg1_addr or exmem_wb_oper = '0')) else
                 idex_reg1_data;
 
 alu_operand2 <= (others => '0') when rst = '1' else
                 exmem_alu_result when ((exmem_wb_oper = '1') and (exmem_ra_addr = idex_reg2_addr)) else
-                memwb_alu_result when ((memwb_wb_oper = '1') and (memwb_ra_addr = idex_reg2_addr) and (exmem_ra_addr /= idex_reg2_addr or exmem_wb_oper /= '0')) else
+                memwb_alu_result when ((memwb_wb_oper /= "00") and (memwb_ra_addr = idex_reg2_addr) and (exmem_ra_addr /= idex_reg2_addr or exmem_wb_oper /= '0')) else
                 idex_reg2_data;
 
 --Stall in case when Load followed by arith instr using result          
-stall_out <= '1' when exmem_opcode_in = X"0040" and (exmem_ra_addr = idex_reg1_addr or exmem_ra_addr = idex_reg2_addr) else
+stall_out <= '1' when (exmem_opcode_in = "0010000" or exmem_opcode_in = "0010010") and (exmem_ra_addr = idex_reg1_addr or exmem_ra_addr = idex_reg2_addr or (memwb_ra_addr = idex_reg1_addr and memwb_wb_oper /= "00")) else --LOAD
              '0';         
 
 end Behavioral;
