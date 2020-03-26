@@ -14,7 +14,7 @@
 	SHL R1, 1
 	SUB R2, R2, R4
 	TEST R2
-	BRR.Z 1
+	BRR.Z 2
 	BRR -6
 	OUT R1
 	BRR -1
