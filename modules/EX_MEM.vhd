@@ -27,7 +27,6 @@ entity EX_MEM is
        ra_addr_out    : out std_logic_vector (2 downto 0);
        mem_oper_out   : out std_logic_vector (1 downto 0); --Mem interface requires vector input
        wb_oper_out    : out std_logic;
-       m1_out         : out std_logic;
        br_trigger     : out std_logic --Notifies elements that a branch is occuring (reset by PC once new address is in place)
   );
 
@@ -101,7 +100,6 @@ begin
         ra_addr_out    <= (others => '0');
         mem_oper_out   <= "00";
         wb_oper_out    <= '0';
-        m1_out         <= '0';
         br_trigger     <= '0';
 
     elsif(clk='1' and clk'event) then
@@ -112,9 +110,13 @@ begin
         wb_oper_out <= '1'; --enable writeBack to reg 7
         ra_addr_out <= "111"; --r7 is reserved for subroutine return address
         alu_result_out <= ex_mem_sig.pc_addr + X"0002"; -- pass the 2's complement of 2 + current pc_addr
-      elsif ex_mem_sig.opcode = "0010010" or ex_mem_sig.opcode = "0010011" then
-        --if LOADIMM or MOV src data needs to be put in a register
-        alu_result_out <= ex_mem_sig.src_data;
+      elsif ex_mem_sig.opcode = "0010010" then
+        --if LOADIMM create data to write back to ra
+        if ex_mem_sig.m1 = '1' then
+            alu_result_out <= ex_mem_sig.src_data(7 downto 0)&ex_mem_sig.alu_res(7 downto 0); --concat upper imm with lower r7
+        else --m1 = 0
+            alu_result_out <= ex_mem_sig.alu_res(15 downto 8)&ex_mem_sig.src_data(7 downto 0); --concat upper r7 with lower imm
+        end if;
         wb_oper_out    <= ex_mem_sig.wb_opr;
         ra_addr_out    <= ex_mem_sig.ra_addr;
       else
@@ -127,7 +129,6 @@ begin
       instr_form_out <= ex_mem_sig.instr_form;
       opcode_out     <= ex_mem_sig.opcode;
       PC_addr_out    <= ex_mem_sig.pc_addr;
-      m1_out         <= ex_mem_sig.m1;
 
       
       --Fix for mem_oper needing to be 0-length vector
@@ -147,7 +148,7 @@ begin
       when "0010011" =>
       --MOV
         dest_data  <= ex_mem_sig.dest_data;
-        src_data <= (others => '0');
+        src_data <= ex_mem_sig.src_data;
         br_trigger <= '0';
       when "0010000" =>
         --LOAD

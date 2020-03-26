@@ -196,12 +196,12 @@ begin
                 ra_addr_out <= (others => '0');
             when "110" =>
                 --L1
-                operand1 <= (others => '0');
+                operand1 <= id_ex_sig.reg1_data; -- pass r7 data through alu (add 0) for load immediate
                 operand2 <= (others => '0');
                 ra_addr_out <= id_ex_sig.ra_addr; --ra address
             when "111" =>
                 --L2
-                operand1 <= (others => '0');
+                operand1 <= id_ex_sig.reg1_data;
                 operand2 <= (others => '0');
                 ra_addr_out <= id_ex_sig.ra_addr; --ra address
             when others =>
@@ -213,10 +213,10 @@ begin
         --Set dest and src mem outputs
         case id_ex_sig.opcode is
         when "0100000" =>
-            --OUT
-            --out port mapped to X"FFF2"
-            dest_mem_data <= id_ex_sig.op3; --Address of OUT port
-            src_mem_data <= id_ex_sig.reg1_data; --Data to send out
+        --OUT
+        --out port mapped to X"FFF2"
+        dest_mem_data <= id_ex_sig.op3; --Address of OUT port
+        src_mem_data <= id_ex_sig.reg1_data; --Data to send out
         
         when "0100001" =>
         --IN
@@ -237,7 +237,7 @@ begin
         when "0010011" =>
         --MOV
         dest_mem_data <= (others => '0');
-        src_mem_data <= id_ex_sig.reg1_data; --data to move
+        src_mem_data <= (others => '0');
         
         when "0010001" =>
         --STORE

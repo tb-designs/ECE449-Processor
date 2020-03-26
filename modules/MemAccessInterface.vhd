@@ -89,7 +89,7 @@ generic map (
   BYTE_WRITE_WIDTH_A => 8, -- DECIMAL
   CLOCKING_MODE => "common_clock", -- String
   MEMORY_INIT_FILE => "none", -- String
-  MEMORY_INIT_PARAM => "0", -- String
+  MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_SIZE => 8192, -- DECIMAL
   MESSAGE_CONTROL => 0, -- DECIMAL
@@ -138,7 +138,7 @@ generic map (
   ADDR_WIDTH_A => 16, -- DECIMAL
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
-  MEMORY_INIT_FILE => "formatl_pt2.mem", -- String
+  MEMORY_INIT_FILE => "formatl.mem", -- String
   MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String

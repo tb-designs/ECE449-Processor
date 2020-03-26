@@ -95,6 +95,7 @@ begin
     in_port <= X"0005";
     wait for clk_period;
     in_port <= X"0000";
+    wait;
 
 end process;
     

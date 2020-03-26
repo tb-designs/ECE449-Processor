@@ -154,7 +154,7 @@ begin
      if_id_sig.rsrc  <= instr_in(5 downto 3);
         
      if_id_sig.pc_addr <= PC_addr_in;
-     format <= get_instrformat(instr_in(15 downto 9)); 
+     format <= get_instrformat(instr_in(15 downto 9));
         
 process(clk,rst)
 begin
