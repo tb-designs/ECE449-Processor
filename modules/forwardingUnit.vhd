@@ -41,14 +41,16 @@ entity fwdunit is
         idex_reg2_addr   : in STD_LOGIC_VECTOR (2 downto 0);
         idex_reg1_data   : in STD_LOGIC_VECTOR (15 downto 0);
         idex_reg2_data   : in STD_LOGIC_VECTOR (15 downto 0);
+        idex_data_pass   : in STD_LOGIC_VECTOR (15 downto 0);
         idex_instr_form  : in STD_LOGIC_VECTOR (2 downto 0);
         exmem_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
-        exmem_opcode_in  : in STD_LOGIC_VECTOR (6 downto 0); --Use for Load->Arith special case
+        exmem_opcode_in  : in STD_LOGIC_VECTOR (6 downto 0); --Use for Load special case
         memwb_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
         exmem_wb_oper    : in STD_LOGIC;
         memwb_wb_oper    : in STD_LOGIC;
         alu_operand1     : out STD_LOGIC_VECTOR (15 downto 0);
         alu_operand2     : out STD_LOGIC_VECTOR (15 downto 0);
+        data_pass        : out STD_LOGIC_VECTOR (15 downto 0);
         stall_out        : out STD_LOGIC
         );
 end fwdunit;
@@ -61,15 +63,22 @@ begin
 
 alu_operand1 <= (others => '0') when rst = '1' else
                 exmem_alu_result when ((exmem_wb_oper = '1') and (exmem_ra_addr = idex_reg1_addr)) else
-                memwb_alu_result when ((memwb_wb_oper /= '0') and (memwb_ra_addr = idex_reg1_addr) and (exmem_ra_addr /= idex_reg1_addr or exmem_wb_oper = '0')) else
+                memwb_alu_result when ((memwb_wb_oper = '1') and (memwb_ra_addr = idex_reg1_addr) and (exmem_ra_addr /= idex_reg1_addr or exmem_wb_oper = '1')) else
                 idex_reg1_data;
 
 alu_operand2 <= (others => '0') when rst = '1' else
+                idex_reg2_data when idex_instr_form = "111" else -- don't forward operand2 for L2 instr
                 exmem_alu_result when ((exmem_wb_oper = '1') and (exmem_ra_addr = idex_reg2_addr)) else
-                memwb_alu_result when ((memwb_wb_oper /= '0') and (memwb_ra_addr = idex_reg2_addr) and (exmem_ra_addr /= idex_reg2_addr or exmem_wb_oper /= '0')) else
+                memwb_alu_result when ((memwb_wb_oper = '1') and (memwb_ra_addr = idex_reg2_addr) and (exmem_ra_addr /= idex_reg2_addr or exmem_wb_oper = '1')) else
                 idex_reg2_data;
 
---Stall in case when Load followed by arith instr using result          
+-- forward mem addresses to LOAD and STORES if preceding instruction writes to same register               
+data_pass <= (others => '0') when rst = '1' else
+             exmem_alu_result when ((idex_instr_form = "111") and (exmem_wb_oper = '1') and (exmem_ra_addr = idex_reg2_addr)) else
+             memwb_alu_result when ((idex_instr_form = "111") and (memwb_wb_oper = '1') and (memwb_ra_addr = idex_reg2_addr) and (exmem_ra_addr /= idex_reg2_addr or exmem_wb_oper = '1')) else
+             idex_data_pass;
+
+--Stall in case when Load followed by instr using result         
 stall_out <= '1' when (exmem_opcode_in = "0010000") and (exmem_ra_addr = idex_reg1_addr or exmem_ra_addr = idex_reg2_addr or (memwb_ra_addr = idex_reg1_addr and memwb_wb_oper /= '0')) else --LOAD
              '0';
 

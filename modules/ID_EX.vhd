@@ -25,8 +25,7 @@ entity ID_EX is
        reg1_addr_out : out std_logic_vector (2 downto 0);
        reg2_addr_out : out std_logic_vector (2 downto 0);
        PC_addr_out   : out std_logic_vector (15 downto 0);
-       dest_mem_data : out std_logic_vector (15 downto 0);
-       src_mem_data  : out std_logic_vector (15 downto 0);
+       data_pass_out : out std_logic_vector (15 downto 0);
        ra_addr_out   : out std_logic_vector (2 downto 0);
        mem_oper_out  : out std_logic;
        wb_oper_out   : out std_logic;
@@ -52,6 +51,7 @@ function getalumode(op : std_logic_vector(6 downto 0)) return std_logic_vector i
         when "0000110" => mode := "110"; --SHR
         --A3
         when "0000111" => mode := "111"; --TEST
+        when "0100000" => mode := "001"; --OUT
         --B1
         when "1000000" => mode := "001"; --BRR
         when "1000001" => mode := "001"; --BRR.N
@@ -62,17 +62,16 @@ function getalumode(op : std_logic_vector(6 downto 0)) return std_logic_vector i
         when "1000101" => mode := "001"; --BR.Z
         when "1000110" => mode := "001"; --BR.SUB
         --L1
+        when "0010010" => mode := "001";--LOADIMM       
+        --L2
         when "0010000" => mode := "001";--LOAD
         when "0010001" => mode := "001";--STORE
-        when "0010010" => mode := "001";--LOADIMM
         when "0010011" => mode := "001";--MOV
-        
-        --L2
         
         --A0
         when "1000111" => mode := "001"; --RETURN (used to add 0 in alu, result is then placed in PC in ex/mem)
         --Default to NOP
-        when others => mode := "000";
+        when others => mode := "000"; --IN
         end case; 
 
     return mode;
@@ -123,7 +122,7 @@ begin
     id_ex_sig.reg2_data <= data_2;
     id_ex_sig.op3 <= operand_3;
     id_ex_sig.alu_mode <= getalumode(opcode_in);
-    id_ex_sig.opcode <= "0000000" when mem_stall = '1' else
+    id_ex_sig.opcode <= (others => '0') when mem_stall = '1' else
                         opcode_in;
     id_ex_sig.instr_form <= instr_form_in;
     id_ex_sig.pc_addr <= pc_addr_in;
@@ -141,8 +140,7 @@ begin
             opcode_out <= (others => '0');
             PC_addr_out <= (others => '0');
             instr_form_out <= (others => '0');
-            dest_mem_data <= (others => '0');
-            src_mem_data <= (others => '0');
+            data_pass_out <= (others => '0');
             alu_mode_out <= (others => '0');
             ra_addr_out <= (others => '0');
             mem_oper_out <= '0';
@@ -181,7 +179,7 @@ begin
                 ra_addr_out <= id_ex_sig.ra_addr;
             when "011" =>
                 --A3
-                operand1 <= X"0000"; --ra data
+                operand1 <= id_ex_sig.reg1_data; --ra data
                 operand2 <= (others => '0'); --Dont care
                 ra_addr_out <= id_ex_sig.ra_addr; --ra address
             when "100" =>
@@ -201,6 +199,8 @@ begin
                 ra_addr_out <= id_ex_sig.ra_addr; --ra address
             when "111" =>
                 --L2
+                --pass data from reg1 through alu (add 0)
+                --reg1 is wb data for MOV and mem data for STORE
                 operand1 <= id_ex_sig.reg1_data;
                 operand2 <= (others => '0');
                 ra_addr_out <= id_ex_sig.ra_addr; --ra address
@@ -215,38 +215,27 @@ begin
         when "0100000" =>
         --OUT
         --out port mapped to X"FFF2"
-        dest_mem_data <= id_ex_sig.op3; --Address of OUT port
-        src_mem_data <= id_ex_sig.reg1_data; --Data to send out
+        data_pass_out <= id_ex_sig.op3; --Address of OUT port
         
         when "0100001" =>
         --IN
         --in port mapped to X"FFF0"
-        dest_mem_data <= id_ex_sig.op3; --Address of IN port
-        src_mem_data <= (others => '0');
+        data_pass_out <= id_ex_sig.op3; --Address of IN port
         
         when "0010010" =>
         --LOADIMM
-        dest_mem_data <= (others => '0');
-        src_mem_data <= id_ex_sig.op3; --immediate
+        data_pass_out <= id_ex_sig.op3; --immediate
         
         when "0010000" =>
         --LOAD
-        dest_mem_data <= id_ex_sig.reg1_data; --mem address
-        src_mem_data <= (others => '0');
-        
-        when "0010011" =>
-        --MOV
-        dest_mem_data <= (others => '0');
-        src_mem_data <= (others => '0');
+        data_pass_out <= id_ex_sig.reg2_data; --mem address
         
         when "0010001" =>
         --STORE
-        dest_mem_data <= id_ex_sig.reg1_data; --mem address
-        src_mem_data <= id_ex_sig.reg2_data; --data to store
+        data_pass_out <= id_ex_sig.reg2_data; --mem address
         
         when others =>
-        dest_mem_data <= (others => '0');
-        src_mem_data <=  (others => '0');
+        data_pass_out <= (others => '0');
         
         end case;
         

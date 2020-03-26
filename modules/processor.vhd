@@ -101,7 +101,7 @@ component ID_EX is
         opcode_in : in std_logic_vector (6 downto 0);
         instr_form_in, ra_addr_in, reg1_addr_in, reg2_addr_in : in std_logic_vector (2 downto 0);
         mem_oper_in, wb_oper_in, m1_in, clk, rst, mem_stall : in std_logic;
-        operand1, operand2, pc_addr_out, dest_mem_data, src_mem_data : out std_logic_vector (15 downto 0);
+        operand1, operand2, pc_addr_out, data_pass_out : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         alu_mode_out, instr_form_out, ra_addr_out, reg1_addr_out, reg2_addr_out : out std_logic_vector (2 downto 0);
         mem_oper_out, wb_oper_out, m1_out : out std_logic
@@ -118,6 +118,7 @@ component fwdunit is
         idex_reg2_addr   : in STD_LOGIC_VECTOR (2 downto 0);
         idex_reg1_data   : in STD_LOGIC_VECTOR (15 downto 0);
         idex_reg2_data   : in STD_LOGIC_VECTOR (15 downto 0);
+        idex_data_pass   : in STD_LOGIC_VECTOR (15 downto 0);
         idex_instr_form  : in STD_LOGIC_VECTOR (2 downto 0);
         exmem_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
         exmem_opcode_in  : in STD_LOGIC_VECTOR (6 downto 0);
@@ -126,6 +127,7 @@ component fwdunit is
         memwb_wb_oper    : in STD_LOGIC;
         alu_operand1     : out STD_LOGIC_VECTOR (15 downto 0);
         alu_operand2     : out STD_LOGIC_VECTOR (15 downto 0);
+        data_pass        : out STD_LOGIC_VECTOR (15 downto 0);
         stall_out        : out STD_LOGIC
     );
 end component;
@@ -147,7 +149,7 @@ end component;
 --EX/MEM
 component EX_MEM is
     port (
-        alu_result, pc_addr_in, dest_data_in, src_data_in : in std_logic_vector (15 downto 0);
+        alu_result, pc_addr_in, data_pass_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_form_in, ra_addr_in : in std_logic_vector (2 downto 0);
         mem_oper_in, wb_oper_in, m1_in, clk, rst : in std_logic;
@@ -221,16 +223,17 @@ signal idex_opcode_out : std_logic_vector (6 downto 0):= (others => '0');
 signal idex_alu_mode_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_pc_addr_out : std_logic_vector (15 downto 0):= (others => '0');
-signal idex_dest_mem_data_out : std_logic_vector (15 downto 0):= (others => '0');
-signal idex_src_mem_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal idex_data_pass_out : std_logic_vector (15 downto 0):= (others => '0');
 signal idex_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_r1_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_r2_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_mem_oper_out : std_logic;
 signal idex_wb_oper_out : std_logic;
 signal idex_m1_out : std_logic := '0';
+
 signal fwd_unit_operand1_out : std_logic_vector (15 downto 0):= (others => '0');
 signal fwd_unit_operand2_out : std_logic_vector (15 downto 0):= (others => '0');
+signal fwd_unit_data_pass_out : std_logic_vector (15 downto 0):= (others => '0');
 
 --EXECUTE
 signal alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -280,7 +283,7 @@ pc0 : pc port map (
 --Mem Module
 mem0 : mem_interface port map (
     clk => clk,
-    rst => rst,
+    rst => rst_sig,
     
     --INSTRUCTION MEMORY
     addr2 => pc_addr,
@@ -359,8 +362,7 @@ idex0 : id_ex port map (
     alu_mode_out => idex_alu_mode_out,
     instr_form_out => idex_instr_form_out,
     pc_addr_out => idex_pc_addr_out,
-    dest_mem_data => idex_dest_mem_data_out,
-    src_mem_data => idex_src_mem_data_out,
+    data_pass_out => idex_data_pass_out,
     ra_addr_out => idex_ra_addr_out,
     reg1_addr_out => idex_r1_addr_out,
     reg2_addr_out => idex_r2_addr_out,
@@ -375,8 +377,7 @@ fu0: fwdunit port map (
     exmem_opcode_in => exmem_opcode_out,
     idex_reg1_data => idex_reg1_data_out,
     idex_reg2_data => idex_reg2_data_out,
-    alu_operand1 =>fwd_unit_operand1_out,
-    alu_operand2 =>fwd_unit_operand2_out,
+    idex_data_pass => idex_data_pass_out,
     idex_reg1_addr => idex_r1_addr_out,
     idex_reg2_addr => idex_r2_addr_out,
     idex_instr_form => idex_instr_form_out,
@@ -386,6 +387,10 @@ fu0: fwdunit port map (
     memwb_wb_oper => memwb_wb_oper_out,
     exmem_ra_addr => exmem_ra_addr_out,
     memwb_ra_addr => memwb_ra_addr_out,
+    
+    alu_operand1 => fwd_unit_operand1_out,
+    alu_operand2 => fwd_unit_operand2_out,
+    data_pass => fwd_unit_data_pass_out,
     stall_out => stall_sig
 );
 
@@ -410,8 +415,7 @@ exmem0: ex_mem port map (
     instr_form_in => idex_instr_form_out,
     opcode_in => idex_opcode_out,
     pc_addr_in => idex_pc_addr_out,
-    dest_data_in => idex_dest_mem_data_out,
-    src_data_in => idex_src_mem_data_out,
+    data_pass_in => fwd_unit_data_pass_out,
     ra_addr_in => idex_ra_addr_out,
     mem_oper_in => idex_mem_oper_out,
     wb_oper_in => idex_wb_oper_out,

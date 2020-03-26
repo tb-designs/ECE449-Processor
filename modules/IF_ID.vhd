@@ -316,16 +316,16 @@ begin
  
         --L2
         when "0010000" =>  --LOAD
-            reg1_addr <= if_id_sig.rsrc; --get memory address for load
-            reg2_addr <= "000"; --unused
+            reg1_addr <= "000"; --unused
+            reg2_addr <= if_id_sig.rsrc; --get memory address for load
             ra_addr_out <= if_id_sig.ra_addr;
             op_pass <= (others => '0');
             mem_oper_out <= '1';
             wb_oper_out  <= '1';
  
         when "0010001" =>  --STORE
-            reg1_addr <= if_id_sig.rdest; --get memory address to store to
-            reg2_addr <= if_id_sig.rsrc; --data to store
+            reg1_addr <= if_id_sig.rsrc; --data to store
+            reg2_addr <= if_id_sig.rdest; --get memory address to store to
             ra_addr_out <= (others => '0'); --unused
             op_pass <= (others => '0');
             mem_oper_out <= '1';
