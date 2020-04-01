@@ -11,13 +11,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1234137210000fs"></ZoomStartTime>
-      <ZoomEndTime time="1510852011445fs"></ZoomEndTime>
-      <Cursor1Time time="1501000000000fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="257234878600fs"></ZoomEndTime>
+      <Cursor1Time time="2401000000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="216"></NameColumnWidth>
-      <ValueColumnWidth column_width="149"></ValueColumnWidth>
+      <ValueColumnWidth column_width="145"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="24" />
    <wvobject type="logic" fp_name="/processor_sim/clk">
@@ -85,6 +85,10 @@
          <obj_property name="ElementShortName">rd_data2[15:0]</obj_property>
          <obj_property name="ObjectShortName">rd_data2[15:0]</obj_property>
       </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/rf0/rd_vflag1">
+         <obj_property name="ElementShortName">rd_vflag1</obj_property>
+         <obj_property name="ObjectShortName">rd_vflag1</obj_property>
+      </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/rf0/wr_index">
          <obj_property name="ElementShortName">wr_index[2:0]</obj_property>
          <obj_property name="ObjectShortName">wr_index[2:0]</obj_property>
@@ -97,43 +101,14 @@
          <obj_property name="ElementShortName">wr_enable</obj_property>
          <obj_property name="ObjectShortName">wr_enable</obj_property>
       </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/rf0/v_flag">
+         <obj_property name="ElementShortName">v_flag</obj_property>
+         <obj_property name="ObjectShortName">v_flag</obj_property>
+      </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file">
-         <obj_property name="ElementShortName">reg_file[0:7][15:0]</obj_property>
-         <obj_property name="ObjectShortName">reg_file[0:7][15:0]</obj_property>
+         <obj_property name="ElementShortName">reg_file[0:7]</obj_property>
+         <obj_property name="ObjectShortName">reg_file[0:7]</obj_property>
          <obj_property name="isExpanded"></obj_property>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[0]">
-            <obj_property name="ElementShortName">[0][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][15:0]</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[1]">
-            <obj_property name="ElementShortName">[1][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[1][15:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[2]">
-            <obj_property name="ElementShortName">[2][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[2][15:0]</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[3]">
-            <obj_property name="ElementShortName">[3][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[3][15:0]</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[4]">
-            <obj_property name="ElementShortName">[4][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[4][15:0]</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[5]">
-            <obj_property name="ElementShortName">[5][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[5][15:0]</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[6]">
-            <obj_property name="ElementShortName">[6][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[6][15:0]</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/processor_sim/u0/rf0/reg_file[7]">
-            <obj_property name="ElementShortName">[7][15:0]</obj_property>
-            <obj_property name="ObjectShortName">[7][15:0]</obj_property>
-         </wvobject>
       </wvobject>
    </wvobject>
    <wvobject fp_name="divider310" type="divider">
@@ -217,6 +192,10 @@
       <wvobject type="array" fp_name="/processor_sim/u0/idex0/data_2">
          <obj_property name="ElementShortName">data_2[15:0]</obj_property>
          <obj_property name="ObjectShortName">data_2[15:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/idex0/v_flag_1">
+         <obj_property name="ElementShortName">v_flag_1</obj_property>
+         <obj_property name="ObjectShortName">v_flag_1</obj_property>
       </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/idex0/operand_3">
          <obj_property name="ElementShortName">operand_3[15:0]</obj_property>
@@ -324,6 +303,10 @@
          <obj_property name="ElementShortName">m1_out</obj_property>
          <obj_property name="ObjectShortName">m1_out</obj_property>
       </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/idex0/v_flag_1_out">
+         <obj_property name="ElementShortName">v_flag_1_out</obj_property>
+         <obj_property name="ObjectShortName">v_flag_1_out</obj_property>
+      </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/idex0/id_ex_sig">
          <obj_property name="ElementShortName">id_ex_sig</obj_property>
          <obj_property name="ObjectShortName">id_ex_sig</obj_property>
@@ -340,6 +323,7 @@
    <wvobject type="group" fp_name="group768">
       <obj_property name="label">Forwarding</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject type="logic" fp_name="/processor_sim/u0/fu0/rst">
          <obj_property name="ElementShortName">rst</obj_property>
          <obj_property name="ObjectShortName">rst</obj_property>
@@ -368,6 +352,10 @@
          <obj_property name="ElementShortName">idex_reg2_data[15:0]</obj_property>
          <obj_property name="ObjectShortName">idex_reg2_data[15:0]</obj_property>
       </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/fu0/idex_reg1_vflag">
+         <obj_property name="ElementShortName">idex_reg1_vflag</obj_property>
+         <obj_property name="ObjectShortName">idex_reg1_vflag</obj_property>
+      </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/fu0/idex_data_pass">
          <obj_property name="ElementShortName">idex_data_pass[15:0]</obj_property>
          <obj_property name="ObjectShortName">idex_data_pass[15:0]</obj_property>
@@ -376,13 +364,14 @@
          <obj_property name="ElementShortName">idex_instr_form[2:0]</obj_property>
          <obj_property name="ObjectShortName">idex_instr_form[2:0]</obj_property>
       </wvobject>
+      <wvobject type="array" fp_name="/processor_sim/u0/fu0/idex_opcode_in">
+         <obj_property name="ElementShortName">idex_opcode_in[6:0]</obj_property>
+         <obj_property name="ObjectShortName">idex_opcode_in[6:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/fu0/exmem_alu_result">
          <obj_property name="ElementShortName">exmem_alu_result[15:0]</obj_property>
          <obj_property name="ObjectShortName">exmem_alu_result[15:0]</obj_property>
-      </wvobject>
-      <wvobject type="array" fp_name="/processor_sim/u0/fu0/exmem_opcode_in">
-         <obj_property name="ElementShortName">exmem_opcode_in[6:0]</obj_property>
-         <obj_property name="ObjectShortName">exmem_opcode_in[6:0]</obj_property>
       </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/fu0/memwb_alu_result">
          <obj_property name="ElementShortName">memwb_alu_result[15:0]</obj_property>
@@ -396,6 +385,14 @@
          <obj_property name="ElementShortName">memwb_wb_oper</obj_property>
          <obj_property name="ObjectShortName">memwb_wb_oper</obj_property>
       </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/fu0/exmem_v_flag">
+         <obj_property name="ElementShortName">exmem_v_flag</obj_property>
+         <obj_property name="ObjectShortName">exmem_v_flag</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/fu0/memwb_v_flag">
+         <obj_property name="ElementShortName">memwb_v_flag</obj_property>
+         <obj_property name="ObjectShortName">memwb_v_flag</obj_property>
+      </wvobject>
       <wvobject type="array" fp_name="/processor_sim/u0/fu0/alu_operand1">
          <obj_property name="ElementShortName">alu_operand1[15:0]</obj_property>
          <obj_property name="ObjectShortName">alu_operand1[15:0]</obj_property>
@@ -407,6 +404,10 @@
       <wvobject type="array" fp_name="/processor_sim/u0/fu0/data_pass">
          <obj_property name="ElementShortName">data_pass[15:0]</obj_property>
          <obj_property name="ObjectShortName">data_pass[15:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/fu0/v_flag_out">
+         <obj_property name="ElementShortName">v_flag_out</obj_property>
+         <obj_property name="ObjectShortName">v_flag_out</obj_property>
       </wvobject>
       <wvobject type="logic" fp_name="/processor_sim/u0/fu0/stall_out">
          <obj_property name="ElementShortName">stall_out</obj_property>
@@ -420,6 +421,7 @@
    <wvobject type="group" fp_name="group743">
       <obj_property name="label">ALU</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject type="array" fp_name="/processor_sim/u0/alu0/in1">
          <obj_property name="ElementShortName">in1[15:0]</obj_property>
          <obj_property name="ObjectShortName">in1[15:0]</obj_property>
@@ -464,6 +466,11 @@
          <obj_property name="ElementShortName">shift_dir</obj_property>
          <obj_property name="ObjectShortName">shift_dir</obj_property>
       </wvobject>
+      <wvobject type="array" fp_name="/processor_sim/u0/alu0/add_overflow">
+         <obj_property name="ElementShortName">add_overflow[2:0]</obj_property>
+         <obj_property name="ObjectShortName">add_overflow[2:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
    </wvobject>
    <wvobject type="group" fp_name="group976">
       <obj_property name="label">Status Register</obj_property>
@@ -485,6 +492,10 @@
          <obj_property name="ElementShortName">z_flag_in</obj_property>
          <obj_property name="ObjectShortName">z_flag_in</obj_property>
       </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/sr0/v_flag_in">
+         <obj_property name="ElementShortName">v_flag_in</obj_property>
+         <obj_property name="ObjectShortName">v_flag_in</obj_property>
+      </wvobject>
       <wvobject type="logic" fp_name="/processor_sim/u0/sr0/br_flag_in">
          <obj_property name="ElementShortName">br_flag_in</obj_property>
          <obj_property name="ObjectShortName">br_flag_in</obj_property>
@@ -500,6 +511,10 @@
       <wvobject type="logic" fp_name="/processor_sim/u0/sr0/z_flag_out">
          <obj_property name="ElementShortName">z_flag_out</obj_property>
          <obj_property name="ObjectShortName">z_flag_out</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/processor_sim/u0/sr0/v_flag_out">
+         <obj_property name="ElementShortName">v_flag_out</obj_property>
+         <obj_property name="ObjectShortName">v_flag_out</obj_property>
       </wvobject>
       <wvobject type="logic" fp_name="/processor_sim/u0/sr0/br_flag_out">
          <obj_property name="ElementShortName">br_flag_out</obj_property>

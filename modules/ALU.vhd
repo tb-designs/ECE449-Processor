@@ -73,10 +73,17 @@ signal mult_buf : std_logic_vector(31 downto 0);
 signal out_buf : std_logic_vector(15 downto 0);
 signal shift_dir : std_logic;
 
+signal sum_s : signed(15 downto 0);
+signal add_overflow : std_logic_vector(2 downto 0);
+
 begin
+    -- addition
+    sum_s <= signed(in1) + signed(in2);
+    add_overflow <= in1(in1'high)&in2(in2'high)&sum_s(sum_s'high);
+
 	result <= (others => '0') when (rst = '1') else
 		  -- ADD
-		  std_logic_vector(signed(in1) + signed(in2)) when (alu_mode = "001") else
+		  std_logic_vector(sum_s) when (alu_mode = "001") else
 		  -- SUB
 		  std_logic_vector(signed(in1) - signed(in2)) when (alu_mode = "010") else
 		  -- MUL
@@ -96,9 +103,10 @@ begin
 		  '1' when (alu_mode = "111") and (signed(in1) < 0) else
 		  '0';
 
-	v_flag <= '1' when (alu_mode = "011") and (unsigned(mult_buf(31 downto 16)) > 0) else
-		  '0' when (rst = '1') else
-		  '0';
+	v_flag <= '0' when (rst = '1') else
+	          '1' when (alu_mode = "011") and (unsigned(mult_buf(31 downto 16)) > 0) else
+	          '1' when (alu_mode = "001") and (add_overflow = "001" or add_overflow = "110") else
+		      '0';
 
     shift_dir <= '0' when (alu_mode = "110") else '1';
 

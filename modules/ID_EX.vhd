@@ -5,6 +5,7 @@ use ieee.std_logic_unsigned.all;
 entity ID_EX is 
   port(data_1        : in std_logic_vector (15 downto 0);
        data_2        : in std_logic_vector (15 downto 0);
+       v_flag_1      : in std_logic;
        operand_3     : in std_logic_vector (15 downto 0);
        opcode_in     : in std_logic_vector (6 downto 0);
        instr_form_in : in std_logic_vector (2 downto 0);
@@ -29,7 +30,8 @@ entity ID_EX is
        ra_addr_out   : out std_logic_vector (2 downto 0);
        mem_oper_out  : out std_logic;
        wb_oper_out   : out std_logic;
-       m1_out        : out std_logic
+       m1_out        : out std_logic;
+       v_flag_1_out  : out std_logic
        );
 
 end ID_EX;
@@ -81,6 +83,7 @@ end function getalumode;
 type id_ex is record
     reg1_data  : std_logic_vector(15 downto 0);
     reg2_data  : std_logic_vector(15 downto 0);
+    reg1_vflag : std_logic;
     op3        : std_logic_vector (15 downto 0);
     alu_mode   : std_logic_vector (2 downto 0);
     ra_addr    : std_logic_vector (2 downto 0);
@@ -98,6 +101,7 @@ end record id_ex;
 constant ID_EX_INIT : id_ex := (
     reg1_data => (others => '0'),
     reg2_data => (others => '0'),
+    reg1_vflag => '0',
     op3 => (others => '0'),
     alu_mode => (others => '0'),
     ra_addr => (others => '0'),
@@ -120,10 +124,10 @@ begin
     id_ex_sig.r2_addr <= reg2_addr_in;
     id_ex_sig.reg1_data <= data_1;
     id_ex_sig.reg2_data <= data_2;
+    id_ex_sig.reg1_vflag <= v_flag_1;
     id_ex_sig.op3 <= operand_3;
     id_ex_sig.alu_mode <= getalumode(opcode_in);
-    id_ex_sig.opcode <= (others => '0') when mem_stall = '1' else
-                        opcode_in;
+    id_ex_sig.opcode <= opcode_in;
     id_ex_sig.instr_form <= instr_form_in;
     id_ex_sig.pc_addr <= pc_addr_in;
     id_ex_sig.mem_opr <= mem_oper_in;
@@ -134,7 +138,7 @@ begin
     process(clk,rst)
     begin
         --reset behaviour
-        if rst = '1' then
+        if rst = '1' or (clk = '1' and clk'event and mem_stall = '1') then
             operand1 <= (others => '0');
             operand2 <= (others => '0');
             opcode_out <= (others => '0');
@@ -146,6 +150,7 @@ begin
             mem_oper_out <= '0';
             wb_oper_out <= '0';
             m1_out <= '0';
+            v_flag_1_out <= '0';
               
         elsif(clk='1' and clk'event) then
        --rising edge set output depending on the instruction format
@@ -212,6 +217,11 @@ begin
 
         --Set dest and src mem outputs
         case id_ex_sig.opcode is
+        when "0000111" =>
+        --TEST
+        data_pass_out <= (others => '0');
+        v_flag_1_out <= id_ex_sig.reg1_vflag;
+        
         when "0100000" =>
         --OUT
         --out port mapped to X"FFF2"
@@ -238,6 +248,13 @@ begin
         data_pass_out <= (others => '0');
         
         end case;
+        
+        --pass overflow flag of reg1 to status reg if TEST
+        if id_ex_sig.opcode = "0000111" then
+            v_flag_1_out <= id_ex_sig.reg1_vflag;
+        else
+            v_flag_1_out <= '0';
+        end if;
         
     end if;
 end process;

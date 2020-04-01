@@ -35,6 +35,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity IF_ID is 
   port( instr_in     : in std_logic_vector (15 downto 0); --next instruction to latch
         PC_addr_in   : in std_logic_vector (15 downto 0);
+        mem_stall    : in std_logic;
         PC_addr_out  : out std_logic_vector (15 downto 0);
         op_pass      : out std_logic_vector (15 downto 0);  --Pass through operand (c1 OR ra OR disp1 OR disps OR imm)
         op_code      : out std_logic_vector (6 downto 0);
@@ -173,7 +174,7 @@ begin
    
      --if the clock is rising we gate
      --falling edge store input and compute instr format  
-    elsif(clk='1' and clk'event) then
+    elsif(clk='1' and clk'event) and mem_stall /= '1' then
         --rising edge set output depending on format and opcode          
         case if_id_sig.opcode is
         --A1

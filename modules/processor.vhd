@@ -70,7 +70,7 @@ end component;
 component IF_ID is
     port (
         instr_in, pc_addr_in : in  std_logic_vector (15 downto 0);
-        clk,rst : in  std_logic;
+        clk, rst, mem_stall : in  std_logic;
         pc_addr_out,op_pass : out std_logic_vector (15 downto 0);
         op_code: out std_logic_vector (6 downto 0);
         instr_format, reg1_addr, reg2_addr, ra_addr_out : out std_logic_vector (2 downto 0);
@@ -87,10 +87,12 @@ component register_file is
         rd_index2: in std_logic_vector(2 downto 0); 
         rd_data1: out std_logic_vector(15 downto 0); 
         rd_data2: out std_logic_vector(15 downto 0);
+        rd_vflag1: out std_logic;
         --write signals
         wr_index: in std_logic_vector(2 downto 0); 
         wr_data: in std_logic_vector(15 downto 0);
-        wr_enable: in std_logic
+        wr_enable: in std_logic;
+        v_flag: in std_logic
     );
 end component;
 
@@ -100,11 +102,11 @@ component ID_EX is
         data_1, data_2, operand_3, pc_addr_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
         instr_form_in, ra_addr_in, reg1_addr_in, reg2_addr_in : in std_logic_vector (2 downto 0);
-        mem_oper_in, wb_oper_in, m1_in, clk, rst, mem_stall : in std_logic;
+        mem_oper_in, wb_oper_in, m1_in, v_flag_1, clk, rst, mem_stall : in std_logic;
         operand1, operand2, pc_addr_out, data_pass_out : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
         alu_mode_out, instr_form_out, ra_addr_out, reg1_addr_out, reg2_addr_out : out std_logic_vector (2 downto 0);
-        mem_oper_out, wb_oper_out, m1_out : out std_logic
+        mem_oper_out, wb_oper_out, m1_out, v_flag_1_out : out std_logic
         );
 end component;
 
@@ -114,20 +116,27 @@ component fwdunit is
         rst              : in STD_LOGIC;
         memwb_ra_addr    : in STD_LOGIC_VECTOR (2 downto 0);
         exmem_ra_addr    : in STD_LOGIC_VECTOR (2 downto 0);
+        ifid_reg1_addr   : in STD_LOGIC_VECTOR (2 downto 0);
+        ifid_reg2_addr   : in STD_LOGIC_VECTOR (2 downto 0);
         idex_reg1_addr   : in STD_LOGIC_VECTOR (2 downto 0);
         idex_reg2_addr   : in STD_LOGIC_VECTOR (2 downto 0);
+        idex_ra_addr     : in STD_LOGIC_VECTOR (2 downto 0);
         idex_reg1_data   : in STD_LOGIC_VECTOR (15 downto 0);
         idex_reg2_data   : in STD_LOGIC_VECTOR (15 downto 0);
+        idex_reg1_vflag  : in STD_LOGIC;
         idex_data_pass   : in STD_LOGIC_VECTOR (15 downto 0);
         idex_instr_form  : in STD_LOGIC_VECTOR (2 downto 0);
+        idex_opcode_in   : in STD_LOGIC_VECTOR (6 downto 0);
         exmem_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
-        exmem_opcode_in  : in STD_LOGIC_VECTOR (6 downto 0);
         memwb_alu_result : in STD_LOGIC_VECTOR (15 downto 0);
         exmem_wb_oper    : in STD_LOGIC;
         memwb_wb_oper    : in STD_LOGIC;
+        exmem_v_flag     : in STD_LOGIC;
+        memwb_v_flag     : in STD_LOGIC;
         alu_operand1     : out STD_LOGIC_VECTOR (15 downto 0);
         alu_operand2     : out STD_LOGIC_VECTOR (15 downto 0);
         data_pass        : out STD_LOGIC_VECTOR (15 downto 0);
+        v_flag_out       : out STD_LOGIC;
         stall_out        : out STD_LOGIC
     );
 end component;
@@ -161,8 +170,11 @@ component EX_MEM is
         mem_oper_out : out std_logic_vector (1 downto 0);
         n_flag_in     : in std_logic; --Inputs from the status register, checked when branch instr reaches ex/mem
         z_flag_in    : in std_logic;
+        v_flag_in      : in std_logic;
+        v_flag_pass_in : in std_logic;
         br_flag_in   : in std_logic;
-        br_trigger     : out std_logic
+        br_trigger     : out std_logic;
+        v_flag_pass_out: out std_logic
     );
 end component;
 
@@ -173,9 +185,11 @@ component MEM_WB is
         opcode_in : in std_logic_vector (6 downto 0);
         instr_format_in, ra_addr_in : in std_logic_vector (2 downto 0);
         wb_oper_in, clk, rst : in std_logic;
+        v_flag_in     : in std_logic;
         wb_data_out   : out std_logic_vector (15 downto 0);
-        ra_addr_out    : out std_logic_vector (2 downto 0);
-        wb_oper_out    : out std_logic
+        ra_addr_out   : out std_logic_vector (2 downto 0);
+        wb_oper_out   : out std_logic;
+        v_flag_out    : out std_logic
     );
 end component;
 
@@ -184,10 +198,12 @@ component status_reg is
     port (clk, rst : in std_logic;
           n_flag_in : in std_logic;
           z_flag_in : in std_logic;
+          v_flag_in : in std_logic;
           br_flag_in : in std_logic;
           clear_test_flags : in std_logic;
           n_flag_out : out std_logic;
           z_flag_out : out std_logic;
+          v_flag_out : out std_logic;
           br_flag_out : out std_logic
     );
     
@@ -215,8 +231,9 @@ signal ifid_wb_oper_out : std_logic := '0';
 signal ifid_m1_out : std_logic := '0';
 
 --INSTRUCTION DECODE
-signal regfile_reg1_data_out : std_logic_vector (15 downto 0):= (others => '0');
-signal regfile_reg2_data_out : std_logic_vector (15 downto 0):= (others => '0');
+signal regfile_reg1_data_out : std_logic_vector (15 downto 0);
+signal regfile_reg2_data_out : std_logic_vector (15 downto 0);
+signal regfile_reg1_v_flag : std_logic;
 signal idex_reg1_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal idex_reg2_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal idex_opcode_out : std_logic_vector (6 downto 0):= (others => '0');
@@ -230,15 +247,18 @@ signal idex_r2_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal idex_mem_oper_out : std_logic;
 signal idex_wb_oper_out : std_logic;
 signal idex_m1_out : std_logic := '0';
+signal idex_vflag_out : std_logic := '0';
 
 signal fwd_unit_operand1_out : std_logic_vector (15 downto 0):= (others => '0');
 signal fwd_unit_operand2_out : std_logic_vector (15 downto 0):= (others => '0');
 signal fwd_unit_data_pass_out : std_logic_vector (15 downto 0):= (others => '0');
+signal fwd_unit_vflag_out : std_logic:= '0';
 
 --EXECUTE
 signal alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
 signal alu_z_flag_out : std_logic;
 signal alu_n_flag_out : std_logic;
+signal alu_v_flag_out : std_logic;
 signal exmem_alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
 signal exmem_pc_addr_out : std_logic_vector (15 downto 0):= (others => '0');
 signal exmem_dest_data_out : std_logic_vector (15 downto 0):= (others => '0');
@@ -248,12 +268,14 @@ signal exmem_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_mem_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 signal exmem_wb_oper_out : std_logic;
+signal exmem_vflag_out : std_logic:= '0';
 
 --MEMORY/WB
 signal data_mem_output : std_logic_vector (15 downto 0):= (others => '0');
 signal memwb_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal memwb_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal memwb_wb_oper_out : std_logic:= '0';
+signal memwb_vflag_out : std_logic:= '0';
 
 --BRANCHING
 signal exmem_br_addr_out : std_logic_vector (15 downto 0) := (others => '0');
@@ -266,6 +288,7 @@ signal pc_next_addr : std_logic_vector(15 downto 0):= (others => '0');
 --STATUS REGISTER
 signal stat_reg_n_out : std_logic;
 signal stat_reg_z_out : std_logic;
+signal stat_reg_v_out : std_logic;
 signal stat_reg_br_out : std_logic;
 signal stat_reg_clr_flag_in : std_logic;
 
@@ -304,6 +327,7 @@ mem0 : mem_interface port map (
 ifid0: if_id port map(
     clk => clk,
     rst => rst_sig,
+    mem_stall => stall_sig,
     
     instr_in => instr_mem_output,
     pc_addr_in => pc_addr,
@@ -329,21 +353,25 @@ rf0: register_file port map (
     rd_index1 => ifid_reg1_addr_out,
     rd_index2 => ifid_reg2_addr_out,
     rd_data1 => regfile_reg1_data_out,
-    rd_data2 => regfile_reg2_data_out, 
+    rd_data2 => regfile_reg2_data_out,
+    rd_vflag1 => regfile_reg1_v_flag,
     
     --WRITE
     wr_index => memwb_ra_addr_out,
     wr_data => memwb_data_out,
-    wr_enable => memwb_wb_oper_out
+    wr_enable => memwb_wb_oper_out,
+    v_flag => memwb_vflag_out
 );
 
 --ID/EX
 idex0 : id_ex port map (
     clk => clk,
     rst => rst_sig,
+    mem_stall => stall_sig,
     
     data_1 => regfile_reg1_data_out,
     data_2 => regfile_reg2_data_out,
+    v_flag_1 => regfile_reg1_v_flag,
     operand_3 => ifid_op_pass_out,
     opcode_in => ifid_opcode_out,
     instr_form_in => ifid_instr_format_out,
@@ -354,7 +382,6 @@ idex0 : id_ex port map (
     mem_oper_in => ifid_mem_oper_out,
     wb_oper_in => ifid_wb_oper_out,
     m1_in => ifid_m1_out,
-    mem_stall => stall_sig,
     operand1 => idex_reg1_data_out,
     operand2 => idex_reg2_data_out,
 
@@ -368,29 +395,37 @@ idex0 : id_ex port map (
     reg2_addr_out => idex_r2_addr_out,
     mem_oper_out => idex_mem_oper_out,
     wb_oper_out => idex_wb_oper_out,
-    m1_out => idex_m1_out   
+    m1_out => idex_m1_out,
+    v_flag_1_out => idex_vflag_out
 );
 
 --FWD_UNIT
 fu0: fwdunit port map (
     rst => rst_sig,
-    exmem_opcode_in => exmem_opcode_out,
+    ifid_reg1_addr => ifid_reg1_addr_out,
+    ifid_reg2_addr => ifid_reg2_addr_out,
+    idex_ra_addr => idex_ra_addr_out,
     idex_reg1_data => idex_reg1_data_out,
     idex_reg2_data => idex_reg2_data_out,
+    idex_reg1_vflag => idex_vflag_out,
     idex_data_pass => idex_data_pass_out,
     idex_reg1_addr => idex_r1_addr_out,
     idex_reg2_addr => idex_r2_addr_out,
     idex_instr_form => idex_instr_form_out,
+    idex_opcode_in => idex_opcode_out,
     exmem_alu_result => exmem_alu_result_out,
     memwb_alu_result => memwb_data_out,
     exmem_wb_oper => exmem_wb_oper_out,
     memwb_wb_oper => memwb_wb_oper_out,
+    exmem_v_flag => exmem_vflag_out,
+    memwb_v_flag => memwb_vflag_out,
     exmem_ra_addr => exmem_ra_addr_out,
     memwb_ra_addr => memwb_ra_addr_out,
     
     alu_operand1 => fwd_unit_operand1_out,
     alu_operand2 => fwd_unit_operand2_out,
     data_pass => fwd_unit_data_pass_out,
+    v_flag_out => fwd_unit_vflag_out,
     stall_out => stall_sig
 );
 
@@ -403,7 +438,8 @@ alu0: alu port map (
     alu_mode => idex_alu_mode_out,
     result => alu_result_out,
     z_flag => alu_z_flag_out,
-    n_flag => alu_n_flag_out
+    n_flag => alu_n_flag_out,
+    v_flag => alu_v_flag_out
 );
 
 --EX/MEM
@@ -422,6 +458,8 @@ exmem0: ex_mem port map (
     m1_in => idex_m1_out,
     n_flag_in => stat_reg_n_out,
     z_flag_in => stat_reg_z_out,
+    v_flag_in => stat_reg_v_out,
+    v_flag_pass_in => alu_v_flag_out,
     br_flag_in => stat_reg_br_out,
     
     alu_result_out => exmem_alu_result_out,
@@ -433,6 +471,7 @@ exmem0: ex_mem port map (
     ra_addr_out => exmem_ra_addr_out,
     mem_oper_out => exmem_mem_oper_out,
     wb_oper_out => exmem_wb_oper_out,
+    v_flag_pass_out => exmem_vflag_out,
     br_trigger => exmem_br_trig_out,
     new_pc_addr_out => exmem_br_addr_out
 );
@@ -449,10 +488,12 @@ memwb0: mem_wb port map (
     opcode_in => exmem_opcode_out,
     ra_addr_in => exmem_ra_addr_out,
     wb_oper_in => exmem_wb_oper_out,
+    v_flag_in => exmem_vflag_out,
     
     wb_data_out => memwb_data_out,
     ra_addr_out => memwb_ra_addr_out,
-    wb_oper_out => memwb_wb_oper_out
+    wb_oper_out => memwb_wb_oper_out,
+    v_flag_out => memwb_vflag_out
     
 );
 
@@ -462,10 +503,12 @@ sr0: status_reg port map (
      rst => rst,
      n_flag_in => alu_n_flag_out,
      z_flag_in => alu_z_flag_out,
+     v_flag_in => fwd_unit_vflag_out,
      br_flag_in => exmem_br_trig_out,
      clear_test_flags => stat_reg_clr_flag_in,
-     n_flag_out  => stat_reg_n_out,
-     z_flag_out  => stat_reg_z_out,
+     n_flag_out => stat_reg_n_out,
+     z_flag_out => stat_reg_z_out,
+     v_flag_out => stat_reg_v_out,
      br_flag_out => stat_reg_br_out
 );
 

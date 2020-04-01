@@ -35,10 +35,12 @@ entity status_reg is
     port (clk, rst : in std_logic;
           n_flag_in : in std_logic;
           z_flag_in : in std_logic;
+          v_flag_in : in std_logic;
           br_flag_in : in std_logic;
           clear_test_flags : in std_logic;
           n_flag_out : out std_logic;
           z_flag_out : out std_logic;
+          v_flag_out : out std_logic;
           br_flag_out : out std_logic
           );
 end status_reg;
@@ -52,6 +54,7 @@ begin
         if (rst = '1') then
             n_flag_out <= '0';
             z_flag_out <= '0';
+            v_flag_out <= '0';
             br_flag_out <= '0';
         end if;
     
@@ -59,6 +62,7 @@ begin
            if clear_test_flags = '1' then
                n_flag_out <= '0';
                z_flag_out <= '0';
+               v_flag_out <= '0';
                br_flag_out <= '0';
            else
                if (n_flag_in = '1') then
@@ -66,6 +70,9 @@ begin
                end if;
                if (z_flag_in = '1') then
                    z_flag_out <= '1';
+               end if;
+               if (v_flag_in = '1') then
+                   v_flag_out <= '1';
                end if;
                if (br_flag_in = '1') then
                    br_flag_out <= '1';

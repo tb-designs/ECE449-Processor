@@ -24,7 +24,7 @@ use ieee.std_logic_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -76,15 +76,15 @@ end process;
 stim_process : process
 begin
     rst <= '1';
-    in_port <= X"0000";
+    in_port <= X"7fff";
     wait for 2*clk_period;
     rst <= '0';
     wait for clk_period/2;
-    in_port <= X"0002";
+    in_port <= X"7fff";
     wait for 3.5*clk_period;
-    in_port <= X"0003";
+    in_port <= X"7fff";
     wait for clk_period;
-    in_port <= X"0001";
+    in_port <= X"dddd";
     wait for clk_period;
     in_port <= X"0005";
     wait for clk_period;

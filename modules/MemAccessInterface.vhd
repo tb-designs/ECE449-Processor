@@ -73,11 +73,9 @@ begin
     end if;
 end process;
 
-ext_out : process(rst,addr1)
+ext_out : process(addr1)
 begin
-    if rst = '1' then
-        out_reg <= (others => '0');
-    elsif addr1 = x"FFF2" then
+    if addr1 = x"FFF2" then
         out_reg <= wr_data;
     end if;
 end process;
@@ -138,7 +136,7 @@ generic map (
   ADDR_WIDTH_A => 16, -- DECIMAL
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
-  MEMORY_INIT_FILE => "formatl_pt2.mem", -- String
+  MEMORY_INIT_FILE => "formatl_pt1.mem", -- String
   MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String
