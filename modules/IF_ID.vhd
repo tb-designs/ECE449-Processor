@@ -74,11 +74,13 @@ function get_instrformat(op : std_logic_vector(6 downto 0)) return std_logic_vec
         when "1000000" => format := "100"; --BRR
         when "1000001" => format := "100"; --BRR.N
         when "1000010" => format := "100"; --BRR.Z
+        when "1001000" => format := "100"; --BRR.V
         --B2
         when "1000011" => format := "101"; --BR
         when "1000100" => format := "101"; --BR.N
         when "1000101" => format := "101"; --BR.Z
         when "1000110" => format := "101"; --BR.SUB
+        when "1001001" => format := "101"; --BR.V
         --L1
         when "0010010" => format := "110"; --LOADIMM
         --L2
@@ -272,6 +274,14 @@ begin
             op_pass <= std_logic_vector(resize(signed(if_id_sig.displ), 16)); --pass disp1
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
+            
+        when "1001000" => --BRR.V
+            reg1_addr <= "000"; --Not needed here
+            reg2_addr <= "000"; --Not needed here
+            ra_addr_out <= if_id_sig.ra_addr;
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.displ), 16)); --pass disp1
+            mem_oper_out <= '0';
+            wb_oper_out  <= '0';
                     
         --B2
         when "1000011" =>  --BR
@@ -305,7 +315,15 @@ begin
             op_pass <= std_logic_vector(resize(signed(if_id_sig.disps), 16)); --pass disp1 padded with zeros
             mem_oper_out <= '0';
             wb_oper_out  <= '0';
-                    
+            
+        when "1001001" => --BR.V
+            reg1_addr <= if_id_sig.ra_addr;
+            reg2_addr <= "000"; --Not needed here
+            ra_addr_out <= if_id_sig.ra_addr;
+            op_pass <= std_logic_vector(resize(signed(if_id_sig.disps), 16)); --pass disp1 padded with zeros
+            mem_oper_out <= '0';
+            wb_oper_out  <= '0';
+                
         --L1
         when "0010010" =>  --LOADIMM
             reg1_addr <= "111";

@@ -58,11 +58,13 @@ function getalumode(op : std_logic_vector(6 downto 0)) return std_logic_vector i
         when "1000000" => mode := "001"; --BRR
         when "1000001" => mode := "001"; --BRR.N
         when "1000010" => mode := "001"; --BRR.Z
+        when "1001000" => mode := "001"; --BRR.V
         --B2
         when "1000011" => mode := "001"; --BR
         when "1000100" => mode := "001"; --BR.N
         when "1000101" => mode := "001"; --BR.Z
         when "1000110" => mode := "001"; --BR.SUB
+        when "1001001" => mode := "001"; --BR.V
         --L1
         when "0010010" => mode := "001";--LOADIMM       
         --L2

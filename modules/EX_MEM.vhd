@@ -142,30 +142,34 @@ begin
       case ex_mem_sig.opcode is
       when "0010000" =>
         --LOAD
+        br_trigger <= '0';
         dest_data  <= ex_mem_sig.data_pass; --address to load data from
         src_data <= (others => '0'); --don't care
-        br_trigger <= '0';
+        new_pc_addr_out <= (others => '0');
       when "0010001" =>
         --STORE
+        br_trigger <= '0';
         dest_data <= ex_mem_sig.data_pass; --address to store data to
         src_data  <= ex_mem_sig.alu_res; --data to store passed through alu
-        br_trigger <= '0';
+        new_pc_addr_out <= (others => '0');
       when "0100000" =>
         --OUT
+        br_trigger <= '0';
         dest_data <= ex_mem_sig.data_pass; --address of mem mapped out port
         src_data  <= ex_mem_sig.alu_res; --data to store passed through alu
-        br_trigger <= '0';        
+        new_pc_addr_out <= (others => '0');
       when "0100001" =>
         --IN
+        br_trigger <= '0';
         dest_data <= ex_mem_sig.data_pass; --address of mem mapped in port
         src_data  <= (others => '0'); --don't care
-        br_trigger <= '0';
+        new_pc_addr_out <= (others => '0');
       when "1000000" =>
         --BRR
+        br_trigger <= '1';
         dest_data <= (others => '0');
         src_data  <= (others => '0');
         new_pc_addr_out <= ex_mem_sig.alu_res;  
-        br_trigger <= '1';
       when "1000001" =>
         --BRR.N
         --Check the n and z flags to decide if branch is taken
@@ -182,9 +186,18 @@ begin
         end if;
         dest_data <= (others => '0');
         src_data  <= (others => '0');
-        new_pc_addr_out <= ex_mem_sig.alu_res;        
+        new_pc_addr_out <= ex_mem_sig.alu_res;   
+      when "1001000" =>
+        --BRR.V
+        if ex_mem_sig.v_flag = '1' then
+          br_trigger <= '1';
+        end if;
+        dest_data <= (others => '0');
+        src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res;   
       when "1000011" =>
         --BR
+        br_trigger <= '1';
         dest_data <= (others => '0');
         src_data  <= (others => '0');
         new_pc_addr_out <= ex_mem_sig.alu_res;          
@@ -205,11 +218,19 @@ begin
         src_data  <= (others => '0');
         new_pc_addr_out <= ex_mem_sig.alu_res; 
       when "1000110" =>
-        --BR.SUB  
+        --BR.SUB 
+        br_trigger <= '1';
         dest_data <= (others => '0');
         src_data  <= (others => '0');
         new_pc_addr_out <= ex_mem_sig.alu_res;
-        br_trigger <= '1';  
+      when "1001001" =>
+        --BR.V
+        if ex_mem_sig.v_flag = '1' then
+          br_trigger <= '1';
+        end if;
+        dest_data <= (others => '0');
+        src_data  <= (others => '0');
+        new_pc_addr_out <= ex_mem_sig.alu_res;
       when "1000111" =>
         --RETURN
         br_trigger <= '1';
@@ -218,9 +239,9 @@ begin
         new_pc_addr_out <= ex_mem_sig.alu_res;  
       when others =>
         --OTHER
+        br_trigger <= '0';
         dest_data <= (others => '0');
         src_data  <= (others => '0');
-        br_trigger <= '0';
         new_pc_addr_out <= (others => '0');  
       end case;    
       

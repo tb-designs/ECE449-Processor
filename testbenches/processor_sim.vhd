@@ -76,25 +76,9 @@ end process;
 stim_process : process
 begin
     rst <= '1';
-    in_port <= X"7fff";
+    in_port <= X"0005";
     wait for 2*clk_period;
     rst <= '0';
-    wait for clk_period/2;
-    in_port <= X"7fff";
-    wait for 3.5*clk_period;
-    in_port <= X"7fff";
-    wait for clk_period;
-    in_port <= X"dddd";
-    wait for clk_period;
-    in_port <= X"0005";
-    wait for clk_period;
-    in_port <= X"0012";
-    wait for clk_period;
-    in_port <= X"0001";
-    wait for clk_period;
-    in_port <= X"0005";
-    wait for clk_period;
-    in_port <= X"0000";
     wait;
 
 end process;
