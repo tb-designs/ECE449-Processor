@@ -9,10 +9,13 @@ use xpm.vcomponents.all;
 entity mem_interface is
 port (addr1,addr2 : in std_logic_vector (15 downto 0); -- addr1 is r/w, addr2 is r only
       wr_data : in std_logic_vector(15 downto 0);
+      opcode : in std_logic_vector(6 downto 0);
       clk,rst : in std_logic;
       wr_en : in std_logic_vector(1 downto 0);
   	  r1_data,r2_data : out std_logic_vector(15 downto 0);
   	  err : out std_logic;
+  	  disp_out : out std_logic_vector (15 downto 0); --for seven-seg-display
+  	  sw_in : in std_logic_vector (1 downto 0); --for reset & ex, or reset & load (in that order in the vector)
   	  in_port : in std_logic_vector(15 downto 0);
   	  out_port : out std_logic_vector(15 downto 0));
 end mem_interface;
@@ -33,6 +36,8 @@ signal rom_addra : std_logic_vector(15 downto 0); -- Address for port A read ope
 -- Processor ports
 signal in_reg : std_logic_vector(15 downto 0) := (others => '0');
 signal out_reg : std_logic_vector(15 downto 0) := (others => '0');
+signal disp_reg : std_logic_vector(15 downto 0) := (others => '0');
+signal sw_reg : std_logic_vector(1 downto 0) := (others => '0');
 
 begin	
 --choice of output depends on memory address (mem mapped)
@@ -63,6 +68,7 @@ err <= '1' when (addr1 > X"07FF" and addr1 < X"FFF0") or (addr1 > X"FFF3") or (a
        '0'; --default
        
 out_port <= out_reg;
+disp_out <= disp_reg;
        
 ext_in : process(rst,in_port)
 begin
@@ -73,12 +79,19 @@ begin
     end if;
 end process;
 
-ext_out : process(addr1)
+
+ext_out : process(rst,addr1)
 begin
-    if addr1 = x"FFF2" then
+    if rst = '1' then
+        out_reg <= (others => '0');
+        disp_reg <= (others => '0');
+    elsif addr1 = x"FFF2" and opcode = "1000001" then --Is an OUT instruction to processor output
         out_reg <= wr_data;
+    elsif addr1 = x"FFF2" and opcode /= "1000001" then --is a STORE to the out mem location, send to display
+        disp_reg <= wr_data;
     end if;
 end process;
+ 
 
 xpm_memory_dpdistram_inst : xpm_memory_dpdistram
 generic map (
