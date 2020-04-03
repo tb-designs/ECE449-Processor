@@ -34,9 +34,11 @@ use ieee.numeric_std.all;
 entity processor is
     port ( --Inputs
         clk : in std_logic;
-        rst : in std_logic;
-        in_port : in std_logic_vector(15 downto 0);
-        out_port : out std_logic_vector(15 downto 0)
+        sw_in : in std_logic_vector(1 downto 0);
+        an_out : out std_logic_vector(3 downto 0);
+        sseg_out : out std_logic_vector(6 downto 0);
+        in_port : in std_logic_vector(9 downto 0);
+        out_port : out std_logic
     );
 end processor;
 
@@ -56,13 +58,15 @@ end component;
 component mem_interface is
     port (
         addr1,addr2 : in std_logic_vector (15 downto 0); -- addr1 is r/w, addr2 is r only
-        wr_data : in std_logic_vector(15 downto 0);
-        clk,rst : in std_logic;
-        wr_en : in std_logic_vector(1 downto 0);
-        r1_data,r2_data : out std_logic_vector(15 downto 0);
-  	    err : out std_logic;
-  	    in_port : in std_logic_vector(15 downto 0);
-  	    out_port : out std_logic_vector(15 downto 0)
+          wr_data : in std_logic_vector(15 downto 0);
+          opcode : in std_logic_vector(6 downto 0);
+          clk,rst : in std_logic;
+          wr_en : in std_logic_vector(1 downto 0);
+            r1_data,r2_data : out std_logic_vector(15 downto 0);
+            err : out std_logic;
+            disp_out : out std_logic_vector (15 downto 0); --for seven-seg-display
+            in_port : in std_logic_vector(9 downto 0);
+            out_port : out std_logic
     );
 end component;
 
@@ -206,16 +210,26 @@ component status_reg is
           v_flag_out : out std_logic;
           br_flag_out : out std_logic
     );
-    
 end component;
 
+--DISPLAY CONTROLLER
+component display_controller is
+    port (clk, rst: in std_logic;
+          hex3, hex2, hex1, hex0: in std_logic_vector(3 downto 0);
+          an: out std_logic_vector(3 downto 0);
+          sseg: out std_logic_vector(6 downto 0)   
+          );
+end component;
 -- Constants
 constant instr_mem_size : integer := 2; -- each instr is 2 bytes
 
 --GLOBAL
 signal clk_sig   : std_logic;
+signal rst : std_logic;
 signal rst_sig   : std_logic := '0';
 signal stall_sig : std_logic := '0';
+signal rl_flag :std_logic := '0';
+signal re_flag :std_logic := '0';
 
 --INSTRUCTION FETCH
 signal instr_mem_output : std_logic_vector (15 downto 0) := (others => '0');
@@ -292,13 +306,17 @@ signal stat_reg_v_out : std_logic;
 signal stat_reg_br_out : std_logic;
 signal stat_reg_clr_flag_in : std_logic;
 
+--DISPLAY
+signal sw_sig : std_logic_vector(1 downto 0) := (others => '0');
+signal disp_out : std_logic_vector(15 downto 0) := (others => '0');
+
 begin
 -- Component port mappings
 
 --PC
 pc0 : pc port map (
     clk => clk,
-    rst => rst,
+    rst => rst_sig,
     pc_in => pc_next_addr,
     pc_out => pc_addr
 );
@@ -307,6 +325,7 @@ pc0 : pc port map (
 mem0 : mem_interface port map (
     clk => clk,
     rst => rst_sig,
+    err => open,
     
     --INSTRUCTION MEMORY
     addr2 => pc_addr,
@@ -320,7 +339,9 @@ mem0 : mem_interface port map (
     
     --INPUT AND OUTPUT PORTS
     in_port => in_port,
-    out_port => out_port
+    out_port => out_port,
+    opcode => exmem_opcode_out,
+    disp_out => disp_out
 );
 
 --IF/ID
@@ -432,7 +453,7 @@ fu0: fwdunit port map (
 
 --ALU
 alu0: alu port map (
-    rst => rst,
+    rst => rst_sig,
     in1 => fwd_unit_operand1_out,
     in2 => fwd_unit_operand2_out,
     alu_mode => idex_alu_mode_out,
@@ -512,22 +533,45 @@ sr0: status_reg port map (
      br_flag_out => stat_reg_br_out
 );
 
---Combinational logic
+--DISPLAY
+dc0: display_controller port map (
+    clk => clk,
+    rst => rst,
+    hex3 => disp_out(15 downto 12),
+    hex2 => disp_out(11 downto 8),
+    hex1 => disp_out(7 downto 4),
+    hex0 => disp_out(3 downto 0),
+    an => an_out,
+    sseg => sseg_out
+);
 
+           
+
+--Combinational logic
     -- Detected branch, 
     -- if BR.SUB, store the PC_address in r7 and use new pc addr from R[ra]
     -- r7 <= exmem_pc_addr_out + instr_mem_size
     -- (store incremented address)
-    pc_next_addr <= (others => '0') when rst = '1' else 
+    
+    rl_flag <= sw_in(0);
+    re_flag <= sw_in(1);
+
+    rst <= (sw_in(0) or sw_in(1));
+    
+    pc_next_addr <= (others => '0') when rst_sig = '1' else 
 		    exmem_br_addr_out when exmem_br_trig_out = '1' else
 		    pc_addr when stall_sig = '1' else
+		    X"0002" when sw_in(0) = '1' else --Load
+		    X"0000" when sw_in(1) = '1' else --Exe
             std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch
     stat_reg_clr_flag_in <= '1' when stat_reg_br_out = '1' else '0';
     
     rst_sig <= '1' when exmem_br_trig_out = '1' else -- reset if/id and id/ex when branching
-                rst; -- follow processor reset otherwise
+               rst; -- follow processor reset otherwise
+                
+
    
     --STALL BEHAVIOUR
 

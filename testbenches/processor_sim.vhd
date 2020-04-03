@@ -39,28 +39,34 @@ architecture behavioral of processor_sim is
 component processor
     port (
         clk : in std_logic;
-        rst : in std_logic;
-        in_port : in std_logic_vector(15 downto 0);
-        out_port : out std_logic_vector(15 downto 0)
+        sw_in : in std_logic_vector(1 downto 0);
+        an_out : out std_logic_vector(3 downto 0);
+        sseg_out : out std_logic_vector(6 downto 0);
+        in_port : in std_logic_vector(9 downto 0);
+        out_port : out std_logic
     );
 end component;
 
 -- Inputs
 signal clk : std_logic := '0';
-signal rst : std_logic := '0';
-signal in_port : std_logic_vector(15 downto 0) := (others => '0');
+signal sw_in : std_logic_vector(1 downto 0) := (others => '0');
+signal in_port : std_logic_vector(9 downto 0) := (others => '0');
 
 -- Outputs
-signal out_port : std_logic_vector(15 downto 0) := (others => '0');
+signal out_port : std_logic := '0';
+signal an_out : std_logic_vector(3 downto 0):= (others => '0');
+signal sseg_out : std_logic_vector(6 downto 0):= (others => '0');
 
 constant clk_period : time := 20 us;
 
 begin
 u0 : processor port map (
     clk => clk,
-    rst => rst,
+    sw_in => sw_in,
     in_port => in_port,
-    out_port => out_port
+    out_port => out_port,
+    an_out => an_out,
+    sseg_out => sseg_out
 );
 
 -- clk process
@@ -75,10 +81,10 @@ end process;
 -- stimulation process
 stim_process : process
 begin
-    rst <= '1';
-    in_port <= X"0005";
+    sw_in <= "01";
+    in_port <= "0000000101";
     wait for 2*clk_period;
-    rst <= '0';
+    sw_in <= "00";
     wait;
 
 end process;

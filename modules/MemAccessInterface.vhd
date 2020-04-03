@@ -15,9 +15,8 @@ port (addr1,addr2 : in std_logic_vector (15 downto 0); -- addr1 is r/w, addr2 is
   	  r1_data,r2_data : out std_logic_vector(15 downto 0);
   	  err : out std_logic;
   	  disp_out : out std_logic_vector (15 downto 0); --for seven-seg-display
-  	  sw_in : in std_logic_vector (1 downto 0); --for reset & ex, or reset & load (in that order in the vector)
-  	  in_port : in std_logic_vector(15 downto 0);
-  	  out_port : out std_logic_vector(15 downto 0));
+  	  in_port : in std_logic_vector(9 downto 0);
+  	  out_port : out std_logic);
 end mem_interface;
 
 architecture behavioral of mem_interface is
@@ -37,7 +36,6 @@ signal rom_addra : std_logic_vector(15 downto 0); -- Address for port A read ope
 signal in_reg : std_logic_vector(15 downto 0) := (others => '0');
 signal out_reg : std_logic_vector(15 downto 0) := (others => '0');
 signal disp_reg : std_logic_vector(15 downto 0) := (others => '0');
-signal sw_reg : std_logic_vector(1 downto 0) := (others => '0');
 
 begin	
 --choice of output depends on memory address (mem mapped)
@@ -67,7 +65,7 @@ err <= '1' when (addr1 > X"07FF" and addr1 < X"FFF0") or (addr1 > X"FFF3") or (a
        '0' when rst = '1' else
        '0'; --default
        
-out_port <= out_reg;
+out_port <= out_reg(0);
 disp_out <= disp_reg;
        
 ext_in : process(rst,in_port)
@@ -75,12 +73,12 @@ begin
     if rst = '1' then
         in_reg <= (others => '0');
     else
-        in_reg <= in_port;
+        in_reg <= "000000"&in_port;
     end if;
 end process;
 
 
-ext_out : process(rst,addr1)
+ext_out : process(rst,addr1, opcode)
 begin
     if rst = '1' then
         out_reg <= (others => '0');
@@ -149,7 +147,7 @@ generic map (
   ADDR_WIDTH_A => 16, -- DECIMAL
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
-  MEMORY_INIT_FILE => "boot.mem", -- String
+  MEMORY_INIT_FILE => "count1.mem", -- String
   MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String

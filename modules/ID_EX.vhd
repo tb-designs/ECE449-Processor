@@ -140,7 +140,7 @@ begin
     process(clk,rst)
     begin
         --reset behaviour
-        if rst = '1' or (clk = '1' and clk'event and mem_stall = '1') then
+        if rst = '1' or (rising_edge(clk) and mem_stall = '1') then
             operand1 <= (others => '0');
             operand2 <= (others => '0');
             opcode_out <= (others => '0');
