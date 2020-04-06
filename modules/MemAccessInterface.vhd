@@ -73,7 +73,7 @@ begin
     if rst = '1' then
         in_reg <= (others => '0');
     else
-        in_reg <= "000000"&in_port;
+        in_reg <= in_port&"000000";
     end if;
 end process;
 

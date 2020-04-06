@@ -81,8 +81,8 @@ end process;
 -- stimulation process
 stim_process : process
 begin
-    sw_in <= "10";
-    in_port <= "0000000101";
+    sw_in <= "01";
+    in_port <= "1010101010"; --AA
     wait for 2*clk_period;
     sw_in <= "00";
     wait for 2*clk_period;
