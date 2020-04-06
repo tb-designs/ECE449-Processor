@@ -324,7 +324,7 @@ pc0 : pc port map (
 --Mem Module
 mem0 : mem_interface port map (
     clk => clk,
-    rst => rst_sig,
+    rst => rst,
     err => open,
     
     --INSTRUCTION MEMORY
