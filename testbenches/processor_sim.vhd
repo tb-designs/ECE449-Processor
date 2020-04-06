@@ -85,6 +85,10 @@ begin
     in_port <= "0000000101";
     wait for 2*clk_period;
     sw_in <= "00";
+    wait for 2*clk_period;
+    sw_in <= "10";
+    wait for 2*clk_period;
+    sw_in <= "00";
     wait;
 
 end process;

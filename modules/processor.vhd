@@ -48,7 +48,7 @@ architecture behavioral of processor is
 component pc is
     port (
         clk : in std_logic;
-        rst : in std_logic;
+       -- rst : in std_logic;
         pc_in : in std_logic_vector(15 downto 0);
         pc_out : out std_logic_vector(15 downto 0)  
     );
@@ -316,7 +316,7 @@ begin
 --PC
 pc0 : pc port map (
     clk => clk,
-    rst => rst_sig,
+    --rst => rst_sig,
     pc_in => pc_next_addr,
     pc_out => pc_addr
 );
@@ -558,11 +558,11 @@ dc0: display_controller port map (
 
     rst <= (sw_in(0) or sw_in(1));
     
-    pc_next_addr <= (others => '0') when rst_sig = '1' else 
+    pc_next_addr <= (others => '0') when (rst_sig = '1' and sw_in = "00" and exmem_br_trig_out = '0') else 
 		    exmem_br_addr_out when exmem_br_trig_out = '1' else
 		    pc_addr when stall_sig = '1' else
-		    X"0002" when sw_in(0) = '1' else --Load
-		    X"0000" when sw_in(1) = '1' else --Exe
+		    X"0002" when (rl_flag and rst) = '1' else --Load
+		    X"0000" when (re_flag and rst) = '1'  else --Exe
             std_logic_vector(unsigned(pc_addr) + instr_mem_size);
     
     --set clear on succesful branch

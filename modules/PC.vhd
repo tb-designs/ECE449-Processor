@@ -34,7 +34,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity pc is
     port (
         clk : in std_logic;
-        rst : in std_logic;
+       -- rst : in std_logic;
         pc_in : in std_logic_vector(15 downto 0);
         pc_out : out std_logic_vector(15 downto 0)  
     );
@@ -48,12 +48,12 @@ begin
 
 next_pc <= pc_in;
 
-process(clk, rst, pc_in)
+process(clk, pc_in)
 begin
-    if (rst= '1') then
+    --if (rst= '1') then
         --Reset to base address
-        pc_out <= (others => '0');
-    elsif rising_edge(clk) then
+      --  pc_out <= (others => '0');
+    if rising_edge(clk) then
         pc_out <= next_pc;
     end if;
     

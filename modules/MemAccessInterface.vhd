@@ -83,9 +83,9 @@ begin
     if rst = '1' then
         out_reg <= (others => '0');
         disp_reg <= (others => '0');
-    elsif addr1 = x"FFF2" and opcode = "1000001" then --Is an OUT instruction to processor output
+    elsif addr1 = X"FFF2" and opcode = "1000001" then --Is an OUT instruction to processor output
         out_reg <= wr_data;
-    elsif addr1 = x"FFF2" and opcode /= "1000001" then --is a STORE to the out mem location, send to display
+    elsif addr1 = X"FFF2" and opcode /= "1000001" then --is a STORE to the out mem location, send to display
         disp_reg <= wr_data;
     end if;
 end process;
