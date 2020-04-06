@@ -858,6 +858,7 @@
       <wvobject type="array" fp_name="/processor_sim/sseg_out">
          <obj_property name="ElementShortName">sseg_out[6:0]</obj_property>
          <obj_property name="ObjectShortName">sseg_out[6:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
       </wvobject>
       <wvobject type="other" fp_name="/processor_sim/clk_period">
          <obj_property name="ElementShortName">clk_period</obj_property>
