@@ -97,7 +97,7 @@ generic map (
   ADDR_WIDTH_B => 16, -- DECIMAL
   BYTE_WRITE_WIDTH_A => 8, -- DECIMAL
   CLOCKING_MODE => "common_clock", -- String
-  MEMORY_INIT_FILE => "count1.mem", -- String
+  MEMORY_INIT_FILE => "", -- String
   MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_SIZE => 8192, -- DECIMAL
