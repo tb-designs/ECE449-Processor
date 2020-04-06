@@ -21,7 +21,7 @@ end mem_interface;
 
 architecture behavioral of mem_interface is
 
-constant addr_mask : std_logic_vector(15 downto 0) := X"03FF";
+constant addr_mask : std_logic_vector(15 downto 0) := X"01FF";
 
 -- RAM signals
 signal ram_douta,ram_doutb : std_logic_vector(15 downto 0); -- Data output for port A,B read operations
@@ -54,9 +54,9 @@ r2_data <= ram_doutb when rst = '1' or (addr2 >= X"0400" and addr2 <= X"07FF") e
         
 ram_dina <= wr_data;
 
-ram_addra <= (addr1 and addr_mask) when rst = '0' and addr1 >= X"0400" and addr1 <= X"07FF" else
+ram_addra <= (('0' & addr1(15 downto 1)) and addr_mask) when rst = '0' and addr1 >= X"0400" and addr1 <= X"07FF" else
              (others => '0');
-ram_addrb <= (addr2 and addr_mask) when rst = '0' and addr2 >= X"0400" and addr1 <= X"07FF" else
+ram_addrb <= (('0' & addr2(15 downto 1)) and addr_mask) when rst = '0' and addr2 >= X"0400" and addr1 <= X"07FF" else
              (others => '0');
 rom_addra <= ('0' & addr2(15 downto 1)) when rst = '0' and addr2 >= X"0000" and addr2 <= X"03FF" else
              (others => '0');
@@ -97,7 +97,7 @@ generic map (
   ADDR_WIDTH_B => 16, -- DECIMAL
   BYTE_WRITE_WIDTH_A => 8, -- DECIMAL
   CLOCKING_MODE => "common_clock", -- String
-  MEMORY_INIT_FILE => "none", -- String
+  MEMORY_INIT_FILE => "count1.mem", -- String
   MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_SIZE => 8192, -- DECIMAL
@@ -147,7 +147,7 @@ generic map (
   ADDR_WIDTH_A => 16, -- DECIMAL
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
-  MEMORY_INIT_FILE => "count1.mem", -- String
+  MEMORY_INIT_FILE => "boot.mem", -- String
   MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String
