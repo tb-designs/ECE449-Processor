@@ -6,8 +6,6 @@ entity MEM_WB is
   port(
        mem_data_in     : in std_logic_vector (15 downto 0);
        alu_result_in   : in std_logic_vector (15 downto 0);
-       instr_format_in : in std_logic_vector (2 downto 0);
-       pc_addr_in      : in std_logic_vector (15 downto 0);
        opcode_in       : in std_logic_vector (6 downto 0);
        ra_addr_in      : in std_logic_vector (2 downto 0);
        wb_oper_in      : in std_logic;
@@ -28,8 +26,6 @@ architecture Behavioral of MEM_WB is
 type mem_wb is record
     mem_data     : std_logic_vector (15 downto 0);
     alu_result   : std_logic_vector (15 downto 0);
-    instr_format : std_logic_vector (2 downto 0);
-    pc_addr      : std_logic_vector (15 downto 0);
     opcode       : std_logic_vector (6 downto 0);
     ra_addr      : std_logic_vector (2 downto 0);
     wb_oper      : std_logic;
@@ -40,8 +36,6 @@ end record mem_wb;
 constant MEM_WB_INIT : mem_wb := (
     mem_data     => (others => '0'),
     alu_result   => (others => '0'),
-    instr_format => (others => '0'),
-    pc_addr      => (others => '0'),
     opcode       => (others => '0'),
     ra_addr      => (others => '0'),
     wb_oper      => '0',
@@ -56,8 +50,6 @@ constant MEM_WB_INIT : mem_wb := (
      --falling edge store input
      mem_wb_sig.mem_data <= mem_data_in;
      mem_wb_sig.alu_result <= alu_result_in;
-     mem_wb_sig.instr_format <= instr_format_in;
-     mem_wb_sig.pc_addr <= pc_addr_in;
      mem_wb_sig.opcode <= opcode_in;
      mem_wb_sig.ra_addr <= ra_addr_in;
      mem_wb_sig.wb_oper <= wb_oper_in;

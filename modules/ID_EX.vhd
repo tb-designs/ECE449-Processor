@@ -137,7 +137,7 @@ begin
     id_ex_sig.ra_addr <= ra_addr_in;
     id_ex_sig.m1 <= m1_in;
 
-    process(clk,rst)
+    process(clk,rst,mem_stall)
     begin
         --reset behaviour
         if rst = '1' or (rising_edge(clk) and mem_stall = '1') then

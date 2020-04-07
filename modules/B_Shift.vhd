@@ -11,7 +11,7 @@ end entity bshift;
 architecture behavior of bshift is
 
 begin -- behavior
-process(left,shift)
+process(left,shift,input)
 variable x,y,z : std_logic_vector(15 downto 0);
 variable c0,c1,c2,c3 : std_logic_vector(1 downto 0); -- ctrl variables for each stage
 begin --process

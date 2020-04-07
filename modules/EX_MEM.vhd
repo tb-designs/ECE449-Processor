@@ -4,7 +4,6 @@ use ieee.std_logic_unsigned.all;
 
 entity EX_MEM is 
   port(alu_result     : in std_logic_vector (15 downto 0);
-       instr_form_in  : in std_logic_vector (2 downto 0);
        opcode_in      : in std_logic_vector (6 downto 0);
        PC_addr_in     : in std_logic_vector (15 downto 0);
        data_pass_in   : in std_logic_vector (15 downto 0);
@@ -19,12 +18,10 @@ entity EX_MEM is
        br_flag_in     : in std_logic;
        clk,rst        : in std_logic;
        alu_result_out : out std_logic_vector (15 downto 0);
-       PC_addr_out    : out std_logic_vector (15 downto 0);
        new_pc_addr_out: out std_logic_vector (15 downto 0); 
        dest_data      : out std_logic_vector (15 downto 0); 
        src_data       : out std_logic_vector (15 downto 0);
        opcode_out     : out std_logic_vector (6 downto 0);
-       instr_form_out : out std_logic_vector (2 downto 0);
        ra_addr_out    : out std_logic_vector (2 downto 0);
        mem_oper_out   : out std_logic_vector (1 downto 0); --Mem interface requires vector input
        wb_oper_out    : out std_logic;
@@ -39,7 +36,6 @@ architecture Behavioral of EX_MEM is
 --Type for easier modification
 type ex_mem is record
     alu_res     : std_logic_vector (15 downto 0);
-    instr_form  : std_logic_vector (2 downto 0);
     opcode      : std_logic_vector (6 downto 0);
     pc_addr     : std_logic_vector (15 downto 0);
     data_pass   : std_logic_vector (15 downto 0);
@@ -56,7 +52,6 @@ end record ex_mem;
 --Specify init value for the type
 constant EX_MEM_INIT : ex_mem := (
     alu_res     => (others => '0'),
-    instr_form  => (others => '0'),
     opcode      => (others => '0'),
     pc_addr     => (others => '0'),
     data_pass   => (others => '0'),
@@ -78,7 +73,6 @@ constant EX_MEM_INIT : ex_mem := (
   
   --falling edge store input
   ex_mem_sig.alu_res     <= alu_result;
-  ex_mem_sig.instr_form  <= instr_form_in;
   ex_mem_sig.opcode      <= opcode_in;
   ex_mem_sig.pc_addr     <= pc_addr_in;
   ex_mem_sig.data_pass   <= data_pass_in;
@@ -91,17 +85,15 @@ constant EX_MEM_INIT : ex_mem := (
   ex_mem_sig.v_flag      <= v_flag_in;
   ex_mem_sig.v_flag_pass <= v_flag_pass_in;
 
-process(clk,rst)
+process(clk,rst,br_flag_in)
 begin
     --reset behaviour, all outputs to zero
     if rst = '1' or br_flag_in = '1' then
         alu_result_out  <= (others => '0');
-        PC_addr_out     <= (others => '0');
         new_pc_addr_out <= (others => '0');
         dest_data       <= (others => '0');
         src_data        <= (others => '0');
         opcode_out      <= (others => '0');
-        instr_form_out  <= (others => '0');
         ra_addr_out     <= (others => '0');
         mem_oper_out    <= "00";
         wb_oper_out     <= '0';
@@ -132,9 +124,7 @@ begin
       end if;
 
       --Pass Through Values              
-      instr_form_out  <= ex_mem_sig.instr_form;
       opcode_out      <= ex_mem_sig.opcode;
-      PC_addr_out     <= ex_mem_sig.pc_addr;
       mem_oper_out    <= ex_mem_sig.mem_opr&ex_mem_sig.mem_opr; --Fix for mem_oper needing to be 0-length vector
       v_flag_pass_out <= ex_mem_sig.v_flag_pass; --passthrough overflow flag from alu to writeback to register    
       

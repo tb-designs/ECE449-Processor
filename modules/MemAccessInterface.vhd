@@ -21,20 +21,18 @@ end mem_interface;
 
 architecture behavioral of mem_interface is
 
-constant addr_mask : std_logic_vector(15 downto 0) := X"01FF";
-
 -- RAM signals
 signal ram_douta,ram_doutb : std_logic_vector(15 downto 0); -- Data output for port A,B read operations
-signal ram_addra,ram_addrb : std_logic_vector(15 downto 0); -- Address for port A,B write and read operations
+signal ram_addra,ram_addrb : std_logic_vector(8 downto 0); -- Address for port A,B write and read operations
 signal ram_dina : std_logic_vector(15 downto 0); -- Data input for port A write operations
 
 -- ROM signals
 signal rom_douta : std_logic_vector(15 downto 0); -- Data output for port A read operations
-signal rom_addra : std_logic_vector(15 downto 0); -- Address for port A read operations
+signal rom_addra : std_logic_vector(8 downto 0); -- Address for port A read operations
 
 -- Processor ports
 signal in_reg : std_logic_vector(15 downto 0) := (others => '0');
-signal out_reg : std_logic_vector(15 downto 0) := (others => '0');
+signal out_reg : std_logic := '0';
 signal disp_reg : std_logic_vector(15 downto 0) := (others => '0');
 
 begin	
@@ -54,18 +52,15 @@ r2_data <= ram_doutb when rst = '1' or (addr2 >= X"0400" and addr2 <= X"07FF") e
         
 ram_dina <= wr_data;
 
-ram_addra <= (('0' & addr1(15 downto 1)) and addr_mask) when rst = '0' and addr1 >= X"0400" and addr1 <= X"07FF" else
-             (others => '0');
-ram_addrb <= (('0' & addr2(15 downto 1)) and addr_mask) when rst = '0' and addr2 >= X"0400" and addr1 <= X"07FF" else
-             (others => '0');
-rom_addra <= ('0' & addr2(15 downto 1)) when rst = '0' and addr2 >= X"0000" and addr2 <= X"03FF" else
-             (others => '0');
+ram_addra <= addr1(9 downto 1);
+ram_addrb <= addr2(9 downto 1);
+rom_addra <= addr2(9 downto 1);
 
 err <= '1' when (addr1 > X"07FF" and addr1 < X"FFF0") or (addr1 > X"FFF3") or (addr2 > X"07FF" and addr2 < X"FFF0") or (addr2 > X"FFF3") else
        '0' when rst = '1' else
        '0'; --default
        
-out_port <= out_reg(0);
+out_port <= out_reg;
 disp_out <= disp_reg;
        
 ext_in : process(rst,in_port)
@@ -78,28 +73,37 @@ begin
 end process;
 
 
-ext_out : process(rst,addr1,opcode)
+ext_out : process(clk,rst,addr1,opcode,wr_data)
 begin
     if rst = '1' then
-        out_reg <= (others => '0');
-        disp_reg <= (others => '0');
-    elsif addr1 = X"FFF2" and opcode = "0100000" then --Is an OUT instruction to processor output
-        out_reg <= wr_data;
-    elsif addr1 = X"FFF2" and opcode /= "0100000" then --is a STORE to the out mem location, send to display
-        disp_reg <= wr_data;
+        out_reg <= '0';
+    elsif (clk = '1' and clk'event) then
+        if addr1 = X"FFF2" and opcode = "0100000" then --Is an OUT instruction to processor output
+            out_reg <= wr_data(0);
+        end if;
     end if;
 end process;
- 
+
+display : process(clk,rst,addr1,opcode,wr_data)
+begin
+    if rst = '1' then
+        disp_reg <= (others => '0');
+    elsif (clk = '1' and clk'event) then
+        if addr1 = X"FFF2" and opcode /= "0100000" then --is a STORE to the out mem location, send to display
+            disp_reg <= wr_data;
+        end if;
+    end if;
+end process;
 
 xpm_memory_dpdistram_inst : xpm_memory_dpdistram
 generic map (
-  ADDR_WIDTH_A => 16, -- DECIMAL
-  ADDR_WIDTH_B => 16, -- DECIMAL
+  ADDR_WIDTH_A => 9, -- DECIMAL
+  ADDR_WIDTH_B => 9, -- DECIMAL
   BYTE_WRITE_WIDTH_A => 8, -- DECIMAL
   CLOCKING_MODE => "common_clock", -- String
-  MEMORY_INIT_FILE => "", -- String
+  MEMORY_INIT_FILE => "none", -- String
   MEMORY_INIT_PARAM => "", -- String
-  MEMORY_OPTIMIZATION => "true", -- String
+  MEMORY_OPTIMIZATION => "false", -- String
   MEMORY_SIZE => 8192, -- DECIMAL
   MESSAGE_CONTROL => 0, -- DECIMAL
   READ_DATA_WIDTH_A => 16, -- DECIMAL
@@ -144,10 +148,10 @@ port map (
 
 xpm_memory_sprom_inst : xpm_memory_sprom
 generic map (
-  ADDR_WIDTH_A => 16, -- DECIMAL
+  ADDR_WIDTH_A => 9, -- DECIMAL
   AUTO_SLEEP_TIME => 0, -- DECIMAL
   ECC_MODE => "no_ecc", -- String
-  MEMORY_INIT_FILE => "boot.mem", -- String
+  MEMORY_INIT_FILE => "count1.mem", -- String
   MEMORY_INIT_PARAM => "", -- String
   MEMORY_OPTIMIZATION => "true", -- String
   MEMORY_PRIMITIVE => "auto", -- String

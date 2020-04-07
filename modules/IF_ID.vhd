@@ -159,7 +159,7 @@ begin
      if_id_sig.pc_addr <= PC_addr_in;
      format <= get_instrformat(instr_in(15 downto 9));
         
-process(clk,rst)
+process(clk,rst,mem_stall)
 begin
     --reset behaviour
     if rst = '1' then

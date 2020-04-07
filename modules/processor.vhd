@@ -62,11 +62,11 @@ component mem_interface is
           opcode : in std_logic_vector(6 downto 0);
           clk,rst : in std_logic;
           wr_en : in std_logic_vector(1 downto 0);
-            r1_data,r2_data : out std_logic_vector(15 downto 0);
-            err : out std_logic;
-            disp_out : out std_logic_vector (15 downto 0); --for seven-seg-display
-            in_port : in std_logic_vector(9 downto 0);
-            out_port : out std_logic
+          r1_data,r2_data : out std_logic_vector(15 downto 0);
+          err : out std_logic;
+          disp_out : out std_logic_vector (15 downto 0); --for seven-seg-display
+          in_port : in std_logic_vector(9 downto 0);
+          out_port : out std_logic
     );
 end component;
 
@@ -164,11 +164,11 @@ component EX_MEM is
     port (
         alu_result, pc_addr_in, data_pass_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
-        instr_form_in, ra_addr_in : in std_logic_vector (2 downto 0);
+        ra_addr_in : in std_logic_vector (2 downto 0);
         mem_oper_in, wb_oper_in, m1_in, clk, rst : in std_logic;
-        alu_result_out, pc_addr_out, dest_data, src_data : out std_logic_vector (15 downto 0);
+        alu_result_out, dest_data, src_data : out std_logic_vector (15 downto 0);
         opcode_out : out std_logic_vector (6 downto 0);
-        instr_form_out, ra_addr_out : out std_logic_vector (2 downto 0);
+        ra_addr_out : out std_logic_vector (2 downto 0);
         new_pc_addr_out: out std_logic_vector (15 downto 0);
         wb_oper_out : out std_logic;
         mem_oper_out : out std_logic_vector (1 downto 0);
@@ -185,9 +185,9 @@ end component;
 --MEM/WB
 component MEM_WB is 
     port (
-        mem_data_in, alu_result_in, pc_addr_in : in std_logic_vector (15 downto 0);
+        mem_data_in, alu_result_in : in std_logic_vector (15 downto 0);
         opcode_in : in std_logic_vector (6 downto 0);
-        instr_format_in, ra_addr_in : in std_logic_vector (2 downto 0);
+        ra_addr_in : in std_logic_vector (2 downto 0);
         wb_oper_in, clk, rst : in std_logic;
         v_flag_in     : in std_logic;
         wb_data_out   : out std_logic_vector (15 downto 0);
@@ -274,11 +274,9 @@ signal alu_z_flag_out : std_logic;
 signal alu_n_flag_out : std_logic;
 signal alu_v_flag_out : std_logic;
 signal exmem_alu_result_out : std_logic_vector (15 downto 0):= (others => '0');
-signal exmem_pc_addr_out : std_logic_vector (15 downto 0):= (others => '0');
 signal exmem_dest_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal exmem_src_data_out : std_logic_vector (15 downto 0):= (others => '0');
 signal exmem_opcode_out : std_logic_vector (6 downto 0):= (others => '0');
-signal exmem_instr_form_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_ra_addr_out : std_logic_vector (2 downto 0):= (others => '0');
 signal exmem_mem_oper_out : std_logic_vector (1 downto 0):= (others => '0');
 signal exmem_wb_oper_out : std_logic;
@@ -469,7 +467,6 @@ exmem0: ex_mem port map (
     rst => rst,
 
     alu_result => alu_result_out,
-    instr_form_in => idex_instr_form_out,
     opcode_in => idex_opcode_out,
     pc_addr_in => idex_pc_addr_out,
     data_pass_in => fwd_unit_data_pass_out,
@@ -484,11 +481,9 @@ exmem0: ex_mem port map (
     br_flag_in => stat_reg_br_out,
     
     alu_result_out => exmem_alu_result_out,
-    pc_addr_out => exmem_pc_addr_out,
     dest_data => exmem_dest_data_out,
     src_data => exmem_src_data_out,
     opcode_out => exmem_opcode_out,
-    instr_form_out => exmem_instr_form_out,
     ra_addr_out => exmem_ra_addr_out,
     mem_oper_out => exmem_mem_oper_out,
     wb_oper_out => exmem_wb_oper_out,
@@ -504,8 +499,6 @@ memwb0: mem_wb port map (
 
     mem_data_in => data_mem_output,
     alu_result_in => exmem_alu_result_out,
-    instr_format_in => exmem_instr_form_out,
-    pc_addr_in => exmem_pc_addr_out,
     opcode_in => exmem_opcode_out,
     ra_addr_in => exmem_ra_addr_out,
     wb_oper_in => exmem_wb_oper_out,
